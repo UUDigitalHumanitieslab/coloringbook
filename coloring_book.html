@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<!--
+	(c) 2014 Julian Gonggrijp, j.gonggrijp@uu.nl, Utrecht University
+-->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Kleurplaat</title>
+<style type="text/css">
+* {
+	margin: 0;
+	padding: 0;
+}
+body {
+	padding: 50px;
+}
+#starting_form, #instructions {
+	font-size: 24pt;
+}
+input {
+	font-size: 18pt;
+}
+#swatches input {
+	font-size: 1px;
+}
+label {
+	display: inline-block;
+	width: 15ex;
+}
+#coloring_book_image {
+	margin: 0 0 50px 0;
+}
+</style>
+<script src="jquery-2.1.1.min.js"></script>
+<script src="ion.sound.min.js"></script>
+<script src="coloring_book.js"></script>
+</head>
+<body onload="init_application();">
+
+<form id="starting_form" onsubmit="return false;">
+	<label name="name">Naam</label><input type="text" name="name" required="true" size="30"/><br />
+	<label name="age">Geboorte</label><input type="date" name="age" required="true"/><br />
+	<label name="lang1">Eerste taal</label><input type="text" name="lang1"><br />
+	<label name="lang2">Tweede taal</label><input type="text" name="lang2"><br />
+	<input type="submit"/>
+</form>
+
+<p id="instructions">
+	Je krijgt straks steeds 5 seconden lang een zin te zien.
+	Hierna verschijnt een kleurplaat.
+	Kleur de kleurplaat in zoals beschreven in de zin.
+	Druk daarna op "klaar", je krijgt dan de volgende zin te zien.<br />
+	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
+</p>
+
+<p id="sentence" style="font-size: 48pt; text-align: center; margin: auto;"></p>
+
+<div id="controls" style="padding-bottom: 50px;">
+	<div id="coloring_book_image"></div>
+	<!--<div id="color_chosen" style="float: left; clear: left; width: 100px; height: 50px; background-color: #000; border: 2px #888 solid; border-radius: 20px;"></div>-->
+	<p id="swatches" style="float: left; clear: left;"></p>  
+	<p style="float: right; clear: right;">
+		<input type="button" id="undo_redo" value="Herstel"/>
+		<input type="button" id="reset_image" value="Alles wissen"/>
+		<input type="button" value="klaar" onclick="end_page();"/>
+	</p>
+</div>
+</body>
+</html>
