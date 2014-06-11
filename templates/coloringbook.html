@@ -33,9 +33,12 @@ label {
 	margin: 0 0 50px 0;
 }
 </style>
-<script src="jquery-2.1.1.min.js"></script>
-<script src="ion.sound.min.js"></script>
-<script src="coloring_book.js"></script>
+<script src="{{
+  url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
+<script src="{{
+  url_for('static', filename='ion.sound.min.js') }}"></script>
+<script src="{{
+  url_for('static', filename='coloring_book.js') }}"></script>
 </head>
 <body onload="init_application();">
 
