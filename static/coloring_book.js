@@ -169,7 +169,15 @@ display_data = function ( ) {
 		subject: form_data,
 		results: page_data
 	};
-	$('#starting_form').html('<pre>' + JSON.stringify(data, null, '\t') + '</pre>').show();
+	$.ajax({
+		type: 'POST',
+		url: $SCRIPT_ROOT + 'submit',
+		'data': JSON.stringify(data),
+		contentType: 'application/json',
+		success: function (result) {
+			alert(result);
+		}
+	});
 }
 
 command = function (previous) {
