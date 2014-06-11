@@ -30,7 +30,7 @@ init_application = function ( ) {
 	create_swatches(colors);
 	$.ajax({
 		type: 'GET',
-		url: 'test.json',
+		url: $SCRIPT_ROOT + 'static/test.json',
 		dataType: 'json',
 		success: function (resp, xmlstatus) {
 			for (i in resp.images) {
@@ -43,7 +43,7 @@ init_application = function ( ) {
 			for (i in pages) {
 				if (pages[i].audio) sounds.push(pages[i].audio);
 			}
-			$.ionSound({ "sounds": sounds, path: './' });
+			$.ionSound({ "sounds": sounds, path: $SCRIPT_ROOT + 'static/' });
 		},
 		error: function (xhr, status, error) {
 			alert(error);
@@ -111,7 +111,7 @@ create_swatches = function (colors) {
 load_image = function (url, data, name) {
 	$.ajax({
 		type: 'GET',
-		url: url,
+		url: $SCRIPT_ROOT + 'static/' + url,
 		data: data,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
@@ -169,7 +169,15 @@ display_data = function ( ) {
 		subject: form_data,
 		results: page_data
 	};
-	$('#starting_form').html('<pre>' + JSON.stringify(data, null, '\t') + '</pre>').show();
+	$.ajax({
+		type: 'POST',
+		url: $SCRIPT_ROOT + 'submit',
+		'data': JSON.stringify(data),
+		contentType: 'application/json',
+		success: function (result) {
+			alert(result);
+		}
+	});
 }
 
 command = function (previous) {
