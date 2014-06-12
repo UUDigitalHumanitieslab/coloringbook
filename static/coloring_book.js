@@ -25,9 +25,9 @@ lang_field = function (count) {
 }
 
 button = function (color) {
-	return $('<span class="color_choice" style="border: 5px solid #fff; background-color: ' +
+	return $('<span class="color_choice" style="background-color: ' +
 			color +
-			'; width: 60px; height: 60px; border-radius: 20px; display: inline-block;"/>').data('color', color);
+			';"/>').data('color', color);
 }
 
 init_application = function ( ) {
@@ -100,6 +100,7 @@ create_swatches = function (colors) {
 	for (index in colors) {
 		swatches.append(button(colors[index]));
 	}
+	$(button('#fff')).appendTo(swatches).append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 	color_chosen = $('.color_choice').first();
 	$('.color_choice').click(function (event) {
 		color_chosen.css('border-color', '#fff');
