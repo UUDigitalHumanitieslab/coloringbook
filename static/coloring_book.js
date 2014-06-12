@@ -15,6 +15,15 @@ var images = {};
 var image_count = 0;
 var sentence_image_delay = 5000;  // milliseconds
 
+lang_field = function (count) {
+	var lang = 'name="name' + count + '"';
+	var level = 'name="level' + count + '"';
+	return '<label ' + lang + '>Taal ' + count + '</label>' +
+		'<input type="text" ' + lang + '/> ' +
+		'<label ' + level + '>Niveau</label>' +
+		'<input type="number" ' + level + ' min="1" max="10" step="1"/><br/>';
+}
+
 button = function (color) {
 	return '<span class="color_choice" style="border: 5px solid #fff; background-color: ' +
 			color +
@@ -68,6 +77,14 @@ finish_instructions = function ( ) {
 }
 
 init_controls = function ( ) {
+	$('#starting_form >[name="more"]').click(function () {
+		var self = $(this);
+		var count = self.data('count');
+		if (count) count++; else count = 1;
+		self.data('count', count);
+		self.before(lang_field(count));
+	});
+	
 	$('#reset_image').click(function (event) {
 		launch_reset_command();
 		$('#undo_redo').attr('value', 'Herstel');

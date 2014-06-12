@@ -47,9 +47,14 @@ label {
 
 <form id="starting_form" onsubmit="return false;">
 	<label name="name">Naam</label><input type="text" name="name" required="true" size="30"/><br />
-	<label name="age">Geboorte</label><input type="date" name="age" required="true"/><br />
-	<label name="lang1">Eerste taal</label><input type="text" name="lang1"><br />
-	<label name="lang2">Tweede taal</label><input type="text" name="lang2"><br />
+	<label name="studentno">Studentnummer</label><input type="number" name="studentno" inputmode="number"/><br />
+	<label name="age">Geboortedatum</label><input type="date" name="age" required="true"/><br />
+	<label name="eyesight">Oogafwijkingen</label><input type="text" name="eyesight"/><br />
+	<label name="nativelang">Moedertaal</label><input type="text" name="nativelang" required="true"/><br />
+	Spreek je nog andere talen?
+	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
+	(1: redelijk &ndash; 10: moedertaalniveau).<br />
+	<input type="button" name="more" value="+"/><br/>
 	<input type="submit"/>
 </form>
 
