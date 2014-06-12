@@ -2,7 +2,7 @@
 	(c) 2014 Julian Gonggrijp, j.gonggrijp@uu.nl, Utrecht University
 */
 
-var colors = ['#b11', '#c93', '#dd5', '#2e4', '#14c', '#818', '#963', '#fff', '#000'];
+var colors = ['#b11', '#c93', '#dd5', '#2e4', '#14c', '#818', '#963'];
 var color_chosen;
 var first_command = null;
 var last_command = null;
@@ -25,9 +25,9 @@ lang_field = function (count) {
 }
 
 button = function (color) {
-	return '<span class="color_choice" style="border: 5px solid #fff; background-color: ' +
+	return $('<span class="color_choice" style="border: 5px solid #fff; background-color: ' +
 			color +
-			'; width: 60px; height: 60px; border-radius: 20px; display: inline-block;"/>';
+			'; width: 60px; height: 60px; border-radius: 20px; display: inline-block;"/>').data('color', color);
 }
 
 init_application = function ( ) {
@@ -100,12 +100,13 @@ create_swatches = function (colors) {
 	for (index in colors) {
 		swatches.append(button(colors[index]));
 	}
-	color_chosen = colors[colors.length - 1];
+	color_chosen = $('.color_choice').first();
 	$('.color_choice').click(function (event) {
-		color_chosen = $(this).css('background-color');
-		$('.color_choice').css('border-color', '#fff');
-		$(this).css('border-color', '#000');
-	}).first().click();
+		color_chosen.css('border-color', '#fff');
+		color_chosen = $(this);
+		color_chosen.css('border-color', '#000');
+	});
+	color_chosen.click();
 }
 
 load_image = function (url, data, name) {
@@ -126,7 +127,7 @@ load_image = function (url, data, name) {
 add_coloring_book_events = function ( ) {
 	$('path[class="colorable"]').click(function (event) {
 		event.preventDefault();  // helpful on touchscreen devices
-		launch_fill_command(this, color_chosen);
+		launch_fill_command(this, color_chosen.data('color'));
 		$('#undo_redo').attr('value', 'Herstel');
 	});
 }
