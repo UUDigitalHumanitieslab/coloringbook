@@ -84,23 +84,6 @@ init_controls = function ( ) {
 		self.data('count', count);
 		self.before(lang_field(count));
 	});
-	
-	$('#reset_image').click(function (event) {
-		launch_reset_command();
-		$('#undo_redo').attr('value', 'Herstel');
-	});
-
-	$('#undo_redo').click(function (event) {
-		if ($(this).attr('value') == 'Herstel' && last_command) {
-			last_command.undo();
-			last_command = last_command.prev;
-			$(this).attr('value', 'Opnieuw');
-		} else {
-			last_command = last_command.next;
-			last_command.do();
-			$(this).attr('value', 'Herstel');
-		}
-	});
 }
 
 set_image_dimensions = function ( ) {
@@ -200,23 +183,13 @@ display_data = function ( ) {
 command = function (previous) {
 	if (previous) {
 		this.prev = previous;
-		if (previous.next) {
-			if (previous.old_succ) {
-				previous.old_succ.push(previous.next);
-			} else {
-				previous.old_succ = [previous.next];
-			}
-		}
 		previous.next = this;
 	} else {
 		first_command = this;
-		this.prev = new command(this);  // trick to prevent infinite recursion
-		this.prev.next = this;
-		this.next = null;
 	}
-	this.json = { toggle: [] };
-	this.toggle = function ( ) { this.json.toggle.push($.now() - page_onset); };
-	this.do = this.undo = function ( ) { };
+	this.json = { };
+	this.toggle = function ( ) { this.json.time = $.now() - page_onset; };
+	this.do = function ( ) { };
 }
 
 launch_fill_command = function (target, value) {
@@ -228,34 +201,9 @@ launch_fill_command = function (target, value) {
 		this.toggle();
 		$(cmd.target).attr('fill', this.color);
 	}
-	cmd.undo = function ( ) {
-		this.toggle();
-		$(this.target).attr('fill', this.prior);
-	}
 	cmd.json.action = 'fill';
 	cmd.json.target = target.id;
 	cmd.json.color = value;
-	cmd.do();
-	last_command = cmd;
-}
-
-launch_reset_command = function ( ) {
-	var cmd = new command(last_command);
-	cmd.target = $('path[class="colorable"]:not([fill="white"])');
-	cmd.target.each(function ( ) {
-		this.prior = $(this).attr('fill');
-	});
-	cmd.do = function ( ) {
-		this.toggle();
-		this.target.attr('fill', 'white');
-	}
-	cmd.undo = function ( ) {
-		this.toggle();
-		this.target.each(function ( ) {
-			$(this).attr('fill', this.prior);
-		});
-	}
-	cmd.json.action = 'reset';
 	cmd.do();
 	last_command = cmd;
 }
@@ -264,11 +212,6 @@ serialize_commands = function (current_cmd) {
 	sequence = [];
 	while (current_cmd) {
 		sequence.push(current_cmd.json);
-		if (current_cmd.old_succ) {
-			for (i in current_cmd.old_succ) {
-				sequence = $.merge(sequence, serialize_commands(current_cmd.old_succ[i]));
-			}
-		}
 		current_cmd = current_cmd.next;
 	}
 	return sequence;
