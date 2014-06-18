@@ -45,7 +45,7 @@ class SubjectLanguage (db.Model):
 
 class Language (db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(20))
+    name = db.Column(db.String(30))
     
     def __repr__ (self):
         return '<Language {}>'.format(self.name)
@@ -66,3 +66,23 @@ class Area (db.Model):
     
     def __repr__ (self):
         return '<Area {0} in {1}>'.format(self.name, self.drawing)
+
+class Page (db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(30))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
+    text = db.Column(db.String(200))
+    sound = db.Column(db.String(30))
+    drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
+    
+    language = db.relationship(
+        'Language',
+        backref = db.backref(
+            'pages',
+            lazy = 'dynamic'))
+    drawing = db.relationship(
+        'Drawing',
+        backref = db.backref(
+            'pages',
+            lazy = 'dynamic'))
+    
