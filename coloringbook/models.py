@@ -1,21 +1,23 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
 
-db = SQLAlchemy()
+db = SQLAlchemy()  # actual database connection is done in __init__.py
 
 class Subject (db.Model):
+    ''' Personal information of a test person. '''
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(100))
-    numeral = db.Column(db.Integer)
+    numeral = db.Column(db.Integer)  # such as student ID
     birth = db.Column(db.DateTime)
-    eyesight = db.Column(db.String(100))
+    eyesight = db.Column(db.String(100))  # medical conditions
     
-    languages = association_proxy('subject_languages', 'language')
+    languages = association_proxy('subject_languages', 'language')  # many-many
     
     def __repr__ (self):
         return '<Subject {0} born {1}>'.format(self.name, self.birth_date)
 
 class SubjectLanguage (db.Model):
+    ''' Association between a Subject and a Language they speak. '''
     language_id = db.Column(
         db.Integer,
         db.ForeignKey('language.id'),
@@ -24,20 +26,21 @@ class SubjectLanguage (db.Model):
         db.Integer,
         db.ForeignKey('subject.id'),
         primary_key = True)
-    level = db.Column(db.Integer)
+    level = db.Column(db.Integer)  # language skill 1--10 where 10 is native
     
-    subject = db.relationship(
+    subject = db.relationship(  # many-one (facilitates many-many)
         'Subject',
         backref = db.backref(
             'subject_languages',
             cascade = 'all, delete-orphan'))
-    language = db.relationship(
+    language = db.relationship(  # many-one (facilitates many-many)
         'Language',
         backref = db.backref(
             'language_subjects',
             cascade = 'all, delete-orphan'))
 
 class Language (db.Model):
+    ''' Language that may be associated with a Subject, Survey or Page. '''
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
     
@@ -45,41 +48,46 @@ class Language (db.Model):
         return '<Language {}>'.format(self.name)
 
 class Drawing (db.Model):
+    ''' Metadata associated with a colorable SVG. '''
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))
+    name = db.Column(db.String(30))  # path relative to /static
     
     areas = db.relationship('Area', backref = 'drawing', lazy = 'dynamic')
+        # one-many
     
     def __repr__ (self):
         return '<Drawing {}>'.format(self.name)
 
 class Area (db.Model):
+    ''' Colorable part of a Drawing. '''
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(20))
+    name = db.Column(db.String(20))  # id of the <path> element in the SVG
     drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
     
     def __repr__ (self):
         return '<Area {0} in {1}>'.format(self.name, self.drawing)
 
 class Page (db.Model):
+    ''' Combination of a sentence and a Drawing. '''
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
-    text = db.Column(db.String(200))
+    text = db.Column(db.String(200))  # sentence
     sound = db.Column(db.String(30))
+        # corresponding mp3, path relative to /static
     drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
     
-    language = db.relationship(
+    language = db.relationship(  # many-one
         'Language',
         backref = db.backref(
             'pages',
             lazy = 'dynamic'))
-    drawing = db.relationship(
+    drawing = db.relationship(  # many-one
         'Drawing',
         backref = db.backref(
             'pages',
             lazy = 'dynamic'))
-    expectations = db.relationship('Expectation', backref = 'page')
+    expectations = db.relationship('Expectation', backref = 'page')  # one-many
     
     def __repr__ (self):
         return '<Page {0} with {1}, {2}>'.format(
@@ -88,14 +96,16 @@ class Page (db.Model):
             self.language)
 
 class Color (db.Model):
+    ''' Color that may be associated with a Fill or Expectation. '''
     id = db.Column(db.Integer, primary_key = True)
-    code = db.Column(db.String(25))
+    code = db.Column(db.String(25))  # RGB code as used at the client side
     name = db.Column(db.String(20))
     
     def __repr__ (self):
         return '<Color {0} "{1}">'.format(self.code, self.name)
 
 class Expectation (db.Model):
+    ''' Expected Color for a particular Area on a particular Page. '''
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
@@ -105,10 +115,10 @@ class Expectation (db.Model):
         db.ForeignKey('area.id'),
         primary_key = True)
     color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
-    note = db.Column(db.String(200))
+    motivation = db.Column(db.String(200))
     
-    area = db.relationship('Area', backref = 'expectations')
-    color = db.relationship('Color')
+    area = db.relationship('Area', backref = 'expectations')  # many-one
+    color = db.relationship('Color')  # many-one
     
     def __repr__ (self):
         return '<Expectation {0} in {1}, {2}>'.format(
