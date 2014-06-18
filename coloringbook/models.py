@@ -19,29 +19,23 @@ class SubjectLanguage (db.Model):
     language_id = db.Column(
         db.Integer,
         db.ForeignKey('language.id'),
-        primary_key = True
-    )
+        primary_key = True)
     subject_id = db.Column(
         db.Integer,
         db.ForeignKey('subject.id'),
-        primary_key = True
-    )
+        primary_key = True)
     level = db.Column(db.Integer)
     
     subject = db.relationship(
         'Subject',
         backref = db.backref(
             'subject_languages',
-            cascade = 'all, delete-orphan'
-        )
-    )
+            cascade = 'all, delete-orphan'))
     language = db.relationship(
         'Language',
         backref = db.backref(
             'language_subjects',
-            cascade = 'all, delete-orphan'
-        )
-    )
+            cascade = 'all, delete-orphan'))
 
 class Language (db.Model):
     id = db.Column(db.Integer, primary_key = True)
