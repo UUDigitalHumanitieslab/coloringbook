@@ -13,7 +13,7 @@ var page_data = [];
 var form_data;
 var images = {};
 var image_count = 0;
-var sentence_image_delay = 5000;  // milliseconds
+var sentence_image_delay = 500;  // milliseconds
 
 lang_field = function (count) {
 	var lang = 'name="name' + count + '"';
