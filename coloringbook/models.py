@@ -1,11 +1,7 @@
-from flask import Flask, render_template, request, json
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://coloringbook@localhost/coloringbook'
-db = SQLAlchemy(app)
-
+db = SQLAlchemy()
 
 class Subject (db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -53,15 +49,3 @@ class Language (db.Model):
     
     def __repr__ (self):
         return '<Language {}>'.format(self.name)
-
-
-@app.route('/')
-def index():
-    return render_template('coloringbook.html')
-
-@app.route('/submit', methods=['POST'])
-def submit():
-    return json.dumps(request.get_json())
-
-if __name__ == '__main__':
-    app.run(debug=True)
