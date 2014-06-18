@@ -100,3 +100,24 @@ class Color (db.Model):
     
     def __repr__ (self):
         return '<Color {0} "{1}">'.format(self.code, self.name)
+
+class Expectation (db.Model):
+    page_id = db.Column(
+        db.Integer,
+        db.ForeignKey('page.id'),
+        primary_key = True)
+    area_id = db.Column(
+        db.Integer,
+        db.ForeignKey('area.id'),
+        primary_key = True)
+    color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
+    note = db.Column(db.String(200))
+    
+    area = db.relationship('Area', backref = 'expectations')
+    color = db.relationship('Color')
+    
+    def __repr__ (self):
+        return '<Expectation {0} in {1}, {2}>'.format(
+            self.color,
+            self.are,
+            self.page)
