@@ -85,4 +85,18 @@ class Page (db.Model):
         backref = db.backref(
             'pages',
             lazy = 'dynamic'))
+    expectations = db.relationship('Expectation', backref = 'page')
     
+    def __repr__ (self):
+        return '<Page {0} with {1}, {2}>'.format(
+            self.name,
+            self.drawing,
+            self.language)
+
+class Color (db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    code = db.Column(db.String(25))
+    name = db.Column(db.String(20))
+    
+    def __repr__ (self):
+        return '<Color {0} "{1}">'.format(self.code, self.name)
