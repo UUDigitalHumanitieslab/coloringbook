@@ -125,3 +125,22 @@ class Expectation (db.Model):
             self.color,
             self.are,
             self.page)
+
+class Survey (db.Model):
+    ''' Prepared series of Pages that is presented to Subjects. '''
+    
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(40))
+    language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
+    begin = db.Column(db.DateTime)
+    end = db.Column(db.DateTime)
+    information = db.Column(db.String(500))
+    
+    language = db.relationship('Language', backref = 'surveys')  # many-one
+    pages = association_proxy('survey_pages', 'page')  # many-many
+    
+    def __repr__ (self):
+        return '<Survey {0} in {1} starting {2}>'.format(
+            self.name,
+            self.language,
+            self.begin)
