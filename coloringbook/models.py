@@ -7,7 +7,7 @@ class Subject (db.Model):
     ''' Personal information of a test person. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(50))
     numeral = db.Column(db.Integer)  # such as student ID
     birth = db.Column(db.DateTime)
     eyesight = db.Column(db.String(100))  # medical conditions
@@ -55,7 +55,8 @@ class Drawing (db.Model):
     ''' Metadata associated with a colorable SVG. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))  # path relative to /static
+    name = db.Column(db.String(30))  # filename *without* extension
+                                     # database is path-agnostic
     
     areas = db.relationship('Area', backref = 'drawing', lazy = 'dynamic')
         # one-many
@@ -80,8 +81,8 @@ class Page (db.Model):
     name = db.Column(db.String(30))
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
-    sound = db.Column(db.String(30))
-        # corresponding mp3, path relative to /static
+    sound = db.Column(db.String(30))  # filename *with* extension
+                                      # database is path-agnostic
     drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
     
     language = db.relationship(  # many-one
@@ -107,7 +108,7 @@ class Color (db.Model):
 
     id = db.Column(db.Integer, primary_key = True)
     code = db.Column(db.String(25))  # RGB code as used at the client side
-    name = db.Column(db.String(20))
+    name = db.Column(db.String(20))  # mnemonic
     
     def __repr__ (self):
         return '<Color {0} "{1}">'.format(self.code, self.name)
