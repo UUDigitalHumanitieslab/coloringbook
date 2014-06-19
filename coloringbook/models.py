@@ -48,6 +48,8 @@ class Language (db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30))
     
+    subjects = association_proxy('language_subjects', 'subject')  # many-many
+    
     def __repr__ (self):
         return '<Language {}>'.format(self.name)
 
@@ -96,6 +98,8 @@ class Page (db.Model):
             'pages',
             lazy = 'dynamic'))
     expectations = db.relationship('Expectation', backref = 'page')  # one-many
+    surveys = association_proxy('page_surveys', 'survey')  # many-many
+    fills = association_proxy('page_surveys', 'fills')  # one-many
     
     def __repr__ (self):
         return '<Page {0} with {1}, {2}>'.format(
@@ -129,7 +133,7 @@ class Expectation (db.Model):
     motivation = db.Column(db.String(200))
     
     area = db.relationship('Area', backref = 'expectations')  # many-one
-    color = db.relationship('Color')  # many-one
+    color = db.relationship('Color')  # many-one, no backref
     
     def __repr__ (self):
         return '<Expectation {0} in {1}, {2}>'.format(
@@ -150,6 +154,7 @@ class Survey (db.Model):
     language = db.relationship('Language', backref = 'surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
     subjects = association_proxy('survey_subjects', 'subject') # many-many
+    fills = association_proxy('survey_pages', 'fills')  # one-many
     
     def __repr__ (self):
         return '<Survey {0} in {1} starting {2}>'.format(
