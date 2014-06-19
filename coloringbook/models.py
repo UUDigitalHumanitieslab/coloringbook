@@ -233,7 +233,8 @@ class Fill (db.Model):
         db.Integer,
         db.ForeignKey('subject.id'),
         primary_key = True)
-    time = db.Column(db.Integer, primary_key = True)  # msecs from page start
+    time = db.Column(db.Integer, primary_key = True, autoincrement = False)
+        # msecs from page start
     color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
     
     survey = association_proxy('survey_page', 'survey')  # many-one
