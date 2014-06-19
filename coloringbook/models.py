@@ -166,7 +166,7 @@ class SurveyPage (db.Model):
         db.Integer,
         db.ForeignKey('page.id'),
         primary_key = True)
-    order = db.Column(db.Integer)
+    order = db.Column(db.Integer)  # Nth page of a survey
     
     survey = db.relationship(  # many-one (facilitates many-many)
         'Survey',
