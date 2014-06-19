@@ -178,6 +178,10 @@ class SurveyPage (db.Model):
         backref = db.backref(
             'page_surveys',
             cascade = 'all, delete-orphan'))
+    fills = db.relationship(  # one-many
+        'Fill',
+        backref = 'survey_page',
+        lazy = 'dynamic')
 
 class SurveySubject (db.Model):
     ''' Association between a Survey and a Subject who participated in it. '''
@@ -207,3 +211,44 @@ class SurveySubject (db.Model):
         'Fill',
         backref = 'survey_subject',
         lazy = 'dynamic')
+
+class Fill (db.Model):
+    ''' The Color a Subject filled an Area of a Page in a Survey with at #ms.'''
+    
+    survey_id = db.Column(
+        db.Integer,
+        db.ForeignKey('survey.id'),
+        primary_key = True)
+    page_id = db.Column(
+        db.Integer,
+        db.ForeignKey('page.id'),
+        primary_key = True)
+    area_id = db.Column(
+        db.Integer,
+        db.ForeignKey('area.id'),
+        primary_key = True)
+    subject_id = db.Column(
+        db.Integer,
+        db.ForeignKey('subject.id'),
+        primary_key = True)
+    time = db.Column(db.Integer, primary_key = True)  # msecs from page start
+    color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
+    
+    survey = association_proxy('survey_page', 'survey')  # many-one
+    page = association_proxy('survey_page', 'page')  # many-one
+    area = db.relationship(  # many-one
+        'Area',
+        backref = db.backref(
+            'fills',
+            lazy = 'dynamic'))
+    subject = association_proxy('survey_subject', 'subject')  # many-one
+    color = db.relationship('Color')  # many-one, no backref
+    
+    def __repr__ (self):
+        return '<Fill {0} with {1} after {5} ms by {2} at {3} of {4}>'.format(
+            self.area,
+            self.color,
+            self.subject,
+            self.page,
+            self.survey,
+            self.time)
