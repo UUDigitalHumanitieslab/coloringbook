@@ -152,3 +152,27 @@ class Survey (db.Model):
             self.name,
             self.language,
             self.begin)
+
+class SurveyPage (db.Model):
+    ''' Association between a Survey and a Page that is part of it. '''
+    
+    survey_id = db.Column(
+        db.Integer,
+        db.ForeignKey('survey.id'),
+        primary_key = True)
+    page_id = db.Column(
+        db.Integer,
+        db.ForeignKey('page.id'),
+        primary_key = True)
+    order = db.Column(db.Integer)
+    
+    survey = db.relationship(  # many-one (facilitates many-many)
+        'Survey',
+        backref = db.backref(
+            'survey_pages',
+            cascade = 'all, delete-orphan'))
+    page = db.relationship(  # many-one (facilitates many-many)
+        'Page',
+        backref = db.backref(
+            'page_surveys',
+            cascade = 'all, delete-orphan'))
