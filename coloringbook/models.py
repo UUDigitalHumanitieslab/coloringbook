@@ -13,6 +13,7 @@ class Subject (db.Model):
     eyesight = db.Column(db.String(100))  # medical conditions
     
     languages = association_proxy('subject_languages', 'language')  # many-many
+    surveys = association_proxy('subject_surveys', 'survey')  # many-many
     
     def __repr__ (self):
         return '<Subject {0} born {1}>'.format(self.name, self.birth_date)
@@ -146,6 +147,7 @@ class Survey (db.Model):
     
     language = db.relationship('Language', backref = 'surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
+    subjects = association_proxy('survey_subjects', 'subject') # many-many
     
     def __repr__ (self):
         return '<Survey {0} in {1} starting {2}>'.format(
@@ -176,3 +178,32 @@ class SurveyPage (db.Model):
         backref = db.backref(
             'page_surveys',
             cascade = 'all, delete-orphan'))
+
+class SurveySubject (db.Model):
+    ''' Association between a Survey and a Subject who participated in it. '''
+    
+    survey_id = db.Column(
+        db.Integer,
+        db.ForeignKey('survey.id'),
+        primary_key = True)
+    subject_id = db.Column(
+        db.Integer,
+        db.ForeignKey('subject.id'),
+        primary_key = True)
+    
+    survey = db.relationship(  # many-one (facilitates many-many)
+        'Survey',
+        backref = db.backref(
+            'survey_subjects',
+            cascade = 'all, delete-orphan',
+            lazy = 'dynamic'))
+    subject = db.relationship(  # many-one (facilitates many-many)
+        'Subject',
+        backref = db.backref(
+            'subject_surveys',
+            cascade = 'all, delete-orphan',
+            lazy = 'dynamic'))
+    fills = db.relationship(  # one-many
+        'Fill',
+        backref = 'survey_subject',
+        lazy = 'dynamic')
