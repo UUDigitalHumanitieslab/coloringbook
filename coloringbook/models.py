@@ -125,6 +125,7 @@ class Expectation (db.Model):
         db.ForeignKey('area.id'),
         primary_key = True)
     color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
+    here = db.Column(db.Boolean)  # if False, color is expected in another area
     motivation = db.Column(db.String(200))
     
     area = db.relationship('Area', backref = 'expectations')  # many-one
