@@ -2,7 +2,7 @@
 	(c) 2014 Julian Gonggrijp, j.gonggrijp@uu.nl, Utrecht University
 */
 
-var colors = ['#b11', '#c93', '#dd5', '#2e4', '#14c', '#818', '#963', '#fff', '#000'];
+var colors = ['#b11', '#c93', '#dd5', '#2e4', '#14c', '#818', '#963'];
 var color_chosen;
 var first_command = null;
 var last_command = null;
@@ -13,12 +13,21 @@ var page_data = [];
 var form_data;
 var images = {};
 var image_count = 0;
-var sentence_image_delay = 5000;  // milliseconds
+var sentence_image_delay = 500;  // milliseconds
+
+lang_field = function (count) {
+	var lang = 'name="name' + count + '"';
+	var level = 'name="level' + count + '"';
+	return '<label ' + lang + '>Taal ' + count + '</label>' +
+		'<input type="text" ' + lang + '/> ' +
+		'<label ' + level + '>Niveau</label>' +
+		'<input type="number" ' + level + ' min="1" max="10" step="1"/><br/>';
+}
 
 button = function (color) {
-	return '<span class="color_choice" style="border: 5px solid #fff; background-color: ' +
+	return $('<span class="color_choice" style="background-color: ' +
 			color +
-			'; width: 60px; height: 60px; border-radius: 20px; display: inline-block;"/>';
+			';"/>').data('color', color);
 }
 
 init_application = function ( ) {
@@ -68,21 +77,12 @@ finish_instructions = function ( ) {
 }
 
 init_controls = function ( ) {
-	$('#reset_image').click(function (event) {
-		launch_reset_command();
-		$('#undo_redo').attr('value', 'Herstel');
-	});
-
-	$('#undo_redo').click(function (event) {
-		if ($(this).attr('value') == 'Herstel' && last_command) {
-			last_command.undo();
-			last_command = last_command.prev;
-			$(this).attr('value', 'Opnieuw');
-		} else {
-			last_command = last_command.next;
-			last_command.do();
-			$(this).attr('value', 'Herstel');
-		}
+	$('#starting_form >[name="more"]').click(function () {
+		var self = $(this);
+		var count = self.data('count');
+		if (count) count++; else count = 1;
+		self.data('count', count);
+		self.before(lang_field(count));
 	});
 }
 
@@ -100,12 +100,14 @@ create_swatches = function (colors) {
 	for (index in colors) {
 		swatches.append(button(colors[index]));
 	}
-	color_chosen = colors[colors.length - 1];
+	$(button('#fff')).appendTo(swatches).append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
+	color_chosen = $('.color_choice').first();
 	$('.color_choice').click(function (event) {
-		color_chosen = $(this).css('background-color');
-		$('.color_choice').css('border-color', '#fff');
-		$(this).css('border-color', '#000');
-	}).first().click();
+		color_chosen.css('border-color', '#fff');
+		color_chosen = $(this);
+		color_chosen.css('border-color', '#000');
+	});
+	color_chosen.click();
 }
 
 load_image = function (url, data, name) {
@@ -126,7 +128,7 @@ load_image = function (url, data, name) {
 add_coloring_book_events = function ( ) {
 	$('path[class="colorable"]').click(function (event) {
 		event.preventDefault();  // helpful on touchscreen devices
-		launch_fill_command(this, color_chosen);
+		launch_fill_command(this, color_chosen.data('color'));
 		$('#undo_redo').attr('value', 'Herstel');
 	});
 }
@@ -183,23 +185,13 @@ display_data = function ( ) {
 command = function (previous) {
 	if (previous) {
 		this.prev = previous;
-		if (previous.next) {
-			if (previous.old_succ) {
-				previous.old_succ.push(previous.next);
-			} else {
-				previous.old_succ = [previous.next];
-			}
-		}
 		previous.next = this;
 	} else {
 		first_command = this;
-		this.prev = new command(this);  // trick to prevent infinite recursion
-		this.prev.next = this;
-		this.next = null;
 	}
-	this.json = { toggle: [] };
-	this.toggle = function ( ) { this.json.toggle.push($.now() - page_onset); };
-	this.do = this.undo = function ( ) { };
+	this.json = { };
+	this.toggle = function ( ) { this.json.time = $.now() - page_onset; };
+	this.do = function ( ) { };
 }
 
 launch_fill_command = function (target, value) {
@@ -211,34 +203,9 @@ launch_fill_command = function (target, value) {
 		this.toggle();
 		$(cmd.target).attr('fill', this.color);
 	}
-	cmd.undo = function ( ) {
-		this.toggle();
-		$(this.target).attr('fill', this.prior);
-	}
 	cmd.json.action = 'fill';
 	cmd.json.target = target.id;
 	cmd.json.color = value;
-	cmd.do();
-	last_command = cmd;
-}
-
-launch_reset_command = function ( ) {
-	var cmd = new command(last_command);
-	cmd.target = $('path[class="colorable"]:not([fill="white"])');
-	cmd.target.each(function ( ) {
-		this.prior = $(this).attr('fill');
-	});
-	cmd.do = function ( ) {
-		this.toggle();
-		this.target.attr('fill', 'white');
-	}
-	cmd.undo = function ( ) {
-		this.toggle();
-		this.target.each(function ( ) {
-			$(this).attr('fill', this.prior);
-		});
-	}
-	cmd.json.action = 'reset';
 	cmd.do();
 	last_command = cmd;
 }
@@ -247,11 +214,6 @@ serialize_commands = function (current_cmd) {
 	sequence = [];
 	while (current_cmd) {
 		sequence.push(current_cmd.json);
-		if (current_cmd.old_succ) {
-			for (i in current_cmd.old_succ) {
-				sequence = $.merge(sequence, serialize_commands(current_cmd.old_succ[i]));
-			}
-		}
 		current_cmd = current_cmd.next;
 	}
 	return sequence;

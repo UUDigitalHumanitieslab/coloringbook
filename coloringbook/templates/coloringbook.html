@@ -25,6 +25,15 @@ input {
 #swatches input {
 	font-size: 1px;
 }
+.color_choice {
+	border: 5px solid #fff;
+	padding: 5px;
+	width: 50px;
+	height: 50px;
+	border-radius: 20px;
+	display: inline-block;
+	vertical-align: middle;
+}
 label {
 	display: inline-block;
 	width: 15ex;
@@ -47,9 +56,14 @@ label {
 
 <form id="starting_form" onsubmit="return false;">
 	<label name="name">Naam</label><input type="text" name="name" required="true" size="30"/><br />
-	<label name="age">Geboorte</label><input type="date" name="age" required="true"/><br />
-	<label name="lang1">Eerste taal</label><input type="text" name="lang1"><br />
-	<label name="lang2">Tweede taal</label><input type="text" name="lang2"><br />
+	<label name="studentno">Studentnummer</label><input type="number" name="studentno" inputmode="number"/><br />
+	<label name="age">Geboortedatum</label><input type="date" name="age" required="true"/><br />
+	<label name="eyesight">Oogafwijkingen</label><input type="text" name="eyesight"/><br />
+	<label name="nativelang">Moedertaal</label><input type="text" name="nativelang" required="true"/><br />
+	Spreek je nog andere talen?
+	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
+	(1: redelijk &ndash; 10: moedertaalniveau).<br />
+	<input type="button" name="more" value="+"/><br/>
 	<input type="submit"/>
 </form>
 
@@ -65,11 +79,8 @@ label {
 
 <div id="controls" style="padding-bottom: 50px;">
 	<div id="coloring_book_image"></div>
-	<!--<div id="color_chosen" style="float: left; clear: left; width: 100px; height: 50px; background-color: #000; border: 2px #888 solid; border-radius: 20px;"></div>-->
 	<p id="swatches" style="float: left; clear: left;"></p>  
 	<p style="float: right; clear: right;">
-		<input type="button" id="undo_redo" value="Herstel"/>
-		<input type="button" id="reset_image" value="Alles wissen"/>
 		<input type="button" value="klaar" onclick="end_page();"/>
 	</p>
 </div>
