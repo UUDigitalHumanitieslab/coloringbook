@@ -181,6 +181,7 @@ end_page = function ( ) {
 
 send_data = function ( ) {
 	var data = {
+		survey: 'test',
 		subject: form_data,
 		results: page_data
 	};
