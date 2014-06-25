@@ -16,7 +16,7 @@ var image_count = 0;
 var sentence_image_delay = 500;  // milliseconds
 
 lang_field = function (count) {
-	var lang = 'name="name' + count + '"';
+	var lang = 'name="language' + count + '"';
 	var level = 'name="level' + count + '"';
 	return '<label ' + lang + '>Taal ' + count + '</label>' +
 		'<input type="text" ' + lang + '/> ' +
@@ -69,11 +69,11 @@ handle_form = function (event) {
 	for (i in raw_form) {
 	    if (raw_form[i].name == 'nativelang') {
 	        form_data.languages.push([raw_form[i].value, 10]);
-	    } else if (raw_form[i].name.match('name[0-9]')) {
+	    } else if (raw_form[i].name.match('language[0-9]')) {
 	        form_data.languages.push([raw_form[i].value]);
 	    } else if (RegExp('[0-9]+').test(raw_form[i].name)) {
 	        var level = RegExp('[0-9]+').exec(raw_form[i].name);
-	        form_data.languages[level].push(raw_form[i].value);
+	        form_data.languages[level].push(parseInt(raw_form[i].value, 10));
 	    } else {
 	        form_data[raw_form[i].name] = raw_form[i].value;
 	    }
