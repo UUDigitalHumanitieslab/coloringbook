@@ -16,7 +16,7 @@ def submit():
     
     s = db.session
     data = request.get_json()
-    subject = subject_from_json(data['subject'])  # TODO: make manageable on client side
+    subject = subject_from_json(data['subject'])
     s.add(subject)  # TODO: add uniqueness constraint and conflict handling
     survey = Survey.query().filter_by(name = data['survey']).one()
     pages = (

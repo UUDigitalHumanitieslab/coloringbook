@@ -64,7 +64,20 @@ handle_form = function (event) {
 	event.preventDefault();
 	$(this).hide();
 	$('#instructions').show();
-	form_data = $(this).serializeArray();
+	var raw_form = $(this).serializeArray();
+	form_data = { languages: [] };
+	for (i in raw_form) {
+	    if (raw_form[i].name == 'nativelang') {
+	        form_data.languages.push([raw_form[i].value, 10]);
+	    } else if (raw_form[i].name.match('name[0-9]')) {
+	        form_data.languages.push([raw_form[i].value]);
+	    } else if (RegExp('[0-9]+').test(raw_form[i].name)) {
+	        var level = RegExp('[0-9]+').exec(raw_form[i].name);
+	        form_data.languages[level].push(raw_form[i].value);
+	    } else {
+	        form_data[raw_form[i].name] = raw_form[i].value;
+	    }
+	}
 }
 
 finish_instructions = function ( ) {
