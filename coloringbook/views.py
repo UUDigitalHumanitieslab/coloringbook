@@ -18,9 +18,9 @@ def submit():
     data = request.get_json()
     subject = subject_from_json(data['subject'])
     s.add(subject)  # TODO: add uniqueness constraint and conflict handling
-    survey = Survey.query().filter_by(name = data['survey']).one()
+    survey = Survey.query.filter_by(name = data['survey']).one()
     pages = (
-        Page.query()
+        Page.query
         .join(*Page.surveys.attr)
         .filter(Survey.id == survey.id)
         .order_by(SurveyPage.order)
@@ -43,7 +43,7 @@ def subject_from_json (data):
         eyesight = data['eyesight'] )
     
     for name, level in data['languages']:
-        language = Language.query().filter_by(name = name).first()
+        language = Language.query.filter_by(name = name).first()
         if language == None:
             language = Language(name = name)
         SubjectLanguage(subject = subject, language = language, level = level)
@@ -53,8 +53,8 @@ def subject_from_json (data):
 def fills_from_json (survey, page, subject, data):
     ''' Take fill actions from JSON and put into [relational object]. '''
     
-    colors = Color.query()
-    areas = Area.query().filter_by(drawing = page.drawing)
+    colors = Color.query
+    areas = Area.query.filter_by(drawing = page.drawing)
     fills = []
     for datum in data:
         fills.append(Fill(
