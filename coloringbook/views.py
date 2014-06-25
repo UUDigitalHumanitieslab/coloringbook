@@ -39,7 +39,7 @@ def subject_from_json (data):
     subject = Subject(
         name = data['name'],
         numeral = data['numeral'],
-        birth = date(*data['birth'].split('-')),  # TODO: enforce format
+        birth = date(*map(int, data['birth'].split('-'))),  # TODO: enforce format
         eyesight = data['eyesight'] )
     
     for name, level in data['languages']:
