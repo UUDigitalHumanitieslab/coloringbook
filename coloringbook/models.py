@@ -1,6 +1,21 @@
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
 
+__all__ = [
+    'db',
+    'Subject',
+    'SubjectLanguage',
+    'Language',
+    'Drawing',
+    'Area',
+    'Page',
+    'Color',
+    'Expectation',
+    'Survey',
+    'SurveyPage',
+    'SurveySubject',
+    'Fill'              ]
+
 db = SQLAlchemy()  # actual database connection is done in __init__.py
 
 class Subject (db.Model):
