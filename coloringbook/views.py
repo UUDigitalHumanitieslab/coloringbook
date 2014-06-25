@@ -2,7 +2,7 @@ from datetime import date
 
 from flask import Blueprint, render_template, request, json
 
-from .models import db, Survey, Page, Subject, Fill, Language, SubjectLanguage
+from .models import *
 
 site = Blueprint('site', __name__)
 
@@ -29,7 +29,7 @@ def submit():
     results = data['results']
     assert len(pages) == len(results)
     for page, result in zip(pages, results):
-        s.add_all(fills_from_json(survey, page, result))
+        s.add_all(fills_from_json(survey, page, subject, result))
     s.commit()
     return 'Success'
     
@@ -50,3 +50,18 @@ def subject_from_json (data):
     
     return subject
     
+def fills_from_json (survey, page, subject, data):
+    ''' Take fill actions from JSON and put into [relational object]. '''
+    
+    colors = Color.query()
+    areas = Area.query().filter_by(drawing = page.drawing)
+    fills = []
+    for datum in data:
+        fills.append(Fill(
+            survey = survey,
+            page = page,
+            area = areas.filter_by(name = datum['target']).one(),  # TODO: handle errors
+            subject = subject,
+            time = datum['time'],
+            color = colors.filter_by(code = datum['color']).one() ))  # as above
+    return fills
