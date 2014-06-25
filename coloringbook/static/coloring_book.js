@@ -167,10 +167,7 @@ start_image = function ( ) {
 
 end_page = function ( ) {
 	$('#controls').hide();
-	page_data.push({
-		"id": page.id,
-		"actions": serialize_commands(first_command)
-	});
+	page_data.push(serialize_commands(first_command));
 	if (++pagenum < pages.length) {
 		first_command = last_command = null;
 		start_page();
