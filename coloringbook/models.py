@@ -1,4 +1,5 @@
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.schema import ForeignKeyConstraint
 from sqlalchemy.ext.associationproxy import association_proxy
 
 __all__ = [
@@ -236,6 +237,16 @@ class SurveySubject (db.Model):
 
 class Fill (db.Model):
     ''' The Color a Subject filled an Area of a Page in a Survey with at #ms.'''
+    
+    __tablename__ = 'fill'
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ['survey_id', 'page_id'],
+            ['survey_page.survey_id', 'survey_page.page_id'] ),
+        ForeignKeyConstraint(
+            ['survey_id', 'subject_id'],
+            ['survey_subject.survey_id', 'survey_subject.subject_id'] ),
+    )
     
     survey_id = db.Column(
         db.Integer,
