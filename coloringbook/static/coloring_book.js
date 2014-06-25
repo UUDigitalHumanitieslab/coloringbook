@@ -162,11 +162,11 @@ end_page = function ( ) {
 		first_command = last_command = null;
 		start_page();
 	} else {
-		display_data();
+		send_data();
 	}
 }
 
-display_data = function ( ) {
+send_data = function ( ) {
 	var data = {
 		subject: form_data,
 		results: page_data
