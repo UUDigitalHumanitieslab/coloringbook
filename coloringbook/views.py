@@ -27,7 +27,7 @@ def submit():
         .all()
     )
     results = data['results']
-    assert len(pages) == len(results)
+    assert len(pages) == len(results)  # TODO: handle errors rather than crashing hard
     for page, result in zip(pages, results):
         s.add_all(fills_from_json(survey, page, subject, result))
     s.commit()
@@ -40,7 +40,7 @@ def subject_from_json (data):
         name = data['name'],
         numeral = data['numeral'],  # TODO: rename on client side
         birth = date(data['birth'].split('-')),  # TODO: enforce format
-        eyesight = data['eyesight'])
+        eyesight = data['eyesight'] )
     
     for name, level in data['languages']:
         language = Language.query().filter_by(name = name).first()
