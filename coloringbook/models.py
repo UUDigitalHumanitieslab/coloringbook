@@ -115,7 +115,6 @@ class Page (db.Model):
             lazy = 'dynamic'))
     expectations = db.relationship('Expectation', backref = 'page')  # one-many
     surveys = association_proxy('page_surveys', 'survey')  # many-many
-    fills = association_proxy('page_surveys', 'fills')  # one-many
     
     def __repr__ (self):
         return '<Page {0} with {1}, {2}>'.format(
@@ -170,7 +169,6 @@ class Survey (db.Model):
     language = db.relationship('Language', backref = 'surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
     subjects = association_proxy('survey_subjects', 'subject') # many-many
-    fills = association_proxy('survey_pages', 'fills')  # one-many
     
     def __repr__ (self):
         return '<Survey {0} in {1} starting {2}>'.format(
@@ -201,10 +199,6 @@ class SurveyPage (db.Model):
         backref = db.backref(
             'page_surveys',
             cascade = 'all, delete-orphan'))
-    fills = db.relationship(  # one-many
-        'Fill',
-        backref = 'survey_page',
-        lazy = 'dynamic')
 
 class SurveySubject (db.Model):
     ''' Association between a Survey and a Subject who participated in it. '''
@@ -230,23 +224,9 @@ class SurveySubject (db.Model):
             'subject_surveys',
             cascade = 'all, delete-orphan',
             lazy = 'dynamic'))
-    fills = db.relationship(  # one-many
-        'Fill',
-        backref = 'survey_subject',
-        lazy = 'dynamic')
 
 class Fill (db.Model):
     ''' The Color a Subject filled an Area of a Page in a Survey with at #ms.'''
-    
-    __tablename__ = 'fill'
-    __table_args__ = (
-        ForeignKeyConstraint(
-            ['survey_id', 'page_id'],
-            ['survey_page.survey_id', 'survey_page.page_id'] ),
-        ForeignKeyConstraint(
-            ['survey_id', 'subject_id'],
-            ['survey_subject.survey_id', 'survey_subject.subject_id'] ),
-    )
     
     survey_id = db.Column(
         db.Integer,
@@ -268,14 +248,18 @@ class Fill (db.Model):
         # msecs from page start
     color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
     
-    survey = association_proxy('survey_page', 'survey')  # many-one
-    page = association_proxy('survey_page', 'page')  # many-one
+    survey = db.relationship(  # many-one
+        'Survey',
+        backref = db.backref('fills', lazy = 'dynamic') )
+    page = db.relationship(  # many-one
+        'Page',
+        backref = db.backref('fills', lazy = 'dynamic') )
     area = db.relationship(  # many-one
         'Area',
-        backref = db.backref(
-            'fills',
-            lazy = 'dynamic'))
-    subject = association_proxy('survey_subject', 'subject')  # many-one
+        backref = db.backref('fills', lazy = 'dynamic') )
+    subject = db.relationship(  # many-one
+        'Subject',
+        backref = db.backref('fills', lazy = 'dynamic') )
     color = db.relationship('Color')  # many-one, no backref
     
     def __repr__ (self):
