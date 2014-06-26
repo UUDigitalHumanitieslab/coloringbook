@@ -23,7 +23,7 @@ def submit():
         Page.query
         .join(*Page.surveys.attr)
         .filter(Survey.id == survey.id)
-        .order_by(SurveyPage.order)
+        .order_by(SurveyPage.ordering)
         .all()
     )
     results = data['results']
