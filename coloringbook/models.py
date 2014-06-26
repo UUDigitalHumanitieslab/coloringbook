@@ -29,7 +29,7 @@ class Subject (db.Model):
     languages = association_proxy('subject_languages', 'language')  # many-many
     
     def __repr__ (self):
-        return '<Subject {0} born {1}>'.format(self.name, self.birth)
+        return '{0} ({1}, {2})'.format(self.name, self.birth, self.numeral)
 
 class SubjectLanguage (db.Model):
     ''' Association between a Subject and a Language they speak. '''
@@ -64,7 +64,7 @@ class Language (db.Model):
     subjects = association_proxy('language_subjects', 'subject')  # many-many
     
     def __repr__ (self):
-        return '<Language {}>'.format(self.name)
+        return self.name
 
 class Drawing (db.Model):
     ''' Metadata associated with a colorable SVG. '''
@@ -77,7 +77,7 @@ class Drawing (db.Model):
         # one-many
     
     def __repr__ (self):
-        return '<Drawing {}>'.format(self.name)
+        return self.name
 
 class Area (db.Model):
     ''' Colorable part of a Drawing. '''
@@ -87,7 +87,7 @@ class Area (db.Model):
     drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
     
     def __repr__ (self):
-        return '<Area {0} in {1}>'.format(self.name, self.drawing)
+        return '{0} ({1})'.format(self.name, self.drawing)
 
 class Page (db.Model):
     ''' Combination of a sentence and a Drawing. '''
@@ -114,10 +114,7 @@ class Page (db.Model):
     surveys = association_proxy('page_surveys', 'survey')  # many-many
     
     def __repr__ (self):
-        return '<Page {0} with {1}, {2}>'.format(
-            self.name,
-            self.drawing,
-            self.language)
+        return self.name
 
 class Color (db.Model):
     ''' Color that may be associated with a Fill or Expectation. '''
@@ -127,7 +124,7 @@ class Color (db.Model):
     name = db.Column(db.String(20))  # mnemonic
     
     def __repr__ (self):
-        return '<Color {0} "{1}">'.format(self.code, self.name)
+        return '{0} ({1})'.format(self.code, self.name)
 
 class Expectation (db.Model):
     ''' Expected Color for a particular Area on a particular Page. '''
@@ -184,10 +181,7 @@ class Survey (db.Model):
         backref = db.backref('surveys', lazy = 'dynamic') )
     
     def __repr__ (self):
-        return '<Survey {0} in {1} starting {2}>'.format(
-            self.name,
-            self.language,
-            self.begin)
+        return self.name
 
 class SurveyPage (db.Model):
     ''' Association between a Survey and a Page that is part of it. '''
