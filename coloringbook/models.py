@@ -29,7 +29,7 @@ class Subject (db.Model):
     languages = association_proxy('subject_languages', 'language')  # many-many
     
     def __repr__ (self):
-        return '<Subject {0} born {1}>'.format(self.name, self.birth_date)
+        return '<Subject {0} born {1}>'.format(self.name, self.birth)
 
 class SubjectLanguage (db.Model):
     ''' Association between a Subject and a Language they speak. '''
@@ -150,7 +150,7 @@ class Expectation (db.Model):
     def __repr__ (self):
         return '<Expectation {0} in {1}, {2}>'.format(
             self.color,
-            self.are,
+            self.area,
             self.page)
 
 survey_subject = db.Table(
