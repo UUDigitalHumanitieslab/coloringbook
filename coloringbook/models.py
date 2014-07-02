@@ -13,7 +13,7 @@ __all__ = [
     'Expectation',
     'Survey',
     'SurveyPage',
-    'Fill'              ]
+    'Fill'       ]
 
 db = SQLAlchemy()  # actual database connection is done in __init__.py
 
@@ -252,3 +252,41 @@ class Fill (db.Model):
             self.page,
             self.survey,
             self.time)
+    
+    @classmethod
+    def final (cls):
+        grouped_fills = (
+            db.session.query(
+                Fill.survey_id,
+                Fill.page_id,
+                Fill.area_id,
+                Fill.subject_id,
+                db.func.max(Fill.time).label('latest'),
+                db.func.count(Fill.time).label('numclicks') )
+            .select_from(Fill)
+            .group_by(
+                Fill.survey_id,
+                Fill.page_id,
+                Fill.area_id,
+                Fill.subject_id )
+            .subquery()
+        )
+
+        return (
+            db.session.query(
+                Fill.survey,
+                Fill.page,
+                Fill.area,
+                Fill.subject,
+                grouped_fills.c.latest,
+                Fill.color,
+                grouped_fills.c.numclicks )
+            .select_from(grouped_fills)
+            .join(
+                (Fill, grouped_fills.c.survey_id == Fill.survey_id),
+                (Fill, grouped_fills.c.page_id == Fill.page_id),
+                (Fill, grouped_fills.c.area_id == Fill.area_id),
+                (Fill, grouped_fills.c.subject_id == Fill.subject_id),
+                (Fill, grouped_fills.c.latest == Fill.time) )
+            .subquery()
+        )

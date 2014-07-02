@@ -3,7 +3,11 @@ from flask.ext.admin.contrib.sqla import ModelView
 
 from ..models import *
 
-admin = Admin(name='Coloringbook')
+def create_admin ( ):
+    admin = Admin(name='Coloringbook')
+    admin.add_view(FillView(db.session))
+    admin.add_view(FinalFillView(db.session))
+    return admin
 
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
@@ -27,4 +31,27 @@ class FillView (ModelView):
     def __init__(self, session, **kwargs):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
 
-admin.add_view(FillView(db.session))
+class FinalFillView (FillView):
+    ''' Custom admin table view of coloring end results. '''
+    
+    can_edit = False
+    column_list = 'survey page area subject latest color numclicks'.split()
+    column_sortable_list = (
+        ('survey', Survey.name),
+        ('page', Page.name),
+        ('area', Area.name),
+        ('subject', Subject.name),
+        'latest',
+        ('color', Color.code),
+        'numclicks',
+    )
+    column_filters = column_list
+    
+    def __init__ (self, session, **kwargs):
+        class FinalFill (db.Model):
+            __table__ = Fill.final()
+        super(FillView, self).__init__(
+            FinalFill,
+            session,
+            name='Final data',
+            **kwargs )
