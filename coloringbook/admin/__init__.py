@@ -9,6 +9,7 @@ class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
     
     can_create = False
+    can_edit = False
     can_delete = False
     column_list = 'survey page area subject time color'.split()
     column_sortable_list = (
