@@ -280,7 +280,11 @@ class Fill (db.Model):
                 Fill.subject,
                 grouped_fills.c.latest,
                 Fill.color,
-                grouped_fills.c.numclicks )
+                grouped_fills.c.numclicks,
+                Fill.survey_id,
+                Fill.page_id,
+                Fill.area_id,
+                Fill.subject_id )
             .select_from(grouped_fills)
             .join(
                 (Fill, grouped_fills.c.survey_id == Fill.survey_id),

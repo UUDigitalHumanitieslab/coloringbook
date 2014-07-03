@@ -48,8 +48,15 @@ class FinalFillView (FillView):
     column_filters = column_list
     
     def __init__ (self, session, **kwargs):
+        final_fill = Fill.final()
         class FinalFill (db.Model):
-            __table__ = Fill.final()
+            __table__ = final_fill
+            __mapper_args__ = {
+                'primary_key': [
+                    final_fill.c.survey_id,
+                    final_fill.c.page_id,
+                    final_fill.c.area_id,
+                    final_fill.c.subject_id ] }
         super(FillView, self).__init__(
             FinalFill,
             session,
