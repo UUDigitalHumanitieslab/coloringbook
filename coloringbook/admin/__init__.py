@@ -1,4 +1,4 @@
-from flask.ext.admin import Admin
+from flask.ext.admin import Admin, BaseView, expose
 from flask.ext.admin.contrib.sqla import ModelView
 
 from ..models import *
@@ -27,4 +27,13 @@ class FillView (ModelView):
     def __init__(self, session, **kwargs):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
 
+class FillViewReplica (BaseView):
+    ''' Attempt at mimicking Fill table view from scratch. '''
+    
+    @expose('/')
+    def index (self):
+        self.data = Fill.query.subquery()
+        return self.render('admin/fill_imitation.html')
+
 admin.add_view(FillView(db.session))
+admin.add_view(FillViewReplica(name = 'Replica'))
