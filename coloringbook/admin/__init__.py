@@ -1,4 +1,4 @@
-from flask.ext.admin import Admin
+from flask.ext.admin import Admin, expose
 from flask.ext.admin.contrib.sqla import ModelView
 
 from ..models import *
@@ -26,7 +26,34 @@ class FillView (ModelView):
     page_size = 100
     column_display_all_relations = True
     
-    def __init__(self, session, **kwargs):
+    def __init__ (self, session, **kwargs):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
+    
+    @expose('/csv')
+    def export (self):
+        ''' Render a CSV, similar in operation to BaseModelView.index_view. '''
+        
+        page, sort_idx, sort_desc, search, filters = self._get_list_extra_args()
+        
+        # Map column index to column name
+        sort_column = self._get_column_by_idx(sort_idx)
+        if sort_column is not None:
+            sort_column = sort_column[0]
+
+        # Get count and query
+        count, query = self.get_list(
+            None,
+            sort_column,
+            sort_desc,
+            search,
+            filters,
+            False )
+        data = query.limit(None).all()
+        
+        return self.render(
+            'admin/list.csv',
+            data=data,
+            list_columns=self._list_columns,
+            get_value=self.get_list_value )
 
 admin.add_view(FillView(db.session))
