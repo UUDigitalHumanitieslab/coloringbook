@@ -8,6 +8,7 @@ admin = Admin(name='Coloringbook')
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
     
+    list_template = 'admin/augmented_list.html'
     can_create = False
     can_edit = False
     can_delete = False

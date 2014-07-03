@@ -1,0 +1,6 @@
+{% extends 'admin/model/list.html' %}
+
+{% block model_menu_bar %}
+    <input type="button" id="csvexport" value="Export" class="btn pull-right" />
+    {{ super() }}
+{% endblock %}
