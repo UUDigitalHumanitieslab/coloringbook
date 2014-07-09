@@ -40,6 +40,31 @@ class FillView (ModelView):
             list_columns = self._list_columns,
             get_value = self.get_list_value )
     
+    @expose('/csv/final')
+    @csvdownload('filldata_final.csv')
+    def export_final (self):
+        ''' Render a CSV with only the final color of each area. '''
+        
+        full = self.full_query().subquery()
+        finals = self.get_final_q().subquery()
+        data = (
+            self.session
+            .query(full, finals)
+            .filter(
+                full.c.survey_id == finals.c.survey_id,
+                full.c.page_id == finals.c.page_id,
+                full.c.area_id == finals.c.area_id,
+                full.c.subject_id == finals.c.subject_id,
+                full.c.time == finals.c.time )
+            .all()
+        )
+        
+        return self.render(
+            'admin/list.csv',
+            data = data,
+            list_columns = self._list_columns,
+            get_value = self.get_list_value )
+    
     def full_query (self):
         ''' Get the un-paged query for the currently displayed data. '''
         
@@ -59,3 +84,23 @@ class FillView (ModelView):
             filters,
             False )
         return query.limit(None)
+    
+    def get_final_q (self):
+        ''' Get the query for the final Color of each Area. '''
+        
+        return (
+            self.session
+            .query(
+                'survey_id',
+                'page_id',
+                'area_id',
+                'subject_id',
+                db.func.max('time').label('time'),
+                'color_id' )
+            .select_from(self.model)
+            .group_by(
+                'survey_id',
+                'page_id',
+                'area_id',
+                'subject_id' )
+        )
