@@ -35,6 +35,19 @@ class FillView (ModelView):
     def export (self):
         ''' Render a CSV, similar in operation to BaseModelView.index_view. '''
         
+        response = make_response(self.render(
+            'admin/list.csv',
+            data = self.full_query().all(),
+            list_columns = self._list_columns,
+            get_value = self.get_list_value ))
+        response.headers['Cache-Control'] = 'max-age=600'
+        response.headers['Content-Disposition'] = 'attachment; filename="raw.csv"'
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+        return response
+    
+    def full_query (self):
+        ''' Get the un-paged query for the currently displayed data. '''
+        
         page, sort_idx, sort_desc, search, filters = self._get_list_extra_args()
         
         # Map column index to column name
@@ -50,16 +63,6 @@ class FillView (ModelView):
             search,
             filters,
             False )
-        data = query.limit(None).all()
-        
-        response = make_response(self.render(
-            'admin/list.csv',
-            data=data,
-            list_columns=self._list_columns,
-            get_value=self.get_list_value ))
-        response.headers['Cache-Control'] = 'max-age=600'
-        response.headers['Content-Disposition'] = 'attachment; filename="raw.csv"'
-        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
-        return response
+        return query.limit(None)
 
 admin.add_view(FillView(db.session))
