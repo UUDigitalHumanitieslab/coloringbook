@@ -24,7 +24,7 @@ class FillView (ModelView):
         ('color', Color.code),
     )
     column_filters = column_list
-#    column_default_sort = 'survey'
+#    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
     column_display_all_relations = True
     
