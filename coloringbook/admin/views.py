@@ -29,9 +29,9 @@ class FillView (ModelView):
     def __init__ (self, session, **kwargs):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
     
-    @expose('/csv')
+    @expose('/csv/raw')
     @csvdownload('filldata_raw.csv')
-    def export (self):
+    def export_raw (self):
         ''' Render a CSV, similar in operation to BaseModelView.index_view. '''
         
         return self.render(
