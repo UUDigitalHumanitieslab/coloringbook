@@ -7,6 +7,20 @@ from ..models import *
 
 admin = Admin(name='Coloringbook')
 
+def csvdownload (filename):
+    ''' View decorator adding suitable response headers for CSV downloads. '''
+
+    def decorate (view):
+        def wrap (self):
+            response = make_response(view(self))
+            response.headers['Cache-Control'] = 'max-age=600'
+            response.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+            response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+            return response
+        return wrap
+
+    return decorate
+
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
     
@@ -32,18 +46,15 @@ class FillView (ModelView):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
     
     @expose('/csv')
+    @csvdownload('filldata_raw.csv')
     def export (self):
         ''' Render a CSV, similar in operation to BaseModelView.index_view. '''
         
-        response = make_response(self.render(
+        return self.render(
             'admin/list.csv',
             data = self.full_query().all(),
             list_columns = self._list_columns,
-            get_value = self.get_list_value ))
-        response.headers['Cache-Control'] = 'max-age=600'
-        response.headers['Content-Disposition'] = 'attachment; filename="raw.csv"'
-        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
-        return response
+            get_value = self.get_list_value )
     
     def full_query (self):
         ''' Get the un-paged query for the currently displayed data. '''
