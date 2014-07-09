@@ -1,3 +1,5 @@
+from flask import make_response
+
 from flask.ext.admin import Admin, expose
 from flask.ext.admin.contrib.sqla import ModelView
 
@@ -50,10 +52,14 @@ class FillView (ModelView):
             False )
         data = query.limit(None).all()
         
-        return self.render(
+        response = make_response(self.render(
             'admin/list.csv',
             data=data,
             list_columns=self._list_columns,
-            get_value=self.get_list_value )
+            get_value=self.get_list_value ))
+        response.headers['Cache-Control'] = 'max-age=600'
+        response.headers['Content-Disposition'] = 'attachment; filename="raw.csv"'
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+        return response
 
 admin.add_view(FillView(db.session))
