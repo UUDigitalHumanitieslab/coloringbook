@@ -19,7 +19,7 @@ db = SQLAlchemy()  # actual database connection is done in __init__.py
 
 class Subject (db.Model):
     ''' Personal information of a test person. '''
-
+    
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(50), nullable = False)
     numeral = db.Column(db.Integer)  # such as student ID
@@ -33,7 +33,7 @@ class Subject (db.Model):
 
 class SubjectLanguage (db.Model):
     ''' Association between a Subject and a Language they speak. '''
-
+    
     language_id = db.Column(
         db.Integer,
         db.ForeignKey('language.id'),
@@ -61,7 +61,7 @@ class Language (db.Model):
     ''' Language that may be associated with a Subject, Survey or Page. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30), nullable = False)
+    name = db.Column(db.String(30), nullable = False, unique = True)
     
     subjects = association_proxy('language_subjects', 'subject')  # many-many
     
@@ -72,7 +72,7 @@ class Drawing (db.Model):
     ''' Metadata associated with a colorable SVG. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30), nullable = False)
+    name = db.Column(db.String(30), nullable = False, unique = True)
                                      # filename *without* extension
                                      # database is path-agnostic
     
@@ -84,6 +84,11 @@ class Drawing (db.Model):
 
 class Area (db.Model):
     ''' Colorable part of a Drawing. '''
+    
+    __tablename__ = 'area'
+    __table_args__ = (
+        db.UniqueConstraint('name', 'drawing_id'),
+    )
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(20), nullable = False)
@@ -186,7 +191,7 @@ class Survey (db.Model):
     ''' Prepared series of Pages that is presented to Subjects. '''
     
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(40), nullable = False)
+    name = db.Column(db.String(40), nullable = False, unique = True)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     begin = db.Column(db.DateTime)
     end = db.Column(db.DateTime)
