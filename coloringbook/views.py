@@ -14,24 +14,27 @@ def index():
 def submit():
     ''' Parse and store data sent by the test subject, all in one go. '''
     
-    s = db.session
-    data = request.get_json()
-    subject = subject_from_json(data['subject'])
-    s.add(subject)  # TODO: add uniqueness constraint and conflict handling
-    survey = Survey.query.filter_by(name = data['survey']).one()
-    pages = (
-        Page.query
-        .join(*Page.surveys.attr)
-        .filter(Survey.id == survey.id)
-        .order_by(SurveyPage.ordering)
-        .all()
-    )
-    results = data['results']
-    assert len(pages) == len(results)  # TODO: handle errors rather than crashing hard
-    for page, result in zip(pages, results):
-        s.add_all(fills_from_json(survey, page, subject, result))
-    s.commit()
-    return 'Success'
+    try:
+        s = db.session
+        data = request.get_json()
+        subject = subject_from_json(data['subject'])
+        s.add(subject)
+        survey = Survey.query.filter_by(name = data['survey']).one()
+        pages = (
+            Page.query
+            .join(*Page.surveys.attr)
+            .filter(Survey.id == survey.id)
+            .order_by(SurveyPage.ordering)
+            .all()
+        )
+        results = data['results']
+        assert len(pages) == len(results)
+        for page, result in zip(pages, results):
+            s.add_all(fills_from_json(survey, page, subject, result))
+        s.commit()
+        return 'Success'
+    except Exception as e:  # TODO: multiple handlers with different responses
+        return str(e)
     
 def subject_from_json (data):
     ''' Take personal information from JSON and put into relational object. '''
@@ -60,8 +63,8 @@ def fills_from_json (survey, page, subject, data):
         fills.append(Fill(
             survey = survey,
             page = page,
-            area = areas.filter_by(name = datum['target']).one(),  # TODO: handle errors
+            area = areas.filter_by(name = datum['target']).one(),
             subject = subject,
             time = datum['time'],
-            color = colors.filter_by(code = datum['color']).one() ))  # as above
+            color = colors.filter_by(code = datum['color']).one() ))
     return fills
