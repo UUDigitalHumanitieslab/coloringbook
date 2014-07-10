@@ -45,23 +45,53 @@ class FillView (ModelView):
     def export_final (self):
         ''' Render a CSV with only the final color of each area. '''
         
-        full = self.full_query().subquery()
-        finals = self.get_final_q().subquery()
-        data = (
-            self.session
-            .query(full, finals)
-            .filter(
-                full.c.survey_id == finals.c.survey_id,
-                full.c.page_id == finals.c.page_id,
-                full.c.area_id == finals.c.area_id,
-                full.c.subject_id == finals.c.subject_id,
-                full.c.time == finals.c.time )
-            .all()
+        full = self.model
+        fnl = self.get_final_q().subquery('final')
+        
+        print self.full_query().statement
+
+        merged = (
+            self.session.query(full)
+            .join(
+                fnl,
+                db.and_(
+                    full.survey_id == fnl.c.survey_id,
+                    full.page_id == fnl.c.page_id,
+                    full.area_id == fnl.c.area_id,
+                    full.subject_id == fnl.c.subject_id,
+                    full.time == fnl.c.time ) )
         )
+        
+        print '-----'
+        print merged.statement
+        
+#         survey_1 = db.aliased(Survey, name = 'survey_1')
+#         page_1 = db.aliased(Page, name = 'page_1')
+#         area_1 = db.aliased(Area, name = 'area_1')
+#         subject_1 = db.aliased(Subject, name = 'subject_1')
+#         color_1 = db.aliased(Color, name = 'color_1')
+#         
+#         next_step = (
+#             merged.outerjoin(survey_1, page_1, area_1, subject_1, color_1)
+#             .add_entity(survey_1)
+#             .add_entity(page_1)
+#             .add_entity(area_1)
+#             .add_entity(subject_1)
+#             .add_entity(color_1)
+#         )
+        
+        next_step = (
+            self.full_query()
+            .reset_joinpoint()
+            .select_entity_from(merged.subquery('fill'))
+        )
+        
+        print '-----'
+        print next_step.statement
         
         return self.render(
             'admin/list.csv',
-            data = data,
+            data = next_step.all(),
             list_columns = self._list_columns,
             get_value = self.get_list_value )
     
@@ -91,16 +121,14 @@ class FillView (ModelView):
         return (
             self.session
             .query(
-                'survey_id',
-                'page_id',
-                'area_id',
-                'subject_id',
-                db.func.max('time').label('time'),
-                'color_id' )
-            .select_from(self.model)
+                self.model.survey_id,
+                self.model.page_id,
+                self.model.area_id,
+                self.model.subject_id,
+                db.func.max(self.model.time).label('time') )
             .group_by(
-                'survey_id',
-                'page_id',
-                'area_id',
-                'subject_id' )
+                self.model.survey_id,
+                self.model.page_id,
+                self.model.area_id,
+                self.model.subject_id )
         )
