@@ -21,9 +21,9 @@ class Subject (db.Model):
     ''' Personal information of a test person. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(50))
+    name = db.Column(db.String(50), nullable = False)
     numeral = db.Column(db.Integer)  # such as student ID
-    birth = db.Column(db.DateTime)
+    birth = db.Column(db.DateTime, nullable = False)
     eyesight = db.Column(db.String(100))  # medical conditions
     
     languages = association_proxy('subject_languages', 'language')  # many-many
@@ -37,11 +37,13 @@ class SubjectLanguage (db.Model):
     language_id = db.Column(
         db.Integer,
         db.ForeignKey('language.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     subject_id = db.Column(
         db.Integer,
         db.ForeignKey('subject.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     level = db.Column(db.Integer)  # language skill 1--10 where 10 is native
     
     subject = db.relationship(  # many-one (facilitates many-many)
@@ -59,7 +61,7 @@ class Language (db.Model):
     ''' Language that may be associated with a Subject, Survey or Page. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))
+    name = db.Column(db.String(30), nullable = False)
     
     subjects = association_proxy('language_subjects', 'subject')  # many-many
     
@@ -70,7 +72,8 @@ class Drawing (db.Model):
     ''' Metadata associated with a colorable SVG. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))  # filename *without* extension
+    name = db.Column(db.String(30), nullable = False)
+                                     # filename *without* extension
                                      # database is path-agnostic
     
     areas = db.relationship('Area', backref = 'drawing', lazy = 'dynamic')
@@ -83,8 +86,12 @@ class Area (db.Model):
     ''' Colorable part of a Drawing. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(20))  # id of the <path> element in the SVG
-    drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
+    name = db.Column(db.String(20), nullable = False)
+                                        # id of the <path> element in the SVG
+    drawing_id = db.Column(
+        db.Integer,
+        db.ForeignKey('drawing.id'),
+        nullable = False )
     
     def __str__ (self):
         return self.name
@@ -93,12 +100,14 @@ class Page (db.Model):
     ''' Combination of a sentence and a Drawing. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30))
+    name = db.Column(db.String(30), nullable = False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
     sound = db.Column(db.String(30))  # filename *with* extension
                                       # database is path-agnostic
-    drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
+    drawing_id = db.Column(db.Integer,
+        db.ForeignKey('drawing.id'),
+        nullable = False )
     
     language = db.relationship(  # many-one
         'Language',
@@ -120,8 +129,9 @@ class Color (db.Model):
     ''' Color that may be associated with a Fill or Expectation. '''
 
     id = db.Column(db.Integer, primary_key = True)
-    code = db.Column(db.String(25))  # RGB code as used at the client side
-    name = db.Column(db.String(20))  # mnemonic
+    code = db.Column(db.String(25), nullable = False)
+                                        # RGB code as used at the client side
+    name = db.Column(db.String(20), nullable = False)  # mnemonic
     
     def __str__ (self):
         return self.code
@@ -132,13 +142,19 @@ class Expectation (db.Model):
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     area_id = db.Column(
         db.Integer,
         db.ForeignKey('area.id'),
-        primary_key = True)
-    color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
-    here = db.Column(db.Boolean)  # if False, color is expected in another area
+        primary_key = True,
+        nullable = False )
+    color_id = db.Column(
+        db.Integer,
+        db.ForeignKey('color.id'),
+        nullable = False )
+    here = db.Column(db.Boolean, nullable = False)
+                                # if False, color is expected in another area
     motivation = db.Column(db.String(200))
     
     area = db.relationship('Area', backref = 'expectations')  # many-one
@@ -157,18 +173,20 @@ survey_subject = db.Table(
         'survey_id',
         db.Integer,
         db.ForeignKey('survey.id'),
-        primary_key = True ),
+        primary_key = True,
+        nullable = False ),
     db.Column(
         'subject_id',
         db.Integer,
         db.ForeignKey('subject.id'),
-        primary_key = True ) )
+        primary_key = True,
+        nullable = False ) )
 
 class Survey (db.Model):
     ''' Prepared series of Pages that is presented to Subjects. '''
     
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(40))
+    name = db.Column(db.String(40), nullable = False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     begin = db.Column(db.DateTime)
     end = db.Column(db.DateTime)
@@ -190,12 +208,14 @@ class SurveyPage (db.Model):
     survey_id = db.Column(
         db.Integer,
         db.ForeignKey('survey.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
-        primary_key = True)
-    ordering = db.Column(db.Integer)  # Nth page of a survey
+        primary_key = True,
+        nullable = False )
+    ordering = db.Column(db.Integer, nullable = False)  # Nth page of a survey
     
     survey = db.relationship(  # many-one (facilitates many-many)
         'Survey',
@@ -214,22 +234,32 @@ class Fill (db.Model):
     survey_id = db.Column(
         db.Integer,
         db.ForeignKey('survey.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     area_id = db.Column(
         db.Integer,
         db.ForeignKey('area.id'),
-        primary_key = True)
+        primary_key = True,
+        nullable = False )
     subject_id = db.Column(
         db.Integer,
         db.ForeignKey('subject.id'),
-        primary_key = True)
-    time = db.Column(db.Integer, primary_key = True, autoincrement = False)
-        # msecs from page start
-    color_id = db.Column(db.Integer, db.ForeignKey('color.id'))
+        primary_key = True,
+        nullable = False )
+    time = db.Column(  # msecs from page start
+        db.Integer,
+        primary_key = True,
+        autoincrement = False,
+        nullable = False )
+    color_id = db.Column(
+        db.Integer,
+        db.ForeignKey('color.id'),
+        nullable = False )
     
     survey = db.relationship(  # many-one
         'Survey',
