@@ -28,8 +28,8 @@ class Subject (db.Model):
     
     languages = association_proxy('subject_languages', 'language')  # many-many
     
-    def __repr__ (self):
-        return '{0} ({1}, {2})'.format(self.name, self.birth, self.numeral)
+    def __str__ (self):
+        return str(self.id)
 
 class SubjectLanguage (db.Model):
     ''' Association between a Subject and a Language they speak. '''
@@ -63,7 +63,7 @@ class Language (db.Model):
     
     subjects = association_proxy('language_subjects', 'subject')  # many-many
     
-    def __repr__ (self):
+    def __str__ (self):
         return self.name
 
 class Drawing (db.Model):
@@ -76,7 +76,7 @@ class Drawing (db.Model):
     areas = db.relationship('Area', backref = 'drawing', lazy = 'dynamic')
         # one-many
     
-    def __repr__ (self):
+    def __str__ (self):
         return self.name
 
 class Area (db.Model):
@@ -86,8 +86,8 @@ class Area (db.Model):
     name = db.Column(db.String(20))  # id of the <path> element in the SVG
     drawing_id = db.Column(db.Integer, db.ForeignKey('drawing.id'))
     
-    def __repr__ (self):
-        return '{0} ({1})'.format(self.name, self.drawing)
+    def __str__ (self):
+        return self.name
 
 class Page (db.Model):
     ''' Combination of a sentence and a Drawing. '''
@@ -113,7 +113,7 @@ class Page (db.Model):
     expectations = db.relationship('Expectation', backref = 'page')  # one-many
     surveys = association_proxy('page_surveys', 'survey')  # many-many
     
-    def __repr__ (self):
+    def __str__ (self):
         return self.name
 
 class Color (db.Model):
@@ -123,8 +123,8 @@ class Color (db.Model):
     code = db.Column(db.String(25))  # RGB code as used at the client side
     name = db.Column(db.String(20))  # mnemonic
     
-    def __repr__ (self):
-        return '{0} ({1})'.format(self.code, self.name)
+    def __str__ (self):
+        return self.code
 
 class Expectation (db.Model):
     ''' Expected Color for a particular Area on a particular Page. '''
@@ -145,10 +145,11 @@ class Expectation (db.Model):
     color = db.relationship('Color')  # many-one, no backref
     
     def __repr__ (self):
-        return '<Expectation {0} in {1}, {2}>'.format(
+        return '<Expectation {0} {3}in {1}, {2}>'.format(
             self.color,
             self.area,
-            self.page)
+            self.page,
+            '' if self.here else 'not ' )
 
 survey_subject = db.Table(
     'survey_subject',
@@ -180,7 +181,7 @@ class Survey (db.Model):
         secondary = survey_subject,
         backref = db.backref('surveys', lazy = 'dynamic') )
     
-    def __repr__ (self):
+    def __str__ (self):
         return self.name
 
 class SurveyPage (db.Model):
