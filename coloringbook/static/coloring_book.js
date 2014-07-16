@@ -16,12 +16,12 @@ var image_count = 0;
 var sentence_image_delay = 500;  // milliseconds
 
 lang_field = function (count) {
-	var lang = 'name="language' + count + '"';
-	var level = 'name="level' + count + '"';
-	return '<label ' + lang + '>Taal ' + count + '</label>' +
-		'<input type="text" ' + lang + '/> ' +
-		'<label ' + level + '>Niveau</label>' +
-		'<input type="number" ' + level + ' min="1" max="10" step="1"/><br/>';
+	var lang = '="language' + count + '"';
+	var level = '="level' + count + '"';
+	return '<label for' + lang + '>Taal ' + count + '</label>' +
+		'<input type="text" name' + lang + 'id' + lang + ' required="required"/> ' +
+		'<label for' + level + '>Niveau</label>' +
+		'<input type="number" name' + level + 'id' + level + ' min="1" max="10" step="1"/><br/>';
 }
 
 button = function (color) {

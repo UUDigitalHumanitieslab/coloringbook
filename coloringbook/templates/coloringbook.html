@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
 <!--
 	(c) 2014 Julian Gonggrijp, j.gonggrijp@uu.nl, Utrecht University
 -->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Kleurplaat</title>
@@ -66,12 +66,12 @@ input.error {
 <body onload="init_application();">
 
 <form id="starting_form">
-	<label name="name">Naam</label><input type="text" name="name" required="true" size="30"/><br />
-	<label name="numeral">Studentnummer</label><input type="number" name="numeral" inputmode="number"/><br />
-	<label name="birth">Geboortedatum</label><input type="date" name="birth" required="true" placeholder="jjjj-mm-dd"/><br />
-	<label name="eyesight">Oogafwijkingen</label><input type="text" name="eyesight"/><br />
-	<label name="nativelang">Moedertaal</label><input type="text" name="nativelang" required="true"/><br />
-	Spreek je nog andere talen?
+	<label for="name">Naam</label><input type="text" name="name" id="name" required="required" size="30"/><br />
+	<label for="numeral">Studentnummer</label><input type="number" name="numeral" id="numeral" inputmode="number"/><br />
+	<label for="birth">Geboortedatum</label><input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
+	<label for="eyesight">Oogafwijkingen</label><input type="text" name="eyesight" id="eyesight"/><br />
+	<label for="nativelang">Moedertaal</label><input type="text" name="nativelang" id="nativelang" required="required"/><br />
+	Spreek je nog andere talen?<br />
 	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
 	(1: redelijk &ndash; 10: moedertaalniveau).<br />
 	<input type="button" name="more" value="+"/><br/>
