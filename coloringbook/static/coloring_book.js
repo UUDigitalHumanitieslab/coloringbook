@@ -34,7 +34,9 @@ init_application = function ( ) {
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#controls').hide();
-	$('#starting_form').submit(handle_form);
+	$('#starting_form').validate({
+	    submitHandler: handle_form
+	});
 	init_controls();
 	create_swatches(colors);
 	$.ajax({
@@ -60,11 +62,10 @@ init_application = function ( ) {
 	});
 }
 
-handle_form = function (event) {
-	event.preventDefault();
-	$(this).hide();
+handle_form = function (form) {
+	$(form).hide();
 	$('#instructions').show();
-	var raw_form = $(this).serializeArray();
+	var raw_form = $(form).serializeArray();
 	form_data = { languages: [] };
 	for (i in raw_form) {
 	    if (raw_form[i].name == 'nativelang') {
