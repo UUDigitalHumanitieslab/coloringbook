@@ -35,7 +35,8 @@ init_application = function ( ) {
 	$('#sentence').hide();
 	$('#controls').hide();
 	$('#starting_form').validate({
-	    submitHandler: handle_form
+	    submitHandler: handle_form,
+	    onkeyup: false
 	});
 	init_controls();
 	create_swatches(colors);
