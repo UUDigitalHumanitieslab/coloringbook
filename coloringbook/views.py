@@ -6,6 +6,8 @@ from .models import *
 
 site = Blueprint('site', __name__)
 
+MAX_AGE_TOLERANCE = 36524  # approx. number of days in 100 years
+
 @site.route('/')
 def index():
     return render_template('coloringbook.html')
@@ -20,6 +22,7 @@ def submit():
         subject = subject_from_json(data['subject'])
         s.add(subject)
         survey = Survey.query.filter_by(name = data['survey']).one()
+        survey.subjects.append(subject)
         pages = (
             Page.query
             .join(*Page.surveys.attr)
@@ -39,13 +42,29 @@ def submit():
 def subject_from_json (data):
     ''' Take personal information from JSON and put into relational object. '''
     
+    if not data['name']:
+        raise ValueError('Name must be non-empty')
+    if not data['birth']:
+        raise ValueError('Birth date must be non-empty')
+    if not data['languages']:
+        raise ValueError('Native language must be set')
+    birth_date = date(*map(int, data['birth'].split('-')))
+    today = date.today()
+    current_age = today - birth_date
+    if current_age.days > MAX_AGE_TOLERANCE:
+        raise ValueError('Age greater than maximum tolerance')
+    if current_age.days < 0:
+        raise ValueError('Negative age')
+    
     subject = Subject(
         name = data['name'],
-        numeral = data['numeral'],
-        birth = date(*map(int, data['birth'].split('-'))),  # TODO: enforce format
+        numeral = int(data['numeral']) if data['numeral'] else None,
+        birth = birth_date,
         eyesight = data['eyesight'] )
     
     for name, level in data['languages']:
+        if not name:
+            raise ValueError('Incomplete language data')
         language = Language.query.filter_by(name = name).first()
         if language == None:
             language = Language(name = name)
@@ -65,6 +84,6 @@ def fills_from_json (survey, page, subject, data):
             page = page,
             area = areas.filter_by(name = datum['target']).one(),
             subject = subject,
-            time = datum['time'],
+            time = int(datum['time']),
             color = colors.filter_by(code = datum['color']).one() ))
     return fills
