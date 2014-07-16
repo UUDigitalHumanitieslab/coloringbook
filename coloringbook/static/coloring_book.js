@@ -34,9 +34,17 @@ init_application = function ( ) {
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#controls').hide();
+	var now = new Date(),
+	    century_ago = new Date();
+	century_ago.setFullYear(now.getFullYear() - 100);
 	$('#starting_form').validate({
 	    submitHandler: handle_form,
-	    onkeyup: false
+	    onkeyup: false,
+	    rules: {
+	        birth: {
+	            daterange: [century_ago.toShortString(), now.toShortString()]
+	        }
+	    }
 	});
 	init_controls();
 	create_swatches(colors);
@@ -62,6 +70,23 @@ init_application = function ( ) {
 		}
 	});
 }
+
+Date.prototype.toShortString = function ( ) {
+    return this.toISOString().substring(0, 10);
+}
+
+// adopted from http://stackoverflow.com/questions/3761185/jquery-validate-date-range
+$.validator.addMethod('daterange', function(value, element, arg) {
+    if (this.optional(element)) return true;
+
+    var startDate = Date.parse(arg[0]),
+        endDate = Date.parse(arg[1]),
+        enteredDate = Date.parse(value);       
+
+    if(isNaN(enteredDate)) return false;
+
+    return ((startDate <= enteredDate) && (enteredDate <= endDate));
+}, $.validator.format("De datum moet tussen {0} en {1} liggen."))
 
 handle_form = function (form) {
 	$(form).hide();
