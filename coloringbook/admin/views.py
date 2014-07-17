@@ -5,6 +5,26 @@ from ..models import *
 
 from .utilities import csvdownload
 
+class SurveyView (ModelView):
+    ''' Custom admin table view of Survey objects. '''
+    
+    can_delete = False
+    column_list = 'name language begin end information'.split()
+    column_sortable_list = (
+        ('name', Survey.name),
+        ('language', Language.name),
+        'begin',
+        'end',
+    )
+    column_auto_select_related = True
+    column_searchable_list = ('information',)
+    column_default_sort = ('begin', True)
+    column_display_all_relations = True
+    form_columns = ('name', 'language', 'begin', 'end', 'information', 'survey_pages')
+    
+    def __init__ (self, session, **kwargs):
+        super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
+
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
     
