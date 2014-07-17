@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from coloringbook import app, db
+from coloringbook import create_app
 
 if __name__ == '__main__':
+    app = create_app()
     app.debug = True
-    db.create_all(app = app)  # pass app because of Flask-SQLAlchemy contexts
     app.run()
