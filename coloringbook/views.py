@@ -4,9 +4,9 @@ from flask import Blueprint, render_template, request, json
 
 from .models import *
 
-site = Blueprint('site', __name__)
-
 MAX_AGE_TOLERANCE = 36524  # approx. number of days in 100 years
+
+site = Blueprint('site', __name__)
 
 @site.route('/')
 def index():
@@ -16,8 +16,8 @@ def index():
 def submit():
     ''' Parse and store data sent by the test subject, all in one go. '''
     
+    s = db.session
     try:
-        s = db.session
         data = request.get_json()
         subject = subject_from_json(data['subject'])
         s.add(subject)
@@ -36,8 +36,8 @@ def submit():
             s.add_all(fills_from_json(survey, page, subject, result))
         s.commit()
         return 'Success'
-    except Exception as e:  # TODO: multiple handlers with different responses
-        return str(e)
+    except:
+        return 'Error'
     
 def subject_from_json (data):
     ''' Take personal information from JSON and put into relational object. '''

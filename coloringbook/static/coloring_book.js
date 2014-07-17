@@ -215,7 +215,25 @@ send_data = function ( ) {
 		'data': JSON.stringify(data),
 		contentType: 'application/json',
 		success: function (result) {
-			alert(result);
+			var inst = $('#instructions');
+			if (result == 'Success') {
+			    inst.html(
+			        'Dank voor je deelname aan dit experiment.<br/>' +
+                    'Je invoer is opgeslagen. ' +
+                    'Je kunt het venster nu sluiten.' );
+			} else {
+			    inst.html(
+			        'Dank voor je deelname aan dit experiment.<br/>' +
+			        'Door een technisch probleem is het opslaan van ' +
+			        'je invoer helaas niet gelukt. Zou je de inhoud ' +
+			        'van onderstaand kader willen kopiëren en opslaan, ' +
+			        'en dit als bijlage willen opsturen naar ' +
+			        'j.gonggrijp@uu.nl?<br/> Bij voorbaat dank!<br/>' +
+			        '<textarea id="errorbox"></textarea>'
+			    )
+			    $('#errorbox').width(300).height(200).val(JSON.stringify(data));
+			}
+			inst.show();
 		}
 	});
 }
