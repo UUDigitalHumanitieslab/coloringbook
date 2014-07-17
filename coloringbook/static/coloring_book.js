@@ -16,12 +16,12 @@ var image_count = 0;
 var sentence_image_delay = 500;  // milliseconds
 
 lang_field = function (count) {
-	var lang = 'name="name' + count + '"';
-	var level = 'name="level' + count + '"';
-	return '<label ' + lang + '>Taal ' + count + '</label>' +
-		'<input type="text" ' + lang + '/> ' +
-		'<label ' + level + '>Niveau</label>' +
-		'<input type="number" ' + level + ' min="1" max="10" step="1"/><br/>';
+	var lang = '="language' + count + '"';
+	var level = '="level' + count + '"';
+	return '<label for' + lang + '>Taal ' + count + '</label>' +
+		'<input type="text" name' + lang + 'id' + lang + ' required="required"/> ' +
+		'<label for' + level + '>Niveau</label>' +
+		'<input type="number" name' + level + 'id' + level + ' min="1" max="10" step="1"/><br/>';
 }
 
 button = function (color) {
@@ -34,7 +34,18 @@ init_application = function ( ) {
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#controls').hide();
-	$('#starting_form').submit(handle_form);
+	var now = new Date(),
+	    century_ago = new Date();
+	century_ago.setFullYear(now.getFullYear() - 100);
+	$('#starting_form').validate({
+	    submitHandler: handle_form,
+	    onkeyup: false,
+	    rules: {
+	        birth: {
+	            daterange: [century_ago.toShortString(), now.toShortString()]
+	        }
+	    }
+	});
 	init_controls();
 	create_swatches(colors);
 	$.ajax({
@@ -60,11 +71,40 @@ init_application = function ( ) {
 	});
 }
 
-handle_form = function (event) {
-	event.preventDefault();
-	$(this).hide();
+Date.prototype.toShortString = function ( ) {
+    return this.toISOString().substring(0, 10);
+}
+
+// adopted from http://stackoverflow.com/questions/3761185/jquery-validate-date-range
+$.validator.addMethod('daterange', function(value, element, arg) {
+    if (this.optional(element)) return true;
+
+    var startDate = Date.parse(arg[0]),
+        endDate = Date.parse(arg[1]),
+        enteredDate = Date.parse(value);       
+
+    if(isNaN(enteredDate)) return false;
+
+    return ((startDate <= enteredDate) && (enteredDate <= endDate));
+}, $.validator.format("De datum moet tussen {0} en {1} liggen."))
+
+handle_form = function (form) {
+	$(form).hide();
 	$('#instructions').show();
-	form_data = $(this).serializeArray();
+	var raw_form = $(form).serializeArray();
+	form_data = { languages: [] };
+	for (i in raw_form) {
+	    if (raw_form[i].name == 'nativelang') {
+	        form_data.languages.push([raw_form[i].value, 10]);
+	    } else if (raw_form[i].name.match('language[0-9]')) {
+	        form_data.languages.push([raw_form[i].value]);
+	    } else if (RegExp('[0-9]+').test(raw_form[i].name)) {
+	        var level = RegExp('[0-9]+').exec(raw_form[i].name);
+	        form_data.languages[level].push(parseInt(raw_form[i].value, 10));
+	    } else {
+	        form_data[raw_form[i].name] = raw_form[i].value;
+	    }
+	}
 }
 
 finish_instructions = function ( ) {
@@ -154,20 +194,18 @@ start_image = function ( ) {
 
 end_page = function ( ) {
 	$('#controls').hide();
-	page_data.push({
-		"id": page.id,
-		"actions": serialize_commands(first_command)
-	});
+	page_data.push(serialize_commands(first_command));
 	if (++pagenum < pages.length) {
 		first_command = last_command = null;
 		start_page();
 	} else {
-		display_data();
+		send_data();
 	}
 }
 
-display_data = function ( ) {
+send_data = function ( ) {
 	var data = {
+		survey: 'test',
 		subject: form_data,
 		results: page_data
 	};
@@ -177,7 +215,25 @@ display_data = function ( ) {
 		'data': JSON.stringify(data),
 		contentType: 'application/json',
 		success: function (result) {
-			alert(result);
+			var inst = $('#instructions');
+			if (result == 'Success') {
+			    inst.html(
+			        'Dank voor je deelname aan dit experiment.<br/>' +
+                    'Je invoer is opgeslagen. ' +
+                    'Je kunt het venster nu sluiten.' );
+			} else {
+			    inst.html(
+			        'Dank voor je deelname aan dit experiment.<br/>' +
+			        'Door een technisch probleem is het opslaan van ' +
+			        'je invoer helaas niet gelukt. Zou je de inhoud ' +
+			        'van onderstaand kader willen kopiëren en opslaan, ' +
+			        'en dit als bijlage willen opsturen naar ' +
+			        'j.gonggrijp@uu.nl?<br/> Bij voorbaat dank!<br/>' +
+			        '<textarea id="errorbox"></textarea>'
+			    )
+			    $('#errorbox').width(300).height(200).val(JSON.stringify(data));
+			}
+			inst.show();
 		}
 	});
 }
