@@ -1,5 +1,5 @@
-from flask.ext.admin import expose
-from flask.ext.admin.contrib.sqla import ModelView
+from flask.ext.admin import expose, form
+from flask.ext.admin.contrib.sqla import ModelView, ajax
 
 from ..models import *
 
@@ -20,10 +20,20 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'information', 'survey_pages')
+    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
+    form_extra_fields = {
+        'page_list': form.Select2Field('Pages', choices = [('a', 'A'), ('b', 'B'), ('c', 'C')])
+    }
+    form_widget_args = {
+        'page_list': { 'multiple': True },
+    }
+#     form_ajax_refs = {
+#         'pages': ajax.QueryAjaxModelLoader('Pages', db.session, Page, fields=['name'])
+#     }
     
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
+#         self.form_extra_fields['pages'].
 
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
