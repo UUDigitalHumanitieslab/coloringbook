@@ -22,7 +22,7 @@ class SurveyView (ModelView):
     column_display_all_relations = True
     form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
     form_extra_fields = {
-        'page_list': form.Select2Field('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all())
+        'page_list': form.Select2Field('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int)
     }
     form_widget_args = {
         'page_list': { 'multiple': True },
