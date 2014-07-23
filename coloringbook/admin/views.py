@@ -4,6 +4,7 @@ from flask.ext.admin.contrib.sqla import ModelView, ajax
 from ..models import *
 
 from .utilities import csvdownload
+from .forms import Select2MultipleField
 
 class SurveyView (ModelView):
     ''' Custom admin table view of Survey objects. '''
@@ -22,10 +23,7 @@ class SurveyView (ModelView):
     column_display_all_relations = True
     form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
     form_extra_fields = {
-        'page_list': form.Select2Field('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
-    }
-    form_widget_args = {
-        'page_list': { 'multiple': True },
+        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
     }
     
     def on_model_change (self, form, model, is_created = False):
