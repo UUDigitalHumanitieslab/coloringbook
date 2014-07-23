@@ -27,9 +27,6 @@ class SurveyView (ModelView):
     form_widget_args = {
         'page_list': { 'multiple': True },
     }
-#     form_ajax_refs = {
-#         'pages': ajax.QueryAjaxModelLoader('Pages', db.session, Page, fields=['name'])
-#     }
     
     def on_model_change (self, form, model, is_created = False):
         if not is_created:
@@ -39,7 +36,6 @@ class SurveyView (ModelView):
     
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
-#         self.form_extra_fields['pages'].
 
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
