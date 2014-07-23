@@ -47,7 +47,7 @@ class FillView (ModelView):
         ('survey', Survey.name),
         ('page', Page.name),
         ('area', Area.name),
-        ('subject', Subject.name),
+        ('subject', Subject.id),
         'time',
         ('color', Color.code),
     )
