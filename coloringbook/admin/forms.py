@@ -23,10 +23,10 @@ class Select2MultipleField(fields.SelectMultipleField):
 
     def iter_choices(self):
         if self.allow_blank:
-            yield (u'__None', self.blank_text, self.data is None)
+            yield (u'__None', self.blank_text, self.data is [])
 
         for value, label in self.choices:
-            yield (value, label, self.coerce(value) == self.data)
+            yield (value, label, self.coerce(value) in self.data)
 
     def process_data(self, value):
         if value is None:
