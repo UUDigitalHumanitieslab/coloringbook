@@ -10,7 +10,7 @@ def create_app ( ):
 
     db.init_app(app)
     db.create_all(app = app)  # pass app because of Flask-SQLAlchemy contexts
-    create_admin().init_app(app)
+    create_admin(app)
     app.register_blueprint(site)
     
     return app
