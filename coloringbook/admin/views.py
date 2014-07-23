@@ -22,7 +22,7 @@ class SurveyView (ModelView):
     column_display_all_relations = True
     form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
     form_extra_fields = {
-        'page_list': form.Select2Field('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int)
+        'page_list': form.Select2Field('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
     }
     form_widget_args = {
         'page_list': { 'multiple': True },
@@ -30,6 +30,12 @@ class SurveyView (ModelView):
 #     form_ajax_refs = {
 #         'pages': ajax.QueryAjaxModelLoader('Pages', db.session, Page, fields=['name'])
 #     }
+    
+    def on_model_change (self, form, model, is_created = False):
+        if not is_created:
+            self.session.query(SurveyPage).filter_by(survey=model).delete()
+        for index, id in enumerate(form.page_list.data):
+            SurveyPage(survey = model, page_id = id, ordering = index)
     
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
