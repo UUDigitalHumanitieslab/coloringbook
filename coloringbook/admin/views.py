@@ -1,5 +1,10 @@
-from flask.ext.admin import expose, form
+from flask import request, url_for, redirect, flash
+from flask.ext.admin import expose
 from flask.ext.admin.contrib.sqla import ModelView, ajax
+from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
+from flask.ext.admin.form import FormOpts
+from flask.ext.admin.model.helpers import get_mdict_item_or_list
+from flask.ext.admin.babel import gettext
 
 from ..models import *
 
@@ -25,13 +30,58 @@ class SurveyView (ModelView):
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
     }
-    
+        
     def on_model_change (self, form, model, is_created = False):
         if not is_created:
             self.session.query(SurveyPage).filter_by(survey=model).delete()
         for index, id in enumerate(form.page_list.data):
             SurveyPage(survey = model, page_id = id, ordering = index)
     
+    @expose('/edit/', methods=('GET', 'POST'))
+    def edit_view(self):
+        """
+            Edit model view
+        """
+        return_url = get_redirect_target() or url_for('.index_view')
+
+        if not self.can_edit:
+            return redirect(return_url)
+
+        id = get_mdict_item_or_list(request.args, 'id')
+        if id is None:
+            return redirect(return_url)
+
+        model = self.get_one(id)
+
+        if model is None:
+            return redirect(return_url)
+
+        form = self.edit_form(obj=model)
+
+        if validate_form_on_submit(form):
+            if self.update_model(form, model):
+                if '_continue_editing' in request.form:
+                    flash(gettext('Model was successfully saved.'))
+                    return redirect(request.url)
+                else:
+                    return redirect(return_url)
+
+        form.page_list.process_data(
+            self.session.query(SurveyPage.page_id)
+            .filter(SurveyPage.survey_id == id)
+            .order_by(SurveyPage.ordering)
+            .all()
+        )
+        
+        form_opts = FormOpts(widget_args=self.form_widget_args,
+                             form_rules=self._form_edit_rules)
+
+        return self.render(self.edit_template,
+                           model=model,
+                           form=form,
+                           form_opts=form_opts,
+                           return_url=return_url)
+
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
 
