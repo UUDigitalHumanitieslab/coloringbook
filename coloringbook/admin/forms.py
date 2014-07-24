@@ -29,13 +29,13 @@ class Select2MultipleField(fields.SelectMultipleField):
             yield (value, label, self.coerce(value) in self.data)
 
     def process_data(self, value):
-        if value is None:
+        if not value:
             self.data = []
         else:
             try:
                 self.data = []
                 for v in value:
-                    self.data.append(self.coerce(v))
+                    self.data.append(self.coerce(v[0]))
             except (ValueError, TypeError):
                 self.data = []
 
