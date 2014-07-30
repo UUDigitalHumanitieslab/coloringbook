@@ -1,0 +1,15 @@
+{% extends 'admin/model/edit.html' %}
+
+{% block tail %}
+    <script>
+        $('input[data-choices]').each(function ( ) {
+            var self = $(this);
+            self.select2({
+                data:self.data().choices,
+                multiple:true,
+                sortable:true,
+                width:'220px'
+            });
+        });
+    </script>
+{% endblock %}

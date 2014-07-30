@@ -14,6 +14,7 @@ from .forms import Select2MultipleField
 class SurveyView (ModelView):
     ''' Custom admin table view of Survey objects. '''
     
+    edit_template = 'admin/augmented_edit.html'
     can_delete = False
     column_list = 'name language begin end information'.split()
     column_sortable_list = (
