@@ -40,7 +40,6 @@ class Select2MultipleField(fields.SelectMultipleField):
                 self.data = []
 
     def process_formdata(self, valuelist):
-        print 'valuelist:', valuelist
         if valuelist:
             if valuelist[0] == '__None':
                 self.data = []
@@ -57,3 +56,6 @@ class Select2MultipleField(fields.SelectMultipleField):
             return
 
         super(Select2MultipleField, self).pre_validate(form)
+    
+    def _value (self):
+        return ','.join(map(str, self.data))
