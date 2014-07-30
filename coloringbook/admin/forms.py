@@ -1,6 +1,25 @@
-from wtforms import fields
+from wtforms import fields, widgets
 from flask.ext.admin._compat import text_type, as_unicode
-from flask.ext.admin.form import widgets
+#from flask.ext.admin.form import widgets
+
+class Select2MultipleWidget(widgets.HiddenInput):
+    """
+    Render a ``<input type="hidden">`` field with metadata.
+
+    This is used to accomodate for sortable Select2 form input fields.
+
+    By default, the `_value()` method will be called upon the associated field
+    to provide the ``value=`` HTML attribute.
+    """
+
+    def __call__(self, field, **kwargs):
+        kwargs.setdefault('data-choices', self.json_choices(field))
+        return super(Select2MultipleWidget, self).__call__(field, **kwargs)
+    
+    @staticmethod
+    def json_choices (field):
+        objects = ('{{"id": {}, "text": "{}"}}'.format(*c) for c in field.iter_choices())
+        return '[' + ','.join(objects) + ']'
 
 class Select2MultipleField(fields.SelectMultipleField):
     """
@@ -11,7 +30,7 @@ class Select2MultipleField(fields.SelectMultipleField):
         
         This is a slightly altered derivation of the original Select2Field.
     """
-    widget = widgets.Select2Widget(multiple = True)
+    widget = Select2MultipleWidget()
 
     def __init__(self, label=None, validators=None, coerce=text_type,
                  choices=None, allow_blank=False, blank_text=None, **kwargs):
