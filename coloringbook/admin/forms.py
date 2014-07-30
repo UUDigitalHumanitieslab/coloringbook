@@ -40,13 +40,14 @@ class Select2MultipleField(fields.SelectMultipleField):
                 self.data = []
 
     def process_formdata(self, valuelist):
+        print 'valuelist:', valuelist
         if valuelist:
             if valuelist[0] == '__None':
                 self.data = []
             else:
                 try:
                     self.data = []
-                    for value in valuelist:
+                    for value in valuelist[0].split(','):
                         self.data.append(self.coerce(value))
                 except ValueError:
                     raise ValueError(self.gettext(u'Invalid Choice: could not coerce {}'.format(value)))
