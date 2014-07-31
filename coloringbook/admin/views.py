@@ -54,7 +54,7 @@ class ModelView (sqla.ModelView):
                            form_opts=form_opts,
                            return_url=return_url)
     
-    def on_form_prefill (form, id):
+    def on_form_prefill (self, form, id):
         ''' Perform additional actions to pre-fill the edit form.
         
         You only need to override this if you have added custom fields
