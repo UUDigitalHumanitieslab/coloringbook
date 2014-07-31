@@ -1,6 +1,6 @@
 from flask import request, url_for, redirect, flash
 from flask.ext.admin import expose
-from flask.ext.admin.contrib.sqla import ModelView
+from flask.ext.admin.contrib import sqla
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts
 from flask.ext.admin.model.helpers import get_mdict_item_or_list
@@ -11,32 +11,8 @@ from ..models import *
 from .utilities import csvdownload
 from .forms import Select2MultipleField
 
-class SurveyView (ModelView):
-    ''' Custom admin table view of Survey objects. '''
-    
-    edit_template = 'admin/augmented_edit.html'
-    can_delete = False
-    column_list = 'name language begin end information'.split()
-    column_sortable_list = (
-        ('name', Survey.name),
-        ('language', Language.name),
-        'begin',
-        'end',
-    )
-    column_auto_select_related = True
-    column_searchable_list = ('information',)
-    column_default_sort = ('begin', True)
-    column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
-    form_extra_fields = {
-        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
-    }
-        
-    def on_model_change (self, form, model, is_created = False):
-        if not is_created:
-            self.session.query(SurveyPage).filter_by(survey=model).delete()
-        for index, id in enumerate(form.page_list.data):
-            SurveyPage(survey = model, page_id = id, ordering = index)
+class ModelView (sqla.ModelView):
+    ''' Shallow subclass that provides the on_form_prefill hook. '''
     
     @expose('/edit/', methods=('GET', 'POST'))
     def edit_view(self):
@@ -67,12 +43,7 @@ class SurveyView (ModelView):
                 else:
                     return redirect(return_url)
 
-        form.page_list.process_data(
-            self.session.query(SurveyPage.page_id)
-            .filter(SurveyPage.survey_id == id)
-            .order_by(SurveyPage.ordering)
-            .all()
-        )
+        self.on_form_prefill(form, id)
         
         form_opts = FormOpts(widget_args=self.form_widget_args,
                              form_rules=self._form_edit_rules)
@@ -82,7 +53,51 @@ class SurveyView (ModelView):
                            form=form,
                            form_opts=form_opts,
                            return_url=return_url)
+    
+    def on_form_prefill (form, id):
+        ''' Perform additional actions to pre-fill the edit form.
+        
+        You only need to override this if you have added custom fields
+        that depend on the database contents in a way that Flask-admin
+        can't figure out by itself. Fields that were added by name of
+        a normal column or relationship should work out of the box. '''
+        pass
 
+class SurveyView (ModelView):
+    ''' Custom admin table view of Survey objects. '''
+    
+    edit_template = 'admin/augmented_edit.html'
+    can_delete = False
+    column_list = 'name language begin end information'.split()
+    column_sortable_list = (
+        ('name', Survey.name),
+        ('language', Language.name),
+        'begin',
+        'end',
+    )
+    column_auto_select_related = True
+    column_searchable_list = ('information',)
+    column_default_sort = ('begin', True)
+    column_display_all_relations = True
+    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
+    form_extra_fields = {
+        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+    }
+        
+    def on_model_change (self, form, model, is_created = False):
+        if not is_created:
+            self.session.query(SurveyPage).filter_by(survey=model).delete()
+        for index, id in enumerate(form.page_list.data):
+            SurveyPage(survey = model, page_id = id, ordering = index)
+    
+    def on_form_prefill (self, form, id):
+        form.page_list.process_data(
+            self.session.query(SurveyPage.page_id)
+            .filter(SurveyPage.survey_id == id)
+            .order_by(SurveyPage.ordering)
+            .all()
+        )
+    
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
 
