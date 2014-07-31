@@ -1,6 +1,5 @@
 from wtforms import fields, widgets
 from flask.ext.admin._compat import text_type, as_unicode
-#from flask.ext.admin.form import widgets
 
 class Select2MultipleWidget(widgets.HiddenInput):
     """

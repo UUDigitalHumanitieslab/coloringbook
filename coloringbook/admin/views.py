@@ -1,6 +1,6 @@
 from flask import request, url_for, redirect, flash
 from flask.ext.admin import expose
-from flask.ext.admin.contrib.sqla import ModelView, ajax
+from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts
 from flask.ext.admin.model.helpers import get_mdict_item_or_list
