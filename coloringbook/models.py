@@ -1,3 +1,6 @@
+# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
 

@@ -1,3 +1,6 @@
+# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+
 from wtforms import fields, widgets
 from flask.ext.admin._compat import text_type, as_unicode
 
