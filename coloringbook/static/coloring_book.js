@@ -1,5 +1,6 @@
 /*
-	(c) 2014 Julian Gonggrijp, j.gonggrijp@uu.nl, Utrecht University
+    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 */
 
 var colors = ['#b11', '#c93', '#dd5', '#2e4', '#14c', '#818', '#963'];

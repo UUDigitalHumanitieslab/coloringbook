@@ -1,3 +1,6 @@
+# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+
 from os.path import join, dirname
 
 from flask.ext.admin import Admin

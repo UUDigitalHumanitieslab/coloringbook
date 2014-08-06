@@ -1,3 +1,6 @@
+# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+
 from datetime import date
 
 from flask import Blueprint, render_template, request, json
