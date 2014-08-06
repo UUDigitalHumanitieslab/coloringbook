@@ -15,7 +15,8 @@ def create_app ( ):
     # $COLORINGBOOK_CONFIG should be the path to an external config
     # file. If placing the file in the same directory as run.py and
     # coloringbook.wsgi, it is recommend to call it config.py because
-    # that name is banned from versioning by .gitignore.
+    # that name is banned from versioning by .gitignore. At the very
+    # least, it should define SQLALCHEMY_DATABASE_URI.
     app.config.from_envvar('COLORINGBOOK_CONFIG')
 
     db.init_app(app)
