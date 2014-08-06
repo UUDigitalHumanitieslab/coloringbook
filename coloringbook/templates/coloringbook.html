@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--
+    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+-->
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Kleurplaat</title>
+<style type="text/css">
+* {
+	margin: 0;
+	padding: 0;
+}
+body {
+	padding: 50px;
+}
+#starting_form, #instructions {
+	font-size: 24pt;
+}
+input {
+	font-size: 18pt;
+}
+#swatches input {
+	font-size: 1px;
+}
+.color_choice {
+	border: 5px solid #fff;
+	padding: 5px;
+	width: 50px;
+	height: 50px;
+	border-radius: 20px;
+	display: inline-block;
+	vertical-align: middle;
+}
+label {
+	display: inline-block;
+	width: 15ex;
+}
+label.error {
+    width: 20em;
+    color: red;
+    display: block;
+    margin: 0 0 0 15ex;
+}
+input.error {
+    border: 2px solid red;
+}
+#coloring_book_image {
+	margin: 0 0 50px 0;
+}
+</style>
+<script src="{{
+  url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
+<script src="{{
+  url_for('static', filename='ion.sound.min.js') }}"></script>
+<script src="{{
+  url_for('static', filename='jquery.validate.min.js') }}"></script>
+<script src="{{
+  url_for('static', filename='messages_nl.min.js') }}"></script>
+<script>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script src="{{
+  url_for('static', filename='coloring_book.js') }}"></script>
+</head>
+<body onload="init_application();">
+
+<form id="starting_form">
+	<label for="name">Naam</label><input type="text" name="name" id="name" required="required" size="30"/><br />
+	<label for="numeral">Studentnummer</label><input type="number" name="numeral" id="numeral" inputmode="number"/><br />
+	<label for="birth">Geboortedatum</label><input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
+	<label for="eyesight">Oogafwijkingen</label><input type="text" name="eyesight" id="eyesight"/><br />
+	<label for="nativelang">Moedertaal</label><input type="text" name="nativelang" id="nativelang" required="required"/><br />
+	Spreek je nog andere talen?<br />
+	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
+	(1: redelijk &ndash; 10: moedertaalniveau).<br />
+	<input type="button" name="more" value="+"/><br/>
+	<input type="submit"/>
+</form>
+
+<p id="instructions">
+	Je krijgt straks steeds 5 seconden lang een zin te zien.
+	Hierna verschijnt een kleurplaat.
+	Kleur de kleurplaat in zoals beschreven in de zin.
+	Druk daarna op "klaar", je krijgt dan de volgende zin te zien.<br />
+	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
+</p>
+
+<p id="sentence" style="font-size: 48pt; text-align: center; margin: auto;"></p>
+
+<div id="controls" style="padding-bottom: 50px;">
+	<div id="coloring_book_image"></div>
+	<p id="swatches" style="float: left; clear: left;"></p>  
+	<p style="float: right; clear: right;">
+		<input type="button" value="klaar" onclick="end_page();"/>
+	</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+	"images": [
+		{
+			"id": "sleeping_cat",
+			"url": "cartoon_sleeping_cat.svg",
+			"data": ""
+		}
+	],
+	"pages": [
+		{
+			"id": "test01",
+			"text": "De kat heeft een paars-groen gestreepte staart met een blauw einde.",
+			"audio": "kizzie-meow",
+			"image": "sleeping_cat"
+		},
+		{
+			"id": "test02",
+			"text": "De kat heeft een oranje vacht met rode strepen.",
+			"audio": "43bbc0_Cat_Purring_Sound_FX",
+			"image": "sleeping_cat"
+		}
+	]
+}
