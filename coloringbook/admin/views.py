@@ -76,44 +76,6 @@ class ModelView (sqla.ModelView):
         a normal column or relationship should work out of the box. '''
         pass
 
-class SurveyView (ModelView):
-    ''' Custom admin table view of Survey objects. '''
-    
-    edit_template = 'admin/augmented_edit.html'
-    can_delete = False
-    column_list = 'name language begin end information'.split()
-    column_sortable_list = (
-        ('name', Survey.name),
-        ('language', Language.name),
-        'begin',
-        'end',
-    )
-    column_auto_select_related = True
-    column_searchable_list = ('information',)
-    column_default_sort = ('begin', True)
-    column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
-    form_extra_fields = {
-        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
-    }
-        
-    def on_model_change (self, form, model, is_created = False):
-        if not is_created:
-            self.session.query(SurveyPage).filter_by(survey=model).delete()
-        for index, id in enumerate(form.page_list.data):
-            SurveyPage(survey = model, page_id = id, ordering = index)
-    
-    def on_form_prefill (self, form, id):
-        form.page_list.process_data(
-            self.session.query(SurveyPage.page_id)
-            .filter(SurveyPage.survey_id == id)
-            .order_by(SurveyPage.ordering)
-            .all()
-        )
-    
-    def __init__ (self, session, **kwargs):
-        super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
-
 class FillView (ModelView):
     ''' Custom admin table view of Fill objects. '''
     
@@ -241,3 +203,41 @@ class FillView (ModelView):
                 self.model.area_id,
                 self.model.subject_id )
         )
+
+class SurveyView (ModelView):
+    ''' Custom admin table view of Survey objects. '''
+    
+    edit_template = 'admin/augmented_edit.html'
+    can_delete = False
+    column_list = 'name language begin end information'.split()
+    column_sortable_list = (
+        ('name', Survey.name),
+        ('language', Language.name),
+        'begin',
+        'end',
+    )
+    column_auto_select_related = True
+    column_searchable_list = ('information',)
+    column_default_sort = ('begin', True)
+    column_display_all_relations = True
+    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
+    form_extra_fields = {
+        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+    }
+        
+    def on_model_change (self, form, model, is_created = False):
+        if not is_created:
+            self.session.query(SurveyPage).filter_by(survey=model).delete()
+        for index, id in enumerate(form.page_list.data):
+            SurveyPage(survey = model, page_id = id, ordering = index)
+    
+    def on_form_prefill (self, form, id):
+        form.page_list.process_data(
+            self.session.query(SurveyPage.page_id)
+            .filter(SurveyPage.survey_id == id)
+            .order_by(SurveyPage.ordering)
+            .all()
+        )
+    
+    def __init__ (self, session, **kwargs):
+        super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
