@@ -1,6 +1,14 @@
 # (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
+"""
+    Model view classes for some of the tables in the database.
+    
+    Note that "views" here means something subtly different from the
+    "views" in coloringbook/views.py. Please refer to the
+    flask.ext.admin documentation for details.
+"""
+
 from flask import request, url_for, redirect, flash
 from flask.ext.admin import expose
 from flask.ext.admin.contrib import sqla
