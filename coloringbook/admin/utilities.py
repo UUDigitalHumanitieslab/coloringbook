@@ -8,7 +8,7 @@
 from flask import make_response
 
 def csvdownload (filename):
-    r'''
+    r"""
         View decorator adding suitable response headers for CSV downloads.
         
         Use this inside a view decorator. Example:
@@ -34,7 +34,7 @@ def csvdownload (filename):
         u'text/csv'
         >>> testresponse.headers['Content-Disposition']
         u'attachment; filename="doctest.csv"'
-    '''
+    """
 
     def decorate (view):
         def wrap (self):

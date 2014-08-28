@@ -26,7 +26,7 @@ def index():
 
 @site.route('/submit', methods=['POST'])
 def submit():
-    ''' Parse and store data sent by the test subject, all in one go. '''
+    """ Parse and store data sent by the test subject, all in one go. """
     
     s = db.session
     try:
