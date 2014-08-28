@@ -3,7 +3,7 @@
     Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 */
 
-var colors = ['#b11', '#c93', '#dd5', '#2e4', '#14c', '#818', '#963'];
+var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
 var color_chosen;
 var first_command = null;
 var last_command = null;
