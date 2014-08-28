@@ -4,7 +4,10 @@
 """
     Views for the public frontend of the website, with auxiliary functions.
     
-    The views are added to a flask.Blueprint, `site`, which is later registered on the application in __init__.create_app. This avoids the cyclical import hack demonstrated on http://flask.pocoo.org/docs/0.10/patterns/packages/.
+    The views are added to a flask.Blueprint, `site`, which is later
+    registered on the application in __init__.create_app. This avoids
+    the cyclical import hack demonstrated on
+    http://flask.pocoo.org/docs/0.10/patterns/packages/.
 """
 
 from datetime import date
@@ -52,7 +55,10 @@ def subject_from_json (data):
     """
         Take personal information from JSON and put into relational object.
         
-        `data` contains the object from the 'subject' key in the request data sent from the JavaScript frontend. The return value is a Subject as defined in .models. The subject is not yet added to the database. Consider the following example code:
+        `data` contains the object from the 'subject' key in the
+        request data sent from the JavaScript frontend. The return
+        value is a Subject as defined in .models. The subject is not
+        yet added to the database. Consider the following example code:
         
         >>> # preparations
         >>> import coloringbook as cb
@@ -119,7 +125,13 @@ def fills_from_json (survey, page, subject, data):
     """
         Take fill actions from JSON and put into [relational object].
         
-        `survey`, `page` and `subject` must be pre-instantiated objects of the respective models. `data` is a parsed JSON object containing one item from the 'results' key in the request data sent from the JavaScript frontend. The Colors and Areas referred to from the `data` must already exist in the database, otherwise a NoResultFound exception will be thrown. Example:
+        `survey`, `page` and `subject` must be pre-instantiated
+        objects of the respective models. `data` is a parsed JSON
+        object containing one item from the 'results' key in the
+        request data sent from the JavaScript frontend. The Colors and
+        Areas referred to from the `data` must already exist in the
+        database, otherwise a NoResultFound exception will be thrown.
+        Example:
         
         >>> # general preparations
         >>> import coloringbook as cb, flask, datetime
