@@ -1,6 +1,14 @@
 # (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
+"""
+    Model view classes for some of the tables in the database.
+    
+    Note that "views" here means something subtly different from the
+    "views" in coloringbook/views.py. Please refer to the
+    flask.ext.admin documentation for details.
+"""
+
 from flask import request, url_for, redirect, flash
 from flask.ext.admin import expose
 from flask.ext.admin.contrib import sqla
@@ -15,7 +23,7 @@ from .utilities import csvdownload
 from .forms import Select2MultipleField
 
 class ModelView (sqla.ModelView):
-    ''' Shallow subclass that provides the on_form_prefill hook. '''
+    """ Shallow subclass that provides the on_form_prefill hook. """
     
     @expose('/edit/', methods=('GET', 'POST'))
     def edit_view(self):
@@ -59,16 +67,16 @@ class ModelView (sqla.ModelView):
                            return_url=return_url)
     
     def on_form_prefill (self, form, id):
-        ''' Perform additional actions to pre-fill the edit form.
+        """ Perform additional actions to pre-fill the edit form.
         
         You only need to override this if you have added custom fields
         that depend on the database contents in a way that Flask-admin
         can't figure out by itself. Fields that were added by name of
-        a normal column or relationship should work out of the box. '''
+        a normal column or relationship should work out of the box. """
         pass
 
 class SurveyView (ModelView):
-    ''' Custom admin table view of Survey objects. '''
+    """ Custom admin table view of Survey objects. """
     
     edit_template = 'admin/augmented_edit.html'
     can_delete = False
@@ -106,7 +114,7 @@ class SurveyView (ModelView):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
 
 class FillView (ModelView):
-    ''' Custom admin table view of Fill objects. '''
+    """ Custom admin table view of Fill objects. """
     
     list_template = 'admin/augmented_list.html'
     can_create = False
@@ -132,7 +140,7 @@ class FillView (ModelView):
     @expose('/csv/raw')
     @csvdownload('filldata_raw.csv')
     def export_raw (self):
-        ''' Render a CSV, similar in operation to BaseModelView.index_view. '''
+        """ Render a CSV, similar in operation to BaseModelView.index_view. """
         
         return self.render(
             'admin/list.csv',
@@ -143,7 +151,7 @@ class FillView (ModelView):
     @expose('/csv/final')
     @csvdownload('filldata_final.csv')
     def export_final (self):
-        ''' Render a CSV with only the final color of each area. '''
+        """ Render a CSV with only the final color of each area. """
         
         full = self.model
         fnl = self.get_final_q().subquery('final')
@@ -196,7 +204,7 @@ class FillView (ModelView):
             get_value = self.get_list_value )
     
     def full_query (self):
-        ''' Get the un-paged query for the currently displayed data. '''
+        """ Get the un-paged query for the currently displayed data. """
         
         page, sort_idx, sort_desc, search, filters = self._get_list_extra_args()
         
@@ -216,7 +224,7 @@ class FillView (ModelView):
         return query.limit(None)
     
     def get_final_q (self):
-        ''' Get the query for the final Color of each Area. '''
+        """ Get the query for the final Color of each Area. """
         
         return (
             self.session

@@ -1,17 +1,24 @@
 # (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
+"""
+    Logic and boilerplate code for custom WTForms form fields.
+    
+    Please refer to the WTForms documentation for details.
+"""
+
 from wtforms import fields, widgets
 from flask.ext.admin._compat import text_type, as_unicode
 
 class Select2MultipleWidget(widgets.HiddenInput):
     """
-    Render a ``<input type="hidden">`` field with metadata.
+        Render a ``<input type="hidden">`` field with metadata.
 
-    This is used to accomodate for sortable Select2 form input fields.
+        This is used to accomodate for sortable Select2 form input
+        fields.
 
-    By default, the `_value()` method will be called upon the associated field
-    to provide the ``value=`` HTML attribute.
+        By default, the `_value()` method will be called upon the
+        associated field to provide the ``value=`` HTML attribute.
     """
 
     def __call__(self, field, **kwargs):

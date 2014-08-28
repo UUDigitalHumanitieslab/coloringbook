@@ -1,6 +1,13 @@
 # (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
+"""
+    Object relational model and database schema.
+    
+    An organogram will be provided as external documentation of the
+    database structure.
+"""
+
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
 
@@ -21,7 +28,7 @@ __all__ = [
 db = SQLAlchemy()  # actual database connection is done in __init__.py
 
 class Subject (db.Model):
-    ''' Personal information of a test person. '''
+    """ Personal information of a test person. """
     
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(50), nullable = False)
@@ -35,7 +42,7 @@ class Subject (db.Model):
         return str(self.id)
 
 class SubjectLanguage (db.Model):
-    ''' Association between a Subject and a Language they speak. '''
+    """ Association between a Subject and a Language they speak. """
     
     language_id = db.Column(
         db.Integer,
@@ -61,7 +68,7 @@ class SubjectLanguage (db.Model):
             cascade = 'all, delete-orphan'))
 
 class Language (db.Model):
-    ''' Language that may be associated with a Subject, Survey or Page. '''
+    """ Language that may be associated with a Subject, Survey or Page. """
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
@@ -72,7 +79,7 @@ class Language (db.Model):
         return self.name
 
 class Drawing (db.Model):
-    ''' Metadata associated with a colorable SVG. '''
+    """ Metadata associated with a colorable SVG. """
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
@@ -86,7 +93,7 @@ class Drawing (db.Model):
         return self.name
 
 class Area (db.Model):
-    ''' Colorable part of a Drawing. '''
+    """ Colorable part of a Drawing. """
     
     __tablename__ = 'area'
     __table_args__ = (
@@ -105,7 +112,7 @@ class Area (db.Model):
         return self.name
 
 class Page (db.Model):
-    ''' Combination of a sentence and a Drawing. '''
+    """ Combination of a sentence and a Drawing. """
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False)
@@ -134,7 +141,7 @@ class Page (db.Model):
         return self.name
 
 class Color (db.Model):
-    ''' Color that may be associated with a Fill or Expectation. '''
+    """ Color that may be associated with a Fill or Expectation. """
 
     id = db.Column(db.Integer, primary_key = True)
     code = db.Column(db.String(25), nullable = False)
@@ -145,7 +152,7 @@ class Color (db.Model):
         return self.code
 
 class Expectation (db.Model):
-    ''' Expected Color for a particular Area on a particular Page. '''
+    """ Expected Color for a particular Area on a particular Page. """
 
     page_id = db.Column(
         db.Integer,
@@ -191,7 +198,7 @@ survey_subject = db.Table(
         nullable = False ) )
 
 class Survey (db.Model):
-    ''' Prepared series of Pages that is presented to Subjects. '''
+    """ Prepared series of Pages that is presented to Subjects. """
     
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(40), nullable = False, unique = True)
@@ -211,7 +218,7 @@ class Survey (db.Model):
         return self.name
 
 class SurveyPage (db.Model):
-    ''' Association between a Survey and a Page that is part of it. '''
+    """ Association between a Survey and a Page that is part of it. """
     
     survey_id = db.Column(
         db.Integer,
@@ -237,7 +244,7 @@ class SurveyPage (db.Model):
             cascade = 'all, delete-orphan'))
 
 class Fill (db.Model):
-    ''' The Color a Subject filled an Area of a Page in a Survey with at #ms.'''
+    """ The Color a Subject filled an Area of a Page in a Survey with at #ms."""
     
     survey_id = db.Column(
         db.Integer,
