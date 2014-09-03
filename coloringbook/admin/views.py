@@ -250,7 +250,7 @@ class SurveyView (ModelView):
 class DrawingView(ModelView):
     """ Custom admin table view of Drawing objects. """
     
-    form_columns = ('file', 'areas')
+    form_columns = ('file',)
     form_extra_fields = {
         'file': form.FileUploadField(
             'Drawing',
