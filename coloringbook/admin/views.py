@@ -9,7 +9,7 @@
     flask.ext.admin documentation for details.
 """
 
-import os.path as op
+import os, os.path as op
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
