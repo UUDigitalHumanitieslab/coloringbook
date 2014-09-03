@@ -4,6 +4,7 @@
 #}
 
 {% extends 'admin/model/edit.html' %}
+{% import 'admin/drawing.html' as drawing %}
 
 {% block tail %}
     {{ super() }}
@@ -27,5 +28,16 @@
                 update: function() { self.select2("onSortEnd"); }
             });
         });
+    </script>
+    <script>
+        var image = $('#coloring_book_image');
+        if (image) {
+            image.append($('#svg_source').val());
+            var svg = $('svg');
+            svg.attr('viewBox', '0 0 ' + svg.attr('width') + ' ' + svg.attr('height'));
+            svg.removeAttr('width').removeAttr('height');
+            svg.css('max-height', $(window).height() - 500 + 'px');
+            svg.css('max-width', $('.navbar').width() + 'px');
+        }
     </script>
 {% endblock %}

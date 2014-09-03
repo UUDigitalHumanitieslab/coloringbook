@@ -13,11 +13,12 @@ import os, os.path as op
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
+from wtforms import fields
 from flask import request, url_for, redirect, flash
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
-from flask.ext.admin.form import FormOpts
+from flask.ext.admin.form import FormOpts, rules
 from flask.ext.admin.model.helpers import get_mdict_item_or_list
 from flask.ext.admin.babel import gettext
 
@@ -250,17 +251,37 @@ class SurveyView (ModelView):
 class DrawingView(ModelView):
     """ Custom admin table view of Drawing objects. """
     
-    form_columns = ('file',)
+    edit_template = 'admin/augmented_edit.html'
+    form_columns = ('file', 'area_list', 'svg_source')
     form_extra_fields = {
         'file': form.FileUploadField(
             'Drawing',
             base_path = file_path,
-            allowed_extensions = ('svg',) )
+            allowed_extensions = ('svg',) ),
+        'area_list': fields.HiddenField(),
+        'svg_source': fields.HiddenField(),
     }
+    form_create_rules = ('file',)
+    form_edit_rules = (
+        'area_list',
+        'svg_source',
+        rules.Macro('drawing.edit'),
+    )
         
     def on_model_change (self, form, model, is_created = False):
         if is_created:
             model.name = op.splitext(form.file.data.filename)[0]
+    
+    def on_form_prefill (self, form, id):
+        form.svg_source.process_data(
+            open(
+                op.join(
+                    file_path,
+                    self.session.query(Drawing.name).filter_by(id = id).scalar()
+                ) + '.svg'
+            )
+            .read()
+        )
     
     def __init__ (self, session, **kwargs):
         super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
