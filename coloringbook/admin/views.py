@@ -9,8 +9,12 @@
     flask.ext.admin documentation for details.
 """
 
+import os.path as op
+
+from sqlalchemy.event import listens_for
+from jinja2 import Markup
 from flask import request, url_for, redirect, flash
-from flask.ext.admin import expose
+from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts
@@ -21,6 +25,8 @@ from ..models import *
 
 from .utilities import csvdownload
 from .forms import Select2MultipleField
+
+file_path = op.join(op.dirname(__file__), '..', 'static')
 
 class ModelView (sqla.ModelView):
     """ Shallow subclass that provides the on_form_prefill hook. """
@@ -240,3 +246,25 @@ class SurveyView (ModelView):
     
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
+
+class DrawingView(ModelView):
+    """ Custom admin table view of Drawing objects. """
+    
+    form_extra_fields = {
+        'name': form.FileUploadField(
+            'Drawing',
+            base_path = file_path,
+            allowed_extensions = ('svg',) )
+    }
+    
+    def __init__ (self, session, **kwargs):
+        super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
+
+@listens_for(Drawing, 'after_delete')
+def delete_drawing(mapper, connection, target):
+    # Delete image
+    try:
+        os.remove(op.join(file_path, target.name + '.svg'))
+    except OSError:
+        # Don't care if it was not deleted because it does not exist
+        pass
