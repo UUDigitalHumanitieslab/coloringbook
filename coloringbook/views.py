@@ -60,11 +60,8 @@ def subject_from_json (data):
         value is a Subject as defined in .models. The subject is not
         yet added to the database. Consider the following example code:
         
-        >>> # preparations
-        >>> import coloringbook as cb
-        >>> class config:
-        ...     SQLALCHEMY_DATABASE_URI = 'sqlite://'
-        >>> app = cb.create_app(config)
+        >>> import coloringbook.testing as t
+        >>> app = t.get_fixture_app()
         >>> testdata = '''{
         ...     "name": "Bob",
         ...     "birth": "2000-01-01",
@@ -133,11 +130,8 @@ def fills_from_json (survey, page, subject, data):
         database, otherwise a NoResultFound exception will be thrown.
         Example:
         
-        >>> # general preparations
-        >>> import coloringbook as cb, flask, datetime
-        >>> class config:
-        ...     SQLALCHEMY_DATABASE_URI = 'sqlite://'
-        >>> app = cb.create_app(config)
+        >>> import coloringbook as cb, flask, datetime, coloringbook.testing
+        >>> app = coloringbook.testing.get_fixture_app()
         >>> # some trivial contents for the database
         >>> testdrawing = cb.models.Drawing(name='picture')
         >>> testdrawing.areas.append(cb.models.Area(name='left door'))

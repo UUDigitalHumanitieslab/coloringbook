@@ -13,11 +13,8 @@ def csvdownload (filename):
         
         Use this inside a view decorator. Example:
         
-        >>> # prerequisites
-        >>> import coloringbook
-        >>> class config:
-        ...     SQLALCHEMY_DATABASE_URI = 'sqlite://'
-        >>> site = coloringbook.create_app(config)
+        >>> import coloringbook.testing as t
+        >>> site = t.get_fixture_app()
         >>> # using the decorator
         >>> @site.route('/doctest')
         ... @csvdownload('doctest.csv')

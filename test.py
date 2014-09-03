@@ -9,9 +9,10 @@
 
 from doctest import testmod, ELLIPSIS
 
-import coloringbook
+import coloringbook, coloringbook.testing
 
 def test_all ( ):
+    testmod(coloringbook.testing)
     testmod(coloringbook)
     testmod(coloringbook.models)
     testmod(coloringbook.views, optionflags = ELLIPSIS)
