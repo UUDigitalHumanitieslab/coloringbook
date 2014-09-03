@@ -250,12 +250,17 @@ class SurveyView (ModelView):
 class DrawingView(ModelView):
     """ Custom admin table view of Drawing objects. """
     
+    form_columns = ('file', 'areas')
     form_extra_fields = {
-        'name': form.FileUploadField(
+        'file': form.FileUploadField(
             'Drawing',
             base_path = file_path,
             allowed_extensions = ('svg',) )
     }
+        
+    def on_model_change (self, form, model, is_created = False):
+        if is_created:
+            model.name = op.splitext(form.file.data.filename)[0]
     
     def __init__ (self, session, **kwargs):
         super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
