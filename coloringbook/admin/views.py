@@ -282,6 +282,12 @@ class DrawingView(ModelView):
             )
             .read()
         )
+        form.area_list.process_data(','.join(x[0] for x in
+            self.session.query(Area.name)
+            .filter_by(drawing_id = id)
+            .all()
+        ))
+        print form.area_list.data
     
     def __init__ (self, session, **kwargs):
         super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
