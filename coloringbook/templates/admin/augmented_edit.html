@@ -10,6 +10,7 @@
     {{ super() }}
     
     <script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+    <script src="/static/admin/drawing.js"></script>
     <script>
         $('input[data-choices]').each(function ( ) {
             var self = $(this);
@@ -28,19 +29,5 @@
                 update: function() { self.select2("onSortEnd"); }
             });
         });
-    </script>
-    <script>
-        var image = $('#coloring_book_image');
-        if (image) {
-            image.append($('#svg_source').val());
-            var svg = $('svg');
-            if (svg.attr('viewBox') == '') {
-                // Below, I can't just use svg.attr(...) directly, because
-                // that method converts everything to lowercase.
-                svg.get(0).setAttribute('viewBox', '0 0 ' + svg.attr('width') + ' ' + svg.attr('height'));
-            }
-            svg.css('max-height', $(window).height() + 'px');
-            svg.css('max-width', $('.navbar').width() + 'px');
-        }
     </script>
 {% endblock %}
