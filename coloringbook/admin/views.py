@@ -287,7 +287,6 @@ class DrawingView(ModelView):
             .filter_by(drawing_id = id)
             .all()
         ))
-        print form.area_list.data
     
     def __init__ (self, session, **kwargs):
         super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
