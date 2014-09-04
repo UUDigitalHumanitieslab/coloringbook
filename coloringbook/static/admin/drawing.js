@@ -4,6 +4,17 @@
 */
 
 (function ($) {
+    'use strict';
+    var display_panel = function (event) {
+        event.preventDefault();
+        $('#area_panel').position({
+            of: $(event.target),
+            my: 'left top',
+            at: 'right top',
+            collision: 'flip flip'
+        }).show();
+        $(event.target).attr('fill', 'grey');
+    }
     var image = $('#coloring_book_image');
     if (image) {
         image.append($('#svg_source').val());
@@ -15,5 +26,7 @@
         }
         svg.css('max-height', $(window).height() + 'px');
         svg.css('max-width', $('.navbar').width() + 'px');
+        $('path').click(display_panel);
+        $('#area_panel').hide();
     }
 })(window.jQuery);

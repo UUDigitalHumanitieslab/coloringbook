@@ -6,6 +6,11 @@
 {% extends 'admin/model/edit.html' %}
 {% import 'admin/drawing.html' as drawing %}
 
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/admin/drawing.css" type="text/css"></link>
+{% endblock %}
+
 {% block tail %}
     {{ super() }}
     
