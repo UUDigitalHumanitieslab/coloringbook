@@ -34,9 +34,12 @@
         if (image) {
             image.append($('#svg_source').val());
             var svg = $('svg');
-            svg.attr('viewBox', '0 0 ' + svg.attr('width') + ' ' + svg.attr('height'));
-            svg.removeAttr('width').removeAttr('height');
-            svg.css('max-height', $(window).height() - 500 + 'px');
+            if (svg.attr('viewBox') == '') {
+                // Below, I can't just use svg.attr(...) directly, because
+                // that method converts everything to lowercase.
+                svg.get(0).setAttribute('viewBox', '0 0 ' + svg.attr('width') + ' ' + svg.attr('height'));
+            }
+            svg.css('max-height', $(window).height() + 'px');
             svg.css('max-width', $('.navbar').width() + 'px');
         }
     </script>
