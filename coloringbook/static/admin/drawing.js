@@ -60,6 +60,12 @@
     var save_panel = function ( ) {
         var oldname = current_path.attr('id'),
             newname = form_namefield.val();
+        if (newname != oldname && newname in areas) {
+            alert('This name is already taken by another area.\n' +
+                    'Please provide a different name.');
+            form_namefield.focus();
+            return;
+        }
         if (form_checkbox[0].checked) {
             if (! newname) {
                 alert('You really have to provide a name.');
