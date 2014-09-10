@@ -271,6 +271,21 @@ class DrawingView(ModelView):
     def on_model_change (self, form, model, is_created = False):
         if is_created:
             model.name = op.splitext(form.file.data.filename)[0]
+        else:
+            open(op.join(file_path, model.name) + '.svg', 'w').write(
+                form.svg_source.data )
+            new_area_set = set(form.area_list.data.split(','))
+            old_area_set = set(x[0] for x in
+                self.session.query(Area.name)
+                .filter_by(drawing = model)
+                .all()
+            )
+            removed_areas = old_area_set - new_area_set
+            for area in removed_areas:
+                Area.query.filter_by(drawing = model, name = area).delete()
+            added_areas = new_area_set - old_area_set
+            for area in added_areas:
+                model.areas.append(Area(name = area))
     
     def on_form_prefill (self, form, id):
         form.svg_source.process_data(
