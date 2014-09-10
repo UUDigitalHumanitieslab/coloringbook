@@ -17,6 +17,14 @@
     function set2string (set) {
         return Object.keys(set).join(',');
     }
+    // Set-once page unload confirmation dialog
+    function enable_confirmation_dialog ( ) {
+        $(window).on('beforeunload', function (e) {
+            return ('You have unsaved changes, are you sure ' +
+                    'you want to leave the page?');
+        });
+        enable_confirmation_dialog = function ( ) { };
+    }
     var current_path,
         former_color,
         panel = $('#area_panel'),
@@ -90,6 +98,7 @@
         close_panel();
         hidden_list.val(set2string(areas));
         hidden_image.val(image.html());
+        enable_confirmation_dialog();
     }
     if (image) {
         image.append(hidden_image.val());
