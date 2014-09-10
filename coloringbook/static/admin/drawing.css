@@ -16,3 +16,7 @@ label {
     border-radius: 10px;
     background: #ccc;
 }
+
+#area_name {
+    margin: 6px 0;
+}
