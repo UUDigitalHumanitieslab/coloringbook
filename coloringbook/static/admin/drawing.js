@@ -32,6 +32,7 @@
         }
         current_path.attr('fill', 'grey');
         if (id) $('#area_name').val(id);
+        form_namefield.focus();
     }
     var close_panel = function ( ) {
         panel.hide();
@@ -46,6 +47,7 @@
         if (form_checkbox[0].checked) {
             if (! form_namefield.val()) {
                 alert('You really have to provide a name.');
+                form_namefield.focus();
                 return;
             }
             current_path.addClass('colorable');
@@ -70,6 +72,17 @@
         $('path').click(display_panel);
         $('#cancel_area').click(cancel_panel);
         $('#save_area').click(save_panel);
+        form_namefield.keydown(function (event) {
+            switch (event.which) {
+            case 13:  // return pressed
+                event.preventDefault();
+                save_panel();
+                break;
+            case 27:  // escape pressed
+                event.preventDefault();
+                cancel_panel();
+            }
+        });
         panel.hide();
         $('.control-label').hide();  // cheap and easy solution
     }
