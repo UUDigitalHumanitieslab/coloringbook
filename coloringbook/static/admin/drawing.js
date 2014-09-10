@@ -102,7 +102,8 @@
         svg.css('max-height', ($(window).height() - 30) + 'px');
         svg.css('max-width', $('.navbar').width() + 'px');
         $('path').click(display_panel);
-        var areas = string2set(hidden_list.val());
+        var areas = {};
+        if (hidden_list.val()) areas = string2set(hidden_list.val());
         $('#cancel_area').click(cancel_panel);
         $('#save_area').click(save_panel);
         form_namefield.keydown(function (event) {
