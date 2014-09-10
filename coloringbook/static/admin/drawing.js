@@ -33,5 +33,6 @@
         svg.css('max-width', $('.navbar').width() + 'px');
         $('path').click(display_panel);
         $('#area_panel').hide();
+        $('.control-label').hide();  // cheap and easy solution
     }
 })(window.jQuery);
