@@ -8,7 +8,9 @@
     var current_path,
         former_color,
         panel = $('#area_panel'),
-        image = $('#coloring_book_image');
+        image = $('#coloring_book_image'),
+        form_checkbox = $('#colorable'),
+        form_namefield = $('#area_name');
     var display_panel = function (event) {
         event.preventDefault();
         if (current_path) cancel_panel(event);
@@ -31,11 +33,29 @@
         current_path.attr('fill', 'grey');
         if (id) $('#area_name').val(id);
     }
-    var cancel_panel = function ( ) {
-        if (former_color) current_path.attr('fill', former_color);
+    var close_panel = function ( ) {
         panel.hide();
         current_path = null;
         former_color = null;
+    }
+    var cancel_panel = function ( ) {
+        if (former_color) current_path.attr('fill', former_color);
+        close_panel();
+    }
+    var save_panel = function ( ) {
+        if (form_checkbox[0].checked) {
+            if (! form_namefield.val()) {
+                alert('You really have to provide a name.');
+                return;
+            }
+            current_path.addClass('colorable');
+            current_path.attr('id', form_namefield.val());
+            current_path.attr('fill', 'white');
+        } else {
+            current_path.removeClass('colorable');
+            current_path.attr('fill', 'black');
+        }
+        close_panel();
     }
     if (image) {
         image.append($('#svg_source').val());
@@ -49,6 +69,7 @@
         svg.css('max-width', $('.navbar').width() + 'px');
         $('path').click(display_panel);
         $('#cancel_area').click(cancel_panel);
+        $('#save_area').click(save_panel);
         panel.hide();
         $('.control-label').hide();  // cheap and easy solution
     }
