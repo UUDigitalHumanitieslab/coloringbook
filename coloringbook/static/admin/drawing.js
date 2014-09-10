@@ -157,7 +157,7 @@
                 form_namefield.prop('disabled', true);
             }
         });
-        panel.hide();
+        panel.draggable().hide();
         $('.control-label').hide();  // cheap and easy solution
     }
 })(window.jQuery);
