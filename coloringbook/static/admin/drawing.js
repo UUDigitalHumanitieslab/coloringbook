@@ -20,7 +20,8 @@
             collision: 'flip flip'
         });
         var css = current_path.css('fill'),
-            fill = current_path.attr('fill');
+            fill = current_path.attr('fill'),
+            id = current_path.attr('id');
         if (css) {
             former_color = css;
             current_path.css('fill', '');
@@ -28,6 +29,7 @@
             former_color = fill;
         }
         current_path.attr('fill', 'grey');
+        if (id) $('#area_name').val(id);
     }
     var cancel_panel = function ( ) {
         if (former_color) current_path.attr('fill', former_color);
