@@ -86,9 +86,6 @@ class Drawing (db.Model):
                                      # filename *without* extension
                                      # database is path-agnostic
     
-    areas = db.relationship('Area', backref = 'drawing', lazy = 'dynamic')
-        # one-many
-    
     def __str__ (self):
         return self.name
 
@@ -107,6 +104,11 @@ class Area (db.Model):
         db.Integer,
         db.ForeignKey('drawing.id'),
         nullable = False )
+    
+    drawing = db.relationship(
+        'Drawing',
+        backref= db.backref('areas', cascade = 'all, delete-orphan') )
+        # many-one
     
     def __str__ (self):
         return self.name
