@@ -7,12 +7,12 @@
     'use strict';
     var display_panel = function (event) {
         event.preventDefault();
-        $('#area_panel').position({
-            of: $(event.target),
-            my: 'left top',
+        $('#area_panel').show().position({
+            my: 'left bottom',
             at: 'right top',
+            of: $(event.target),
             collision: 'flip flip'
-        }).show();
+        });
         $(event.target).attr('fill', 'grey');
     }
     var image = $('#coloring_book_image');

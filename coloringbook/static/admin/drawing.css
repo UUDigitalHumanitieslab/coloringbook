@@ -9,9 +9,10 @@ label {
 
 #area_panel {
     display: block;
+    position: absolute;
+    z-index: 2;
+    padding: 10px;
     border: 3px double black;
     border-radius: 10px;
-    background: #ddd;
-    width: 250px;
-    z-index: 2;
+    background: #ccc;
 }
