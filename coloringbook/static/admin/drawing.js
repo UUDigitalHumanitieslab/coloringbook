@@ -46,7 +46,12 @@
         }
         current_path.attr('fill', 'grey');
         if (id) $('#area_name').val(id);
-        form_namefield.focus();
+        if (!current_path.hasClass('colorable') && former_color == '#000000') {
+            form_checkbox.prop('checked', false);
+        } else {
+            form_checkbox.prop('checked', true);
+        }
+        form_checkbox.change();
     }
     var close_panel = function ( ) {
         panel.hide();
@@ -60,27 +65,28 @@
     var save_panel = function ( ) {
         var oldname = current_path.attr('id'),
             newname = form_namefield.val();
-        if (newname != oldname && newname in areas) {
-            alert('This name is already taken by another area.\n' +
-                    'Please provide a different name.');
-            form_namefield.focus();
-            return;
-        }
         if (form_checkbox[0].checked) {
             if (! newname) {
                 alert('You really have to provide a name.');
                 form_namefield.focus();
                 return;
             }
+            if (newname != oldname && newname in areas) {
+                alert('This name is already taken by another area.\n' +
+                        'Please provide a different name.');
+                form_namefield.focus();
+                return;
+            }
             current_path.addClass('colorable');
             current_path.attr('fill', 'white');
+            current_path.attr('id', newname);
+            if (oldname) delete areas[oldname];
+            areas[newname] = true;
         } else {
             current_path.removeClass('colorable');
             current_path.attr('fill', 'black');
+            if (oldname) delete areas[oldname];
         }
-        if (oldname) delete areas[oldname];
-        areas[newname] = true;
-        current_path.attr('id', newname);
         close_panel();
         hidden_list.val(set2string(areas));
         hidden_image.val(image.html());
@@ -108,6 +114,13 @@
             case 27:  // escape pressed
                 event.preventDefault();
                 cancel_panel();
+            }
+        });
+        form_checkbox.change(function (event) {
+            if (event.target.checked) {
+                form_namefield.prop('disabled', false).focus();
+            } else {
+                form_namefield.prop('disabled', true);
             }
         });
         panel.hide();
