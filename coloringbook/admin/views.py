@@ -9,11 +9,16 @@
     flask.ext.admin documentation for details.
 """
 
+import os, os.path as op
+
+from sqlalchemy.event import listens_for
+from jinja2 import Markup
+from wtforms import fields
 from flask import request, url_for, redirect, flash
-from flask.ext.admin import expose
+from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
-from flask.ext.admin.form import FormOpts
+from flask.ext.admin.form import FormOpts, rules
 from flask.ext.admin.model.helpers import get_mdict_item_or_list
 from flask.ext.admin.babel import gettext
 
@@ -21,6 +26,8 @@ from ..models import *
 
 from .utilities import csvdownload
 from .forms import Select2MultipleField
+
+file_path = op.join(op.dirname(__file__), '..', 'static')
 
 class ModelView (sqla.ModelView):
     """ Shallow subclass that provides the on_form_prefill hook. """
@@ -74,44 +81,6 @@ class ModelView (sqla.ModelView):
         can't figure out by itself. Fields that were added by name of
         a normal column or relationship should work out of the box. """
         pass
-
-class SurveyView (ModelView):
-    """ Custom admin table view of Survey objects. """
-    
-    edit_template = 'admin/augmented_edit.html'
-    can_delete = False
-    column_list = 'name language begin end information'.split()
-    column_sortable_list = (
-        ('name', Survey.name),
-        ('language', Language.name),
-        'begin',
-        'end',
-    )
-    column_auto_select_related = True
-    column_searchable_list = ('information',)
-    column_default_sort = ('begin', True)
-    column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
-    form_extra_fields = {
-        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
-    }
-        
-    def on_model_change (self, form, model, is_created = False):
-        if not is_created:
-            self.session.query(SurveyPage).filter_by(survey=model).delete()
-        for index, id in enumerate(form.page_list.data):
-            SurveyPage(survey = model, page_id = id, ordering = index)
-    
-    def on_form_prefill (self, form, id):
-        form.page_list.process_data(
-            self.session.query(SurveyPage.page_id)
-            .filter(SurveyPage.survey_id == id)
-            .order_by(SurveyPage.ordering)
-            .all()
-        )
-    
-    def __init__ (self, session, **kwargs):
-        super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
 
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
@@ -240,3 +209,108 @@ class FillView (ModelView):
                 self.model.area_id,
                 self.model.subject_id )
         )
+
+class SurveyView (ModelView):
+    """ Custom admin table view of Survey objects. """
+    
+    edit_template = 'admin/augmented_edit.html'
+    can_delete = False
+    column_list = 'name language begin end information'.split()
+    column_sortable_list = (
+        ('name', Survey.name),
+        ('language', Language.name),
+        'begin',
+        'end',
+    )
+    column_auto_select_related = True
+    column_searchable_list = ('information',)
+    column_default_sort = ('begin', True)
+    column_display_all_relations = True
+    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
+    form_extra_fields = {
+        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+    }
+        
+    def on_model_change (self, form, model, is_created = False):
+        if not is_created:
+            self.session.query(SurveyPage).filter_by(survey=model).delete()
+        for index, id in enumerate(form.page_list.data):
+            SurveyPage(survey = model, page_id = id, ordering = index)
+    
+    def on_form_prefill (self, form, id):
+        form.page_list.process_data(
+            self.session.query(SurveyPage.page_id)
+            .filter(SurveyPage.survey_id == id)
+            .order_by(SurveyPage.ordering)
+            .all()
+        )
+    
+    def __init__ (self, session, **kwargs):
+        super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
+
+class DrawingView(ModelView):
+    """ Custom admin table view of Drawing objects. """
+    
+    edit_template = 'admin/augmented_edit.html'
+    form_columns = ('file', 'area_list', 'svg_source')
+    form_extra_fields = {
+        'file': form.FileUploadField(
+            'Drawing',
+            base_path = file_path,
+            allowed_extensions = ('svg',) ),
+        'area_list': fields.HiddenField(),
+        'svg_source': fields.HiddenField(),
+    }
+    form_create_rules = ('file',)
+    form_edit_rules = (
+        'area_list',
+        'svg_source',
+        rules.Macro('drawing.edit'),
+    )
+        
+    def on_model_change (self, form, model, is_created = False):
+        if is_created:
+            model.name = op.splitext(form.file.data.filename)[0]
+        else:
+            new_area_set = set(form.area_list.data.split(','))
+            old_area_set = set(x[0] for x in
+                self.session.query(Area.name)
+                .filter_by(drawing = model)
+                .all()
+            )
+            removed_areas = old_area_set - new_area_set
+            for area in removed_areas:
+                Area.query.filter_by(drawing = model, name = area).delete()
+            added_areas = new_area_set - old_area_set
+            for area in added_areas:
+                model.areas.append(Area(name = area))
+            open(op.join(file_path, model.name) + '.svg', 'w').write(
+                form.svg_source.data )
+    
+    def on_form_prefill (self, form, id):
+        form.svg_source.process_data(
+            open(
+                op.join(
+                    file_path,
+                    self.session.query(Drawing.name).filter_by(id = id).scalar()
+                ) + '.svg'
+            )
+            .read()
+        )
+        form.area_list.process_data(','.join(x[0] for x in
+            self.session.query(Area.name)
+            .filter_by(drawing_id = id)
+            .all()
+        ))
+    
+    def __init__ (self, session, **kwargs):
+        super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
+
+@listens_for(Drawing, 'after_delete')
+def delete_drawing(mapper, connection, target):
+    # Delete image
+    try:
+        os.remove(op.join(file_path, target.name + '.svg'))
+    except OSError:
+        # Don't care if it was not deleted because it does not exist
+        pass

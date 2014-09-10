@@ -38,10 +38,11 @@ def create_admin (app):
     sess = db.session
     admin = Admin(name='Coloringbook', app=app)
     with app.app_context():
-        from .views import SurveyView, FillView
+        from .views import FillView, SurveyView, DrawingView
     admin.add_view(FillView(sess))
     admin.add_view(SurveyView(sess))
     admin.add_view(ModelView(Page, sess, name = 'Pages'))
+    admin.add_view(DrawingView(sess))
     admin.add_view(ModelView(Color, sess, name = 'Colors'))
     admin.add_view(ModelView(Language, sess, name = 'Languages'))
     fpath = join(dirname(dirname(__file__)), 'static')

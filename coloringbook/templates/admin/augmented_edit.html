@@ -4,11 +4,18 @@
 #}
 
 {% extends 'admin/model/edit.html' %}
+{% import 'admin/drawing.html' as drawing %}
+
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="/static/admin/drawing.css" type="text/css"></link>
+{% endblock %}
 
 {% block tail %}
     {{ super() }}
     
     <script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+    <script src="/static/admin/drawing.js"></script>
     <script>
         $('input[data-choices]').each(function ( ) {
             var self = $(this);
