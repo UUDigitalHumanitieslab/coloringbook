@@ -33,7 +33,7 @@
             my: 'left bottom',
             at: 'right top',
             of: current_path,
-            collision: 'flip flip'
+            within: image
         });
         var css = current_path.css('fill'),
             fill = current_path.attr('fill'),
