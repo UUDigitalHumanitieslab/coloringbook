@@ -5,22 +5,36 @@
 
 (function ($) {
     'use strict';
-    var current_path;
+    var current_path,
+        former_color,
+        panel = $('#area_panel'),
+        image = $('#coloring_book_image');
     var display_panel = function (event) {
         event.preventDefault();
+        if (current_path) cancel_panel(event);
         current_path = $(event.target)
-        $('#area_panel').show().position({
+        panel.show().position({
             my: 'left bottom',
             at: 'right top',
             of: current_path,
             collision: 'flip flip'
         });
-        if (current_path.css('fill')) {
+        var css = current_path.css('fill'),
+            fill = current_path.attr('fill');
+        if (css) {
+            former_color = css;
             current_path.css('fill', '');
+        } else if (fill) {
+            former_color = fill;
         }
         current_path.attr('fill', 'grey');
     }
-    var image = $('#coloring_book_image');
+    var cancel_panel = function ( ) {
+        if (former_color) current_path.attr('fill', former_color);
+        panel.hide();
+        current_path = null;
+        former_color = null;
+    }
     if (image) {
         image.append($('#svg_source').val());
         var svg = $('svg');
@@ -32,7 +46,8 @@
         svg.css('max-height', ($(window).height() - 30) + 'px');
         svg.css('max-width', $('.navbar').width() + 'px');
         $('path').click(display_panel);
-        $('#area_panel').hide();
+        $('#cancel_area').click(cancel_panel);
+        panel.hide();
         $('.control-label').hide();  // cheap and easy solution
     }
 })(window.jQuery);
