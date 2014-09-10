@@ -5,10 +5,24 @@
 
 (function ($) {
     'use strict';
+    // Some quick tricks to simulate a set datastructure using plain objects
+    function string2set (str) {
+        var set_emulation = {};
+        var substrings = str.split(',');
+        for (var l = substrings.length, i = 0; i < l; ++i) {
+            set_emulation[substrings[i]] = true;
+        }
+        return set_emulation;
+    }
+    function set2string (set) {
+        return Object.keys(set).join(',');
+    }
     var current_path,
         former_color,
         panel = $('#area_panel'),
         image = $('#coloring_book_image'),
+        hidden_image = $('#svg_source'),
+        hidden_list = $('#area_list'),
         form_checkbox = $('#colorable'),
         form_namefield = $('#area_name');
     var display_panel = function (event) {
@@ -44,23 +58,29 @@
         close_panel();
     }
     var save_panel = function ( ) {
+        var oldname = current_path.attr('id'),
+            newname = form_namefield.val();
         if (form_checkbox[0].checked) {
-            if (! form_namefield.val()) {
+            if (! newname) {
                 alert('You really have to provide a name.');
                 form_namefield.focus();
                 return;
             }
             current_path.addClass('colorable');
-            current_path.attr('id', form_namefield.val());
             current_path.attr('fill', 'white');
         } else {
             current_path.removeClass('colorable');
             current_path.attr('fill', 'black');
         }
+        if (oldname) delete areas[oldname];
+        areas[newname] = true;
+        current_path.attr('id', newname);
         close_panel();
+        hidden_list.val(set2string(areas));
+        hidden_image.val(image.html());
     }
     if (image) {
-        image.append($('#svg_source').val());
+        image.append(hidden_image.val());
         var svg = $('svg');
         // Below, I can't just use svg.attr(...) directly, because
         // that method converts everything to lowercase.
@@ -70,6 +90,7 @@
         svg.css('max-height', ($(window).height() - 30) + 'px');
         svg.css('max-width', $('.navbar').width() + 'px');
         $('path').click(display_panel);
+        var areas = string2set(hidden_list.val());
         $('#cancel_area').click(cancel_panel);
         $('#save_area').click(save_panel);
         form_namefield.keydown(function (event) {
