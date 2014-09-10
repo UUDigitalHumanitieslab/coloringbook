@@ -45,7 +45,7 @@
     // top of, the SVG path that was clicked. Highlight the path that is
     // being edited. Prefill the form in the #area_panel with known values
     // and best guesses.
-    var display_panel = function (event) {
+    function display_panel (event) {
         event.preventDefault();
         if (current_path) cancel_panel(event);
         current_path = $(event.target)
@@ -75,14 +75,14 @@
     }
     
     // Triggered when the #area_panel form is saved or cancelled.
-    var close_panel = function ( ) {
+    function close_panel ( ) {
         panel.hide();
         current_path = null;
         former_color = null;
     }
     
     // Triggered when the #cancel_area button is clicked.
-    var cancel_panel = function ( ) {
+    function cancel_panel ( ) {
         if (former_color) current_path.attr('fill', former_color);
         close_panel();
     }
@@ -90,7 +90,7 @@
     // Triggered when the #save_area button is clicked. Validates the
     // #area_name field and updates the hidden input field when
     // applicable.
-    var save_panel = function ( ) {
+    function save_panel ( ) {
         var oldname = current_path.attr('id'),
             newname = form_namefield.val();
         if (form_checkbox[0].checked) {
