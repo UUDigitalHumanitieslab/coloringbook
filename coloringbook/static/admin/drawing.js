@@ -28,6 +28,7 @@
             return ('You have unsaved changes, are you sure ' +
                     'you want to leave the page?');
         });
+        $('form').submit(function (e) { $(window).off('beforeunload'); });
         enable_confirmation_dialog = function ( ) { };
     }
 
