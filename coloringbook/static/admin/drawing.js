@@ -1,11 +1,15 @@
 /*
     (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
     Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+    
+    This script enables the admins to identify colorable areas in a
+    newly uploaded SVG image.
 */
 
 (function ($) {
     'use strict';
-    // Some quick tricks to simulate a set datastructure using plain objects
+
+    // Some quick tricks to simulate a set datastructure using plain objects.
     function string2set (str) {
         var set_emulation = {};
         var substrings = str.split(',');
@@ -17,7 +21,8 @@
     function set2string (set) {
         return Object.keys(set).join(',');
     }
-    // Set-once page unload confirmation dialog
+
+    // Set-once page unload confirmation dialog.
     function enable_confirmation_dialog ( ) {
         $(window).on('beforeunload', function (e) {
             return ('You have unsaved changes, are you sure ' +
@@ -25,6 +30,8 @@
         });
         enable_confirmation_dialog = function ( ) { };
     }
+
+    // Actual drawing editing logic starts here.
     var current_path,
         former_color,
         panel = $('#area_panel'),
@@ -33,6 +40,11 @@
         hidden_list = $('#area_list'),
         form_checkbox = $('#colorable'),
         form_namefield = $('#area_name');
+    
+    // Unhide and position the #area_panel close to, but preferably not on
+    // top of, the SVG path that was clicked. Highlight the path that is
+    // being edited. Prefill the form in the #area_panel with known values
+    // and best guesses.
     var display_panel = function (event) {
         event.preventDefault();
         if (current_path) cancel_panel(event);
@@ -61,15 +73,23 @@
         }
         form_checkbox.change();
     }
+    
+    // Triggered when the #area_panel form is saved or cancelled.
     var close_panel = function ( ) {
         panel.hide();
         current_path = null;
         former_color = null;
     }
+    
+    // Triggered when the #cancel_area button is clicked.
     var cancel_panel = function ( ) {
         if (former_color) current_path.attr('fill', former_color);
         close_panel();
     }
+    
+    // Triggered when the #save_area button is clicked. Validates the
+    // #area_name field and updates the hidden input field when
+    // applicable.
     var save_panel = function ( ) {
         var oldname = current_path.attr('id'),
             newname = form_namefield.val();
@@ -100,7 +120,10 @@
         hidden_image.val(image.html());
         enable_confirmation_dialog();
     }
+    
     if (image) {
+        // Initialize things and attach events to stuff.
+        
         image.append(hidden_image.val());
         var svg = $('svg');
         // Below, I can't just use svg.attr(...) directly, because
