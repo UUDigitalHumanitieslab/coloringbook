@@ -5,15 +5,20 @@
 
 (function ($) {
     'use strict';
+    var current_path;
     var display_panel = function (event) {
         event.preventDefault();
+        current_path = $(event.target)
         $('#area_panel').show().position({
             my: 'left bottom',
             at: 'right top',
-            of: $(event.target),
+            of: current_path,
             collision: 'flip flip'
         });
-        $(event.target).attr('fill', 'grey');
+        if (current_path.css('fill')) {
+            current_path.css('fill', '');
+        }
+        current_path.attr('fill', 'grey');
     }
     var image = $('#coloring_book_image');
     if (image) {
