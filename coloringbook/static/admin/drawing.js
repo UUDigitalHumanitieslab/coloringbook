@@ -19,12 +19,12 @@
     if (image) {
         image.append($('#svg_source').val());
         var svg = $('svg');
-        if (svg.attr('viewBox') == '') {
-            // Below, I can't just use svg.attr(...) directly, because
-            // that method converts everything to lowercase.
+        // Below, I can't just use svg.attr(...) directly, because
+        // that method converts everything to lowercase.
+        if (! svg.get(0).hasAttribute('viewBox')) {
             svg.get(0).setAttribute('viewBox', '0 0 ' + svg.attr('width') + ' ' + svg.attr('height'));
         }
-        svg.css('max-height', $(window).height() + 'px');
+        svg.css('max-height', ($(window).height() - 30) + 'px');
         svg.css('max-width', $('.navbar').width() + 'px');
         $('path').click(display_panel);
         $('#area_panel').hide();
