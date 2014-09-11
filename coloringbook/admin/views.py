@@ -30,7 +30,16 @@ from .forms import Select2MultipleField
 file_path = op.join(op.dirname(__file__), '..', 'static')
 
 class ModelView (sqla.ModelView):
-    """ Shallow subclass that provides the on_form_prefill hook. """
+    """
+        Shallow subclass that provides the on_form_prefill hook.
+
+        This hook attachment code has been submitted as a patch for
+        flask.ext.admin.model.base.BaseModelView to Flask-Admin and
+        was accepted. When the patched version finds its way to the
+        next release version of Flask-Admin, this class becomes
+        obsolete and we can switch back to directly using
+        sqla.Modelview.
+    """
     
     @expose('/edit/', methods=('GET', 'POST'))
     def edit_view(self):
