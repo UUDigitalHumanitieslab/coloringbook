@@ -281,8 +281,7 @@ class PageView(ModelView):
     column_searchable_list = ('name', 'text',)
     column_default_sort = 'name'
     column_display_all_relations = True
-    form_columns = 'name drawing language text expectations'.split()
-    # TODO: fix possibility to upload sounds
+    form_columns = 'name drawing language text sound expectations'.split()
     
     def on_model_change (self, form, model, is_created = False):
         pass
