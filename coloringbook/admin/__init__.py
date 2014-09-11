@@ -38,7 +38,7 @@ def create_admin (app):
     sess = db.session
     admin = Admin(name='Coloringbook', app=app)
     with app.app_context():
-        from .views import FillView, SurveyView, PageView, DrawingView, SoundView
+        from .views import *
     admin.add_view(FillView(sess))
     admin.add_view(SurveyView(sess))
     admin.add_view(PageView(sess))

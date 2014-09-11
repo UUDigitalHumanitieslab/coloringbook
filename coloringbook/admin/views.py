@@ -27,6 +27,13 @@ from ..models import *
 from .utilities import csvdownload
 from .forms import Select2MultipleField
 
+__all__ = [
+    'FillView',
+    'SurveyView',
+    'PageView',
+    'DrawingView',
+    'SoundView'     ]
+
 file_path = op.join(op.dirname(__file__), '..', 'static')
 
 class ModelView (sqla.ModelView):
