@@ -257,8 +257,24 @@ class SurveyView (ModelView):
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
 
+class PageView(ModelView):
+    """
+        Custom admin table view of Page objects with associated Expectations.
+    """
+    
+    edit_template = 'admin/augmented_edit.html'
+    
+    def on_model_change (self, form, model, is_created = False):
+        pass
+    
+    def on_form_prefill (self, form, id):
+        pass
+    
+    def __init__ (self, session, **kwargs):
+        super(PageView, self).__init__(Page, session, name='Pages', **kwargs)
+
 class DrawingView(ModelView):
-    """ Custom admin table view of Drawing objects. """
+    """ Custom admin table view of Drawing objects with associated Areas. """
     
     edit_template = 'admin/augmented_edit.html'
     form_columns = ('file', 'area_list', 'svg_source')
