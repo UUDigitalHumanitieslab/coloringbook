@@ -292,7 +292,7 @@ class PageView(ModelView):
         'text',
         'sound',
         'expect_list',
-        rules.Macro('drawing.edit'),
+        rules.Macro('drawing.edit_expectations'),
     )
     
     def on_model_change (self, form, model, is_created = False):
@@ -321,7 +321,7 @@ class DrawingView(ModelView):
     form_edit_rules = (
         'area_list',
         'svg_source',
-        rules.Macro('drawing.edit'),
+        rules.Macro('drawing.edit_areas'),
     )
         
     def on_model_change (self, form, model, is_created = False):
