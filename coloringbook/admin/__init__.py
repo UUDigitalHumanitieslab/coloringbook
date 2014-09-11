@@ -46,6 +46,4 @@ def create_admin (app):
     admin.add_view(SoundView(sess))
     admin.add_view(ModelView(Color, sess, name = 'Colors'))
     admin.add_view(ModelView(Language, sess, name = 'Languages'))
-    fpath = join(dirname(dirname(__file__)), 'static')
-    admin.add_view(FileAdmin(fpath, '/static/', name = 'Files'))
     return admin
