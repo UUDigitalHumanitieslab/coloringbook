@@ -135,30 +135,35 @@ set_image_dimensions = function ( ) {
 	image.css('max-width', win.width() - 2 * padding + 'px');
 }
 
-create_swatches = function (colors) {
+insert_swatches = function (colors) {
 	var swatches = $('#swatches');
 	swatches.empty();
 	for (index in colors) {
 		swatches.append(button(colors[index]));
 	}
 	$(button('#fff')).appendTo(swatches).append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
-	color_chosen = $('.color_choice').first();
 	$('.color_choice').click(function (event) {
 		color_chosen.css('border-color', '#fff');
 		color_chosen = $(this);
 		color_chosen.css('border-color', '#000');
 	});
+}
+
+create_swatches = function (colors) {
+    insert_swatches(colors);
+	color_chosen = $('.color_choice').first();
 	color_chosen.click();
 }
 
-load_image = function (url, data, name) {
+load_image = function (url, data, name, store_func) {
 	$.ajax({
 		type: 'GET',
 		url: $SCRIPT_ROOT + 'static/' + url,
 		data: data,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
-			images[name] = svg_resp;
+			if (store_func) store_func(svg_resp, xmlstatus);
+			else            images[name] = svg_resp;
 		},
 		error: function (xhr, status, error) {
 			alert(error);
