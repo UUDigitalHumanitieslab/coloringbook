@@ -281,9 +281,10 @@ class PageView(ModelView):
     column_searchable_list = ('name', 'text',)
     column_default_sort = 'name'
     column_display_all_relations = True
-    form_columns = 'name drawing language text sound expect_list'.split()
+    form_columns = 'name drawing language text sound expect_list fname'.split()
     form_extra_fields = {
         'expect_list': fields.HiddenField(),
+        'fname': fields.HiddenField(),
     }
     form_create_rules = form_columns[:5]  # up to sound
     form_edit_rules = (
@@ -291,6 +292,7 @@ class PageView(ModelView):
         'language',
         'text',
         'sound',
+        'fname',
         'expect_list',
         rules.Macro('drawing.edit_expectations'),
     )
@@ -299,7 +301,12 @@ class PageView(ModelView):
         pass
     
     def on_form_prefill (self, form, id):
-        pass
+        form.fname.process_data(
+            self.session.query(Drawing.name)
+            .join(Drawing.pages)
+            .filter(Page.id == id)
+            .one()[0]
+        )
     
     def __init__ (self, session, **kwargs):
         super(PageView, self).__init__(Page, session, name='Pages', **kwargs)

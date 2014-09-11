@@ -155,15 +155,14 @@ create_swatches = function (colors) {
 	color_chosen.click();
 }
 
-load_image = function (url, data, name, store_func) {
+load_image = function (url, data, name) {
 	$.ajax({
 		type: 'GET',
 		url: $SCRIPT_ROOT + 'static/' + url,
 		data: data,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
-			if (store_func) store_func(svg_resp, xmlstatus);
-			else            images[name] = svg_resp;
+			images[name] = svg_resp;
 		},
 		error: function (xhr, status, error) {
 			alert(error);

@@ -40,6 +40,7 @@
         image = $('#coloring_book_image'),
         hidden_image = $('#svg_source'),
         hidden_list = $('#area_list'),
+        hidden_fname = $('#fname'),
         hidden_table = $('#expect_list'),
         form_radio = $('input[type="radio"][name="where"]'),
         form_checkbox = $('#colorable'),
@@ -182,13 +183,9 @@
         }    
     }
     
-    if (image) {
-        // Initialize things and attach events to stuff.
-        
-        if (hidden_image) {
-            image.append(hidden_image.val());
-        } else if (hidden_table) {
-        }
+    // Place the SVG in the page and ensure that it is scaled properly.
+    function place_svg (data) {
+        image.append(data);
         var svg = $('svg');
         // Below, I can't just use svg.attr(...) directly, because
         // that method converts everything to lowercase.
@@ -197,7 +194,13 @@
         }
         svg.css('max-height', ($(window).height() - 30) + 'px');
         svg.css('max-width', $('.navbar').width() + 'px');
+    }
+    
+    if (image) {
+        // Initialize things and attach events to stuff.
+        
         if (hidden_list) {
+            place_svg(hidden_image.val());
             $('path').click(display_panel(prefill_area));
             var areas = {};
             if (hidden_list.val()) areas = string2set(hidden_list.val());
@@ -221,9 +224,13 @@
                 }
             });
         } else if (hidden_table) {
-            $('path[class="colorable"]').click(
-                display_panel(prefill_expectation)
-            );
+            var url = '/static/' + hidden_fname.val() + '.svg';
+            $.get(url, null, function (svg) {
+                place_svg(svg);
+                $('path[class="colorable"]').click(
+                    display_panel(prefill_expectation)
+                );
+            }, 'html');
             var expectations = JSON.parse(hidden_table.val());
             insert_colors(colors);
             $('#save_area').click(save_expectation);
