@@ -263,6 +263,19 @@ class PageView(ModelView):
     """
     
     edit_template = 'admin/augmented_edit.html'
+    column_list = 'name drawing language text sound'.split()
+    column_sortable_list = (
+        'name',
+        ('drawing', Drawing.name),
+        ('language', Language.name),
+        'sound',
+    )
+    column_auto_select_related = True
+    column_searchable_list = ('name', 'text',)
+    column_default_sort = 'name'
+    column_display_all_relations = True
+    form_columns = 'name drawing language text expectations'.split()
+    # TODO: fix possibility to upload sounds
     
     def on_model_change (self, form, model, is_created = False):
         pass
