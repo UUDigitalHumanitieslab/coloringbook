@@ -352,3 +352,27 @@ def delete_drawing(mapper, connection, target):
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
+
+class SoundView(ModelView):
+    """ Custom admin table view of Drawing objects with associated Areas. """
+    
+    can_edit = False
+    form_columns = ('file',)
+    form_extra_fields = {
+        'file': form.FileUploadField(
+            'Sound',
+            base_path = file_path,
+            allowed_extensions = ('mp3',) ),
+    }
+        
+    def __init__ (self, session, **kwargs):
+        super(SoundView, self).__init__(Sound, session, name='Sounds', **kwargs)
+
+@listens_for(Sound, 'after_delete')
+def delete_sound(mapper, connection, target):
+    # Delete image
+    try:
+        os.remove(op.join(file_path, target.name + '.mp3'))
+    except OSError:
+        # Don't care if it was not deleted because it does not exist
+        pass
