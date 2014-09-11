@@ -128,14 +128,18 @@ class Page (db.Model):
     name = db.Column(db.String(30), nullable = False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
-    sound = db.Column(db.String(30))  # filename *with* extension
-                                      # database is path-agnostic
+    sound_id = db.Column(db.Integer, db.ForeignKey('sound.id'))
     drawing_id = db.Column(db.Integer,
         db.ForeignKey('drawing.id'),
         nullable = False )
     
     language = db.relationship(  # many-one
         'Language',
+        backref = db.backref(
+            'pages',
+            lazy = 'dynamic'))
+    sound = db.relationship(  # many-one
+        'Sound',
         backref = db.backref(
             'pages',
             lazy = 'dynamic'))
