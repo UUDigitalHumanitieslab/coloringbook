@@ -281,7 +281,19 @@ class PageView(ModelView):
     column_searchable_list = ('name', 'text',)
     column_default_sort = 'name'
     column_display_all_relations = True
-    form_columns = 'name drawing language text sound expectations'.split()
+    form_columns = 'name drawing language text sound expect_list'.split()
+    form_extra_fields = {
+        'expect_list': fields.HiddenField(),
+    }
+    form_create_rules = form_columns[:5]  # up to sound
+    form_edit_rules = (
+        'name',
+        'language',
+        'text',
+        'sound',
+        'expect_list',
+        rules.Macro('drawing.edit'),
+    )
     
     def on_model_change (self, form, model, is_created = False):
         pass
