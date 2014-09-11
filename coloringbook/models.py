@@ -78,9 +78,9 @@ class Language (db.Model):
     def __str__ (self):
         return self.name
 
-class Drawing (db.Model):
-    """ Metadata associated with a colorable SVG. """
-
+class File (object):
+    """ Common members for Drawing and Sound. """
+    
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
                                      # filename *without* extension
@@ -88,6 +88,10 @@ class Drawing (db.Model):
     
     def __str__ (self):
         return self.name
+
+class Drawing (File, db.Model):
+    """ Proxy to a colorable SVG. """
+    pass
 
 class Area (db.Model):
     """ Colorable part of a Drawing. """
@@ -112,6 +116,10 @@ class Area (db.Model):
     
     def __str__ (self):
         return self.name
+
+class Sound (File, db.Model):
+    """ Proxy to a MP3 file. """
+    pass
 
 class Page (db.Model):
     """ Combination of a sentence and a Drawing. """
