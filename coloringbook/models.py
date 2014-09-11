@@ -10,6 +10,7 @@
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.declarative import declared_attr
 
 __all__ = [
     'db',
@@ -18,6 +19,7 @@ __all__ = [
     'Language',
     'Drawing',
     'Area',
+    'Sound',
     'Page',
     'Color',
     'Expectation',
@@ -81,6 +83,10 @@ class Language (db.Model):
 class File (object):
     """ Common members for Drawing and Sound. """
     
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
+
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
                                      # filename *without* extension

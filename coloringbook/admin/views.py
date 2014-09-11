@@ -371,6 +371,10 @@ class SoundView(ModelView):
             base_path = file_path,
             allowed_extensions = ('mp3',) ),
     }
+    
+    def on_model_change (self, form, model, is_created = False):
+        if is_created:
+            model.name = op.splitext(form.file.data.filename)[0]
         
     def __init__ (self, session, **kwargs):
         super(SoundView, self).__init__(Sound, session, name='Sounds', **kwargs)
