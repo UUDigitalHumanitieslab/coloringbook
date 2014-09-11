@@ -10,6 +10,7 @@
 
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.declarative import declared_attr
 
 __all__ = [
     'db',
@@ -18,6 +19,7 @@ __all__ = [
     'Language',
     'Drawing',
     'Area',
+    'Sound',
     'Page',
     'Color',
     'Expectation',
@@ -78,8 +80,12 @@ class Language (db.Model):
     def __str__ (self):
         return self.name
 
-class Drawing (db.Model):
-    """ Metadata associated with a colorable SVG. """
+class File (object):
+    """ Common members for Drawing and Sound. """
+    
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
@@ -88,6 +94,10 @@ class Drawing (db.Model):
     
     def __str__ (self):
         return self.name
+
+class Drawing (File, db.Model):
+    """ Proxy to a colorable SVG. """
+    pass
 
 class Area (db.Model):
     """ Colorable part of a Drawing. """
@@ -113,6 +123,10 @@ class Area (db.Model):
     def __str__ (self):
         return self.name
 
+class Sound (File, db.Model):
+    """ Proxy to a MP3 file. """
+    pass
+
 class Page (db.Model):
     """ Combination of a sentence and a Drawing. """
 
@@ -120,14 +134,18 @@ class Page (db.Model):
     name = db.Column(db.String(30), nullable = False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
-    sound = db.Column(db.String(30))  # filename *with* extension
-                                      # database is path-agnostic
+    sound_id = db.Column(db.Integer, db.ForeignKey('sound.id'))
     drawing_id = db.Column(db.Integer,
         db.ForeignKey('drawing.id'),
         nullable = False )
     
     language = db.relationship(  # many-one
         'Language',
+        backref = db.backref(
+            'pages',
+            lazy = 'dynamic'))
+    sound = db.relationship(  # many-one
+        'Sound',
         backref = db.backref(
             'pages',
             lazy = 'dynamic'))

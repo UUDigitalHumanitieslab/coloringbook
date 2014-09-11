@@ -27,6 +27,13 @@ from ..models import *
 from .utilities import csvdownload
 from .forms import Select2MultipleField
 
+__all__ = [
+    'FillView',
+    'SurveyView',
+    'PageView',
+    'DrawingView',
+    'SoundView'     ]
+
 file_path = op.join(op.dirname(__file__), '..', 'static')
 
 class ModelView (sqla.ModelView):
@@ -268,7 +275,7 @@ class PageView(ModelView):
         'name',
         ('drawing', Drawing.name),
         ('language', Language.name),
-        'sound',
+        ('sound', Sound.name),
     )
     column_auto_select_related = True
     column_searchable_list = ('name', 'text',)
@@ -349,6 +356,34 @@ def delete_drawing(mapper, connection, target):
     # Delete image
     try:
         os.remove(op.join(file_path, target.name + '.svg'))
+    except OSError:
+        # Don't care if it was not deleted because it does not exist
+        pass
+
+class SoundView(ModelView):
+    """ Custom admin table view of Drawing objects with associated Areas. """
+    
+    can_edit = False
+    form_columns = ('file',)
+    form_extra_fields = {
+        'file': form.FileUploadField(
+            'Sound',
+            base_path = file_path,
+            allowed_extensions = ('mp3',) ),
+    }
+    
+    def on_model_change (self, form, model, is_created = False):
+        if is_created:
+            model.name = op.splitext(form.file.data.filename)[0]
+        
+    def __init__ (self, session, **kwargs):
+        super(SoundView, self).__init__(Sound, session, name='Sounds', **kwargs)
+
+@listens_for(Sound, 'after_delete')
+def delete_sound(mapper, connection, target):
+    # Delete image
+    try:
+        os.remove(op.join(file_path, target.name + '.mp3'))
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
