@@ -268,7 +268,7 @@ class PageView(ModelView):
         'name',
         ('drawing', Drawing.name),
         ('language', Language.name),
-        'sound',
+        ('sound', Sound.name),
     )
     column_auto_select_related = True
     column_searchable_list = ('name', 'text',)
