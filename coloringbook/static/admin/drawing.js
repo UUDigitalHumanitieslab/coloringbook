@@ -7,7 +7,7 @@
     particular page in which the SVG image is used.
 */
 
-// (function ($) {
+(function ($) {
     'use strict';
 
     // Some quick tricks to simulate a set datastructure using plain objects.
@@ -249,4 +249,4 @@
         $('#cancel_area').click(cancel_panel);
         panel.draggable().hide();
     }
-// })(window.jQuery);
+})(window.jQuery);
