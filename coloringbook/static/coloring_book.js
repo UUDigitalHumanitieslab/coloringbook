@@ -174,7 +174,7 @@ load_image = function (url, data, name) {
 }
 
 add_coloring_book_events = function ( ) {
-	$('path[class="colorable"]').click(function (event) {
+	$('path[class~="colorable"]').click(function (event) {
 		event.preventDefault();  // helpful on touchscreen devices
 		launch_fill_command(this, color_chosen.data('color'));
 		$('#undo_redo').attr('value', 'Herstel');

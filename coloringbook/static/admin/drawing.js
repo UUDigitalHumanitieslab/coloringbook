@@ -232,7 +232,7 @@
             var url = '/static/' + hidden_fname.val() + '.svg';
             $.get(url, null, function (svg) {
                 place_svg(svg);
-                $('path[class="colorable"]').click(
+                $('path[class~="colorable"]').click(
                     display_panel(prefill_expectation)
                 );
                 for (var id in expectations) {
