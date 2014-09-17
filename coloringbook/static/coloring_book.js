@@ -28,7 +28,9 @@ lang_field = function (count) {
 button = function (color) {
 	return $('<span class="color_choice" style="background-color: ' +
 			color +
-			';"/>').data('color', color);
+			';" id="' +
+			color.substr(1, 3) +
+			'"/>').data('color', color);
 }
 
 init_application = function ( ) {

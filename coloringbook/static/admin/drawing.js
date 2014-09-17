@@ -89,7 +89,16 @@
     // Used as the prefill_func above for expectation editing.
     function prefill_expectation ( ) {
         var id = current_path.attr('id');
-        // and some more
+        if (id in expectations) {
+            $(expectations[id].color).click();
+            if (expectations[id].here) {
+                form_radio[0].click();
+            } else {
+                form_radio[1].click();
+            }
+        } else {
+            form_radio[0].click();
+        }
     }
     
     // Triggered when the #area_panel form is saved or cancelled.
