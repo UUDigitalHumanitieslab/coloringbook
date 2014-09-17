@@ -244,6 +244,5 @@
         }
         $('#cancel_area').click(cancel_panel);
         panel.draggable().hide();
-        $('.control-label').hide();  // cheap and easy solution
     }
 })(window.jQuery);
