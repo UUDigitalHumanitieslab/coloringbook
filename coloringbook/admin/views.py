@@ -9,7 +9,7 @@
     flask.ext.admin documentation for details.
 """
 
-import os, os.path as op
+import os, os.path as op, StringIO, csv
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
@@ -127,11 +127,19 @@ class FillView (ModelView):
     def export_raw (self):
         """ Render a CSV, similar in operation to BaseModelView.index_view. """
         
-        return self.render(
-            'admin/list.csv',
-            data = self.full_query().all(),
-            list_columns = self._list_columns,
-            get_value = self.get_list_value )
+        query = self.session.query(Survey.name, Page.name, Area.name, Subject.id, Fill.time, Color.code)
+        base_joins = set((Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color))
+        filter_joins, filters = self.filters_from_request()
+        all_joins = base_joins | filter_joins
+        for j in all_joins:
+            query = query.join(j)
+        for f, v in filters:
+            query = f.apply(query, v)
+        buffer = StringIO.StringIO(b'')
+        writer = csv.writer(buffer)
+        writer.writerow(self.column_list)
+        writer.writerows(query.all())
+        return buffer.getvalue()
     
     @expose('/csv/final')
     @csvdownload('filldata_final.csv')
@@ -188,14 +196,18 @@ class FillView (ModelView):
             list_columns = self._list_columns,
             get_value = self.get_list_value )
     
-    def apply_filters (self, query, filters):
-        # Will contain names of joined tables to avoid duplicate joins
+    def filters_from_request (self):
+        filters = self._get_list_extra_args()[4]
+        
+        # Will contain names of to-be-joined tables to avoid duplicate joins
         joins = set()
+        applicables = []
 
-        # Apply filters
+        # Determine filters
         if filters and self._filters:
             for idx, value in filters:
                 flt = self._filters[idx]
+                applicables.append((flt, value))
 
                 # Figure out joins
                 tbl = flt.column.table.name
@@ -204,16 +216,18 @@ class FillView (ModelView):
 
                 for table in join_tables:
                     if table.name not in joins:
-                        query = query.join(table)
                         joins.add(table.name)
-
-                # Apply filter
-                query = flt.apply(query, value)
+        
+        # Results
+        return joins, applicables
     
     def full_query (self):
         """ Get the un-paged query for the currently displayed data. """
         
         page, sort_idx, sort_desc, search, filters = self._get_list_extra_args()
+        
+        print filters
+        print self._filters
         
         # Map column index to column name
         sort_column = self._get_column_by_idx(sort_idx)
