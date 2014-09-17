@@ -14,7 +14,7 @@ import os, os.path as op
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
 from wtforms import fields
-from flask import request, url_for, redirect, flash
+from flask import request, url_for, redirect, flash, json
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
@@ -26,6 +26,13 @@ from ..models import *
 
 from .utilities import csvdownload
 from .forms import Select2MultipleField
+
+__all__ = [
+    'FillView',
+    'SurveyView',
+    'PageView',
+    'DrawingView',
+    'SoundView'     ]
 
 file_path = op.join(op.dirname(__file__), '..', 'static')
 
@@ -69,7 +76,7 @@ class ModelView (sqla.ModelView):
                     return redirect(request.url)
                 else:
                     return redirect(return_url)
-
+        
         if request.method == 'GET':
             self.on_form_prefill(form, id)
         
@@ -257,8 +264,79 @@ class SurveyView (ModelView):
     def __init__ (self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
 
+class PageView(ModelView):
+    """
+        Custom admin table view of Page objects with associated Expectations.
+    """
+    
+    edit_template = 'admin/augmented_edit.html'
+    column_list = 'name drawing language text sound'.split()
+    column_sortable_list = (
+        'name',
+        ('drawing', Drawing.name),
+        ('language', Language.name),
+        ('sound', Sound.name),
+    )
+    column_auto_select_related = True
+    column_searchable_list = ('name', 'text',)
+    column_default_sort = 'name'
+    column_display_all_relations = True
+    form_columns = 'name drawing language text sound expect_list fname'.split()
+    form_overrides = {
+        'text': fields.TextAreaField,
+    }
+    form_extra_fields = {
+        'expect_list': fields.HiddenField(),
+        'fname': fields.HiddenField(),
+    }
+    form_create_rules = form_columns[:5]  # up to sound
+    form_edit_rules = (
+        'name',
+        rules.Container('hide', rules.Field('drawing')),
+        'language',
+        'text',
+        'sound',
+        rules.Container('hide', rules.Field('fname')),
+        rules.Container('hide', rules.Field('expect_list')),
+        rules.Macro('drawing.edit_expectations'),
+    )
+    
+    def on_model_change (self, form, model, is_created = False):
+        if not is_created:
+            Expectation.query.filter_by(page = model).delete()
+            new_expectations = json.loads(form.expect_list.data)
+            for area_name, settings in new_expectations.iteritems():
+                color = Color.query.filter_by(code = settings['color']).one()
+                area = Area.query.filter_by(name = area_name).one()
+                model.expectations.append(Expectation(
+                    area = area,
+                    color = color,
+                    here = settings['here'] ))
+    
+    def on_form_prefill (self, form, id):
+        form.fname.process_data(
+            self.session.query(Drawing.name)
+            .join(Drawing.pages)
+            .filter(Page.id == id)
+            .one()[0]
+        )
+        form.expect_list.process_data(json.dumps(
+            {
+                area_name: {'color': color_code, 'here': expt.here}
+                for expt, area_name, color_code in (
+                    self.session.query(Expectation, Area.name, Color.code)
+                    .join(Expectation.area)
+                    .join(Expectation.color)
+                    .filter(Expectation.page_id == id)
+                    .all()
+                )
+            } ))
+    
+    def __init__ (self, session, **kwargs):
+        super(PageView, self).__init__(Page, session, name='Pages', **kwargs)
+
 class DrawingView(ModelView):
-    """ Custom admin table view of Drawing objects. """
+    """ Custom admin table view of Drawing objects with associated Areas. """
     
     edit_template = 'admin/augmented_edit.html'
     form_columns = ('file', 'area_list', 'svg_source')
@@ -274,7 +352,7 @@ class DrawingView(ModelView):
     form_edit_rules = (
         'area_list',
         'svg_source',
-        rules.Macro('drawing.edit'),
+        rules.Macro('drawing.edit_areas'),
     )
         
     def on_model_change (self, form, model, is_created = False):
@@ -320,6 +398,34 @@ def delete_drawing(mapper, connection, target):
     # Delete image
     try:
         os.remove(op.join(file_path, target.name + '.svg'))
+    except OSError:
+        # Don't care if it was not deleted because it does not exist
+        pass
+
+class SoundView(ModelView):
+    """ Custom admin table view of Drawing objects with associated Areas. """
+    
+    can_edit = False
+    form_columns = ('file',)
+    form_extra_fields = {
+        'file': form.FileUploadField(
+            'Sound',
+            base_path = file_path,
+            allowed_extensions = ('mp3',) ),
+    }
+    
+    def on_model_change (self, form, model, is_created = False):
+        if is_created:
+            model.name = op.splitext(form.file.data.filename)[0]
+        
+    def __init__ (self, session, **kwargs):
+        super(SoundView, self).__init__(Sound, session, name='Sounds', **kwargs)
+
+@listens_for(Sound, 'after_delete')
+def delete_sound(mapper, connection, target):
+    # Delete image
+    try:
+        os.remove(op.join(file_path, target.name + '.mp3'))
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass

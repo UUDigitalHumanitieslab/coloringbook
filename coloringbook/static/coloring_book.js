@@ -28,7 +28,9 @@ lang_field = function (count) {
 button = function (color) {
 	return $('<span class="color_choice" style="background-color: ' +
 			color +
-			';"/>').data('color', color);
+			';" id="' +
+			color.substr(1, 3) +
+			'"/>').data('color', color);
 }
 
 init_application = function ( ) {
@@ -135,13 +137,13 @@ set_image_dimensions = function ( ) {
 	image.css('max-width', win.width() - 2 * padding + 'px');
 }
 
-create_swatches = function (colors) {
+insert_swatches = function (colors) {
 	var swatches = $('#swatches');
 	swatches.empty();
 	for (index in colors) {
 		swatches.append(button(colors[index]));
 	}
-	$(button('#fff')).appendTo(swatches).append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
+	$(button('#fff')).appendTo(swatches);
 	color_chosen = $('.color_choice').first();
 	$('.color_choice').click(function (event) {
 		color_chosen.css('border-color', '#fff');
@@ -149,6 +151,11 @@ create_swatches = function (colors) {
 		color_chosen.css('border-color', '#000');
 	});
 	color_chosen.click();
+}
+
+create_swatches = function (colors) {
+    insert_swatches(colors);
+    $('.color_choice').last().append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 }
 
 load_image = function (url, data, name) {
