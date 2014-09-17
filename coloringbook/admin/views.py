@@ -298,7 +298,16 @@ class PageView(ModelView):
     )
     
     def on_model_change (self, form, model, is_created = False):
-        pass
+        if not is_created:
+            Expectation.query.filter_by(page = model).delete()
+            new_expectations = json.loads(form.expect_list.data)
+            for area_name, settings in new_expectations.iteritems():
+                color = Color.query.filter_by(code = settings['color']).one()
+                area = Area.query.filter_by(name = area_name).one()
+                model.expectations.append(Expectation(
+                    area = area,
+                    color = color,
+                    here = settings['here'] ))
     
     def on_form_prefill (self, form, id):
         form.fname.process_data(
