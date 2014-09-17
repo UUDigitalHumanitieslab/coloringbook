@@ -14,7 +14,7 @@ import os, os.path as op
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
 from wtforms import fields
-from flask import request, url_for, redirect, flash
+from flask import request, url_for, redirect, flash, json
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
@@ -307,6 +307,17 @@ class PageView(ModelView):
             .filter(Page.id == id)
             .one()[0]
         )
+        form.expect_list.process_data(json.dumps(
+            {
+                area_name: {'color': color_code, 'here': expt.here}
+                for expt, area_name, color_code in (
+                    self.session.query(Expectation, Area.name, Color.code)
+                    .join(Expectation.area)
+                    .join(Expectation.color)
+                    .filter(Expectation.page_id == id)
+                    .all()
+                )
+            } ))
     
     def __init__ (self, session, **kwargs):
         super(PageView, self).__init__(Page, session, name='Pages', **kwargs)

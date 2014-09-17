@@ -234,7 +234,7 @@
             insert_swatches(colors);
             var expectations = JSON.parse(hidden_table.val());
             $('#save_area').click(save_expectation);
-            for (id in expectations) {
+            for (var id in expectations) {
                 render_expectation(
                     $('#' + id),
                     expectations[id].color,
