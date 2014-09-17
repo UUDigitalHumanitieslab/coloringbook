@@ -7,7 +7,7 @@
     particular page in which the SVG image is used.
 */
 
-(function ($) {
+// (function ($) {
     'use strict';
 
     // Some quick tricks to simulate a set datastructure using plain objects.
@@ -149,7 +149,7 @@
         render_expectation(current_path, color, here);
         expectations[id] = {'color': color, 'here': here};
         close_panel();
-        hidden_table.val(expectations);
+        hidden_table.val(JSON.stringify(expectations));
         enable_confirmation_dialog();
     }
     
@@ -159,7 +159,7 @@
         render_expectation(current_path);
         delete expectations[id];
         close_panel();
-        hidden_table.val(expectations);
+        hidden_table.val(JSON.stringify(expectations));
         enable_confirmation_dialog();
     }
     
@@ -218,25 +218,25 @@
                 }
             });
         } else if (hidden_table.length) {
+            var expectations = JSON.parse(hidden_table.val());
             var url = '/static/' + hidden_fname.val() + '.svg';
             $.get(url, null, function (svg) {
                 place_svg(svg);
                 $('path[class="colorable"]').click(
                     display_panel(prefill_expectation)
                 );
+                for (var id in expectations) {
+                    render_expectation(
+                        $('#' + id),
+                        expectations[id].color,
+                        expectations[id].here
+                    );
+                }
             }, 'html');
             insert_swatches(colors);
-            var expectations = JSON.parse(hidden_table.val());
             $('#save_area').click(save_expectation);
-            for (var id in expectations) {
-                render_expectation(
-                    $('#' + id),
-                    expectations[id].color,
-                    expectations[id].here
-                );
-            }
         }
         $('#cancel_area').click(cancel_panel);
         panel.draggable().hide();
     }
-})(window.jQuery);
+// })(window.jQuery);
