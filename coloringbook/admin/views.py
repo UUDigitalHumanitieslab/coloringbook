@@ -188,6 +188,28 @@ class FillView (ModelView):
             list_columns = self._list_columns,
             get_value = self.get_list_value )
     
+    def apply_filters (self, query, filters):
+        # Will contain names of joined tables to avoid duplicate joins
+        joins = set()
+
+        # Apply filters
+        if filters and self._filters:
+            for idx, value in filters:
+                flt = self._filters[idx]
+
+                # Figure out joins
+                tbl = flt.column.table.name
+
+                join_tables = self._filter_joins.get(tbl, [])
+
+                for table in join_tables:
+                    if table.name not in joins:
+                        query = query.join(table)
+                        joins.add(table.name)
+
+                # Apply filter
+                query = flt.apply(query, value)
+    
     def full_query (self):
         """ Get the un-paged query for the currently displayed data. """
         
