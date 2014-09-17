@@ -231,8 +231,8 @@
                     display_panel(prefill_expectation)
                 );
             }, 'html');
+            insert_swatches(colors);
             var expectations = JSON.parse(hidden_table.val());
-            insert_colors(colors);
             $('#save_area').click(save_expectation);
             for (id in expectations) {
                 render_expectation(

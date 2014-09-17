@@ -141,7 +141,8 @@ insert_swatches = function (colors) {
 	for (index in colors) {
 		swatches.append(button(colors[index]));
 	}
-	$(button('#fff')).appendTo(swatches).append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
+	$(button('#fff')).appendTo(swatches);
+	color_chosen = $('.color_choice').first();
 	$('.color_choice').click(function (event) {
 		color_chosen.css('border-color', '#fff');
 		color_chosen = $(this);
@@ -151,7 +152,7 @@ insert_swatches = function (colors) {
 
 create_swatches = function (colors) {
     insert_swatches(colors);
-	color_chosen = $('.color_choice').first();
+    $('.color_choice').last().append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 	color_chosen.click();
 }
 
