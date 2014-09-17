@@ -350,8 +350,8 @@ class DrawingView(ModelView):
     }
     form_create_rules = ('file',)
     form_edit_rules = (
-        'area_list',
-        'svg_source',
+        rules.Container('hide', rules.Field('area_list')),
+        rules.Container('hide', rules.Field('svg_source')),
         rules.Macro('drawing.edit_areas'),
     )
         
