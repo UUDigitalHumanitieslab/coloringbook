@@ -199,7 +199,7 @@
     if (image) {
         // Initialize things and attach events to stuff.
         
-        if (hidden_list) {
+        if (hidden_list.length) {
             place_svg(hidden_image.val());
             $('path').click(display_panel(prefill_area));
             var areas = {};
@@ -223,7 +223,7 @@
                     form_namefield.prop('disabled', true);
                 }
             });
-        } else if (hidden_table) {
+        } else if (hidden_table.length) {
             var url = '/static/' + hidden_fname.val() + '.svg';
             $.get(url, null, function (svg) {
                 place_svg(svg);
