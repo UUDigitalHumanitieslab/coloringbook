@@ -282,6 +282,9 @@ class PageView(ModelView):
     column_default_sort = 'name'
     column_display_all_relations = True
     form_columns = 'name drawing language text sound expect_list fname'.split()
+    form_overrides = {
+        'text': fields.TextAreaField,
+    }
     form_extra_fields = {
         'expect_list': fields.HiddenField(),
         'fname': fields.HiddenField(),
