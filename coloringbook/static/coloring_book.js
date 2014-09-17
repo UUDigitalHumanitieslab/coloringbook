@@ -148,12 +148,12 @@ insert_swatches = function (colors) {
 		color_chosen = $(this);
 		color_chosen.css('border-color', '#000');
 	});
+	color_chosen.click();
 }
 
 create_swatches = function (colors) {
     insert_swatches(colors);
     $('.color_choice').last().append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
-	color_chosen.click();
 }
 
 load_image = function (url, data, name) {

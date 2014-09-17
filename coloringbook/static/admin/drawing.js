@@ -235,6 +235,7 @@
             }, 'html');
             insert_swatches(colors);
             $('#save_area').click(save_expectation);
+            $('#remove_expectation').click(remove_expectation);
         }
         $('#cancel_area').click(cancel_panel);
         panel.draggable().hide();
