@@ -169,17 +169,11 @@
     function render_expectation (path, color, here) {
         if (! color) {
             // This might be risky.
-            path.attr('fill', 'white').removeAttr('stroke');
+            path.attr({'fill': 'white', 'fill-opacity': 1});
         } else if (here) {
-            path.attr('fill', color).removeAttr('stroke');
+            path.attr({'fill': color, 'fill-opacity': 1});
         } else {
-            path.attr({
-                'stroke': color,
-                'stroke-width': '10px',
-                'stroke-dasharray': '1 2',
-                'stroke-linecap': 'butt',
-                'fill': 'white'
-            });
+            path.attr({'fill': color, 'fill-opacity': 0.5});
         }    
     }
     
