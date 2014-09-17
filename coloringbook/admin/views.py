@@ -76,7 +76,7 @@ class ModelView (sqla.ModelView):
                     return redirect(request.url)
                 else:
                     return redirect(return_url)
-
+        
         if request.method == 'GET':
             self.on_form_prefill(form, id)
         
@@ -289,6 +289,7 @@ class PageView(ModelView):
     form_create_rules = form_columns[:5]  # up to sound
     form_edit_rules = (
         'name',
+        'drawing',
         'language',
         'text',
         'sound',
