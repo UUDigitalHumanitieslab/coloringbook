@@ -89,6 +89,7 @@
     // Used as the prefill_func above for expectation editing.
     function prefill_expectation ( ) {
         var id = current_path.attr('id');
+        form_namefield.text(id);
         if (id in expectations) {
             $(expectations[id].color).click();
             if (expectations[id].here) {
