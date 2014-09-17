@@ -289,12 +289,12 @@ class PageView(ModelView):
     form_create_rules = form_columns[:5]  # up to sound
     form_edit_rules = (
         'name',
-        'drawing',
+        rules.Container('hide', rules.Field('drawing')),
         'language',
         'text',
         'sound',
-        'fname',
-        'expect_list',
+        rules.Container('hide', rules.Field('fname')),
+        rules.Container('hide', rules.Field('expect_list')),
         rules.Macro('drawing.edit_expectations'),
     )
     
