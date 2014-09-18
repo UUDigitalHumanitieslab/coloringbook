@@ -144,7 +144,7 @@ class FillView (ModelView):
     @csvdownload
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
-        fill_bis = db.aliased(Fill)
+        color_bis = db.aliased(Color)
         subquery = (
             self.session.query(
                 Fill.survey_id.label('survey_id'),
@@ -168,8 +168,25 @@ class FillView (ModelView):
                 Subject.id,
                 subquery.c.time,
                 subquery.c.clicks,
-                Color.code )
+                Color.code,
+                color_bis.code,
+                Expectation.here,
+                db.case(
+                    [
+                        (
+                            Color.id == Expectation.color_id,
+                            db.case(
+                                [(Expectation.here, 'expected')],
+                                else_ = 'misplaced' ),
+                        ),
+                        (Expectation.color_id == None, 'unspecified'),
+                        (Expectation.here, 'miscolored'),
+                    ],
+                    else_ = 'unspecified' ) )
             .select_from(subquery)
+            .outerjoin(Expectation, db.and_(
+                subquery.c.page_id == Expectation.page_id,
+                subquery.c.area_id == Expectation.area_id ))
             .join(Fill, db.and_(
                 subquery.c.survey_id == Fill.survey_id,
                 subquery.c.page_id == Fill.page_id,
@@ -177,8 +194,11 @@ class FillView (ModelView):
                 subquery.c.subject_id == Fill.subject_id,
                 subquery.c.time == Fill.time ))
             .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
+            .join(color_bis, color_bis.id == Expectation.color_id)
         )
-        headers = 'survey page area subject time clicks color'.split()
+        headers = [ 'survey', 'page', 'area', 'subject', 'time', 'clicks',
+                    'color', 'expected', 'here', 'category',
+                    ]
         return query, headers, 'filldata_final'
     
 class SurveyView (ModelView):
