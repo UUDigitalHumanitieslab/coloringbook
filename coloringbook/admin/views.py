@@ -9,7 +9,7 @@
     flask.ext.admin documentation for details.
 """
 
-import os, os.path as op, StringIO, csv
+import os, os.path as op, StringIO, csv, datetime as dt
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
@@ -145,7 +145,9 @@ class FillView (ModelView):
         writer = csv.writer(buffer)
         writer.writerow(self.column_list)
         writer.writerows(query.all())
-        return buffer.getvalue(), 'filldata_raw_{}.csv'.format(request.query_string)
+        return buffer.getvalue(), '{}_filldata_raw_{}.csv'.format(
+            dt.datetime.utcnow().strftime('%y%m%d%H%M'),
+            request.query_string )
     
     @expose('/csv/final')
     @csvdownload
