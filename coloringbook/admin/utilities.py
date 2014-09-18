@@ -7,7 +7,7 @@
 
 from flask import make_response
 
-def csvdownload (filename):
+def csvdownload (view):
     r"""
         View decorator adding suitable response headers for CSV downloads.
         
@@ -17,9 +17,9 @@ def csvdownload (filename):
         >>> site = t.get_fixture_app()
         >>> # using the decorator
         >>> @site.route('/doctest')
-        ... @csvdownload('doctest.csv')
+        ... @csvdownload
         ... def simpletest (self):
-        ...     return 'name,phone\nAlice,1234567'
+        ...     return 'name,phone\nAlice,1234567', 'doctest.csv'
         >>> # inspecting what the decorated view function does
         >>> with site.app_context():
         ...     testresponse = simpletest(0)
@@ -33,13 +33,11 @@ def csvdownload (filename):
         u'attachment; filename="doctest.csv"'
     """
 
-    def decorate (view):
-        def wrap (self):
-            response = make_response(view(self))
-            response.headers['Cache-Control'] = 'max-age=600'
-            response.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
-            response.headers['Content-Type'] = 'text/csv; charset=utf-8'
-            return response
-        return wrap
-
-    return decorate
+    def wrap (self):
+        data, filename = view(self)
+        response = make_response(data)
+        response.headers['Cache-Control'] = 'max-age=600'
+        response.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
+        response.headers['Content-Type'] = 'text/csv; charset=utf-8'
+        return response
+    return wrap

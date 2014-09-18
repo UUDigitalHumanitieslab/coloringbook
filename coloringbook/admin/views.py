@@ -123,7 +123,7 @@ class FillView (ModelView):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
     
     @expose('/csv/raw')
-    @csvdownload('filldata_raw.csv')
+    @csvdownload
     def export_raw (self):
         """ Render a CSV, similar in operation to BaseModelView.index_view. """
         
@@ -145,10 +145,10 @@ class FillView (ModelView):
         writer = csv.writer(buffer)
         writer.writerow(self.column_list)
         writer.writerows(query.all())
-        return buffer.getvalue()
+        return buffer.getvalue(), 'filldata_raw_{}.csv'.format(request.query_string)
     
     @expose('/csv/final')
-    @csvdownload('filldata_final.csv')
+    @csvdownload
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
         pass
