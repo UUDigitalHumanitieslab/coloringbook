@@ -194,7 +194,7 @@ class FillView (ModelView):
                 subquery.c.subject_id == Fill.subject_id,
                 subquery.c.time == Fill.time ))
             .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
-            .join(color_bis, color_bis.id == Expectation.color_id)
+            .outerjoin(color_bis, color_bis.id == Expectation.color_id)
         )
         headers = [ 'survey', 'page', 'area', 'subject', 'time', 'clicks',
                     'color', 'expected', 'here', 'category',
