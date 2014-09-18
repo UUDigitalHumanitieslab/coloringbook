@@ -151,124 +151,22 @@ class FillView (ModelView):
     @csvdownload('filldata_final.csv')
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
-        
-        full = self.model
-        fnl = self.get_final_q().subquery('final')
-        
-        print self.full_query().statement
-
-        merged = (
-            self.session.query(full)
-            .join(
-                fnl,
-                db.and_(
-                    full.survey_id == fnl.c.survey_id,
-                    full.page_id == fnl.c.page_id,
-                    full.area_id == fnl.c.area_id,
-                    full.subject_id == fnl.c.subject_id,
-                    full.time == fnl.c.time ) )
-        )
-        
-        print '-----'
-        print merged.statement
-        
-#         survey_1 = db.aliased(Survey, name = 'survey_1')
-#         page_1 = db.aliased(Page, name = 'page_1')
-#         area_1 = db.aliased(Area, name = 'area_1')
-#         subject_1 = db.aliased(Subject, name = 'subject_1')
-#         color_1 = db.aliased(Color, name = 'color_1')
-#         
-#         next_step = (
-#             merged.outerjoin(survey_1, page_1, area_1, subject_1, color_1)
-#             .add_entity(survey_1)
-#             .add_entity(page_1)
-#             .add_entity(area_1)
-#             .add_entity(subject_1)
-#             .add_entity(color_1)
-#         )
-        
-        next_step = (
-            self.full_query()
-            .reset_joinpoint()
-            .select_entity_from(merged.subquery('fill'))
-        )
-        
-        print '-----'
-        print next_step.statement
-        
-        return self.render(
-            'admin/list.csv',
-            data = next_step.all(),
-            list_columns = self._list_columns,
-            get_value = self.get_list_value )
+        pass
     
     def filters_from_request (self):
         filters = self._get_list_extra_args()[4]
         
-        # Will contain names of to-be-joined tables to avoid duplicate joins
-        joins = set()
         applicables = []
-        tables = []
 
         # Determine filters
         if filters and self._filters:
             for idx, value in filters:
                 flt = self._filters[idx]
                 applicables.append((flt, value))
-
-                # Figure out joins
-                tbl = flt.column.table.name
-
-                join_tables = self._filter_joins.get(tbl, [])
-
-                for table in join_tables:
-                    if table.name not in joins:
-                        tables.append(table)
         
         # Results
         return applicables
     
-    def full_query (self):
-        """ Get the un-paged query for the currently displayed data. """
-        
-        page, sort_idx, sort_desc, search, filters = self._get_list_extra_args()
-        
-        print filters
-        print self._filters
-        
-        # Map column index to column name
-        sort_column = self._get_column_by_idx(sort_idx)
-        if sort_column is not None:
-            sort_column = sort_column[0]
-
-        # Get count and query
-        count, query = self.get_list(
-            None,
-            sort_column,
-            sort_desc,
-            search,
-            filters,
-            False )
-        return query.limit(None)
-    
-    def get_final_q (self):
-        """ Get the query for the final Color of each Area. """
-        
-        return (
-            self.session
-            .query(
-                self.model.survey_id,
-                self.model.page_id,
-                self.model.area_id,
-                self.model.subject_id,
-                db.func.max(self.model.time).label('time') )
-            .group_by(
-                self.model.survey_id,
-                self.model.page_id,
-                self.model.area_id,
-                self.model.subject_id )
-        )
-
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
     
