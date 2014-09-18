@@ -127,12 +127,18 @@ class FillView (ModelView):
     def export_raw (self):
         """ Render a CSV, similar in operation to BaseModelView.index_view. """
         
-        query = self.session.query(Survey.name, Page.name, Area.name, Subject.id, Fill.time, Color.code)
-        base_joins = set((Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color))
-        filter_joins, filters = self.filters_from_request()
-        all_joins = base_joins | filter_joins
-        for j in all_joins:
-            query = query.join(j)
+        query = (
+            self.session.query(
+                Survey.name,
+                Page.name,
+                Area.name,
+                Subject.id,
+                Fill.time,
+                Color.code )
+            .select_from(Fill)
+            .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
+        )
+        filters = self.filters_from_request()
         for f, v in filters:
             query = f.apply(query, v)
         buffer = StringIO.StringIO(b'')
@@ -202,6 +208,7 @@ class FillView (ModelView):
         # Will contain names of to-be-joined tables to avoid duplicate joins
         joins = set()
         applicables = []
+        tables = []
 
         # Determine filters
         if filters and self._filters:
@@ -216,10 +223,10 @@ class FillView (ModelView):
 
                 for table in join_tables:
                     if table.name not in joins:
-                        joins.add(table.name)
+                        tables.append(table)
         
         # Results
-        return joins, applicables
+        return applicables
     
     def full_query (self):
         """ Get the un-paged query for the currently displayed data. """
