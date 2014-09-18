@@ -187,6 +187,57 @@ class FillView (ModelView):
                     ]
         return query, headers, 'filldata_final'
     
+    @expose('/csv/comparison')
+    @csvdownload
+    def export_comparison (self):
+        """ Render a CSV with expected colors compared to actual final data. """
+        color_bis = db.aliased(Color)
+        subquery = self.get_core_query()
+        query = (
+            self.session.query(
+                Survey.name,
+                Page.name,
+                Area.name,
+                Subject.id,
+                subquery.c.time,
+                subquery.c.clicks,
+                color_bis.name,
+                Expectation.here,
+                Color.name,
+                db.case(
+                    [
+                        (
+                            Color.id == Expectation.color_id,
+                            db.case(
+                                [(Expectation.here, 'expected')],
+                                else_ = 'misplaced' ),
+                        ),
+                        (Color.id == None, 'no_data'),
+                        (Expectation.here, 'miscolored'),
+                    ],
+                    else_ = 'unspecified' ) )
+            .select_from(Expectation)
+            .join(color_bis, color_bis.id == Expectation.color_id)
+            .join(Expectation.page, Expectation.area)
+            .outerjoin(subquery, db.and_(
+                subquery.c.page_id == Expectation.page_id,
+                subquery.c.area_id == Expectation.area_id ))
+            .outerjoin(Fill, db.and_(
+                subquery.c.survey_id == Fill.survey_id,
+                subquery.c.page_id == Fill.page_id,
+                subquery.c.area_id == Fill.area_id,
+                subquery.c.subject_id == Fill.subject_id,
+                subquery.c.time == Fill.time ))
+            .outerjoin(
+                Fill.survey,
+                Fill.subject,
+                Fill.color )
+        )
+        headers = [ 'survey', 'page', 'area', 'subject', 'time', 'clicks',
+                    'expected', 'here', 'color', 'category',
+                    ]
+        return query, headers, 'filldata_comparison'
+    
     def get_core_query (self):
         return (
             self.session.query(
