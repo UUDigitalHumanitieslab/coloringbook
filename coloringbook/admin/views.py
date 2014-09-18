@@ -114,7 +114,7 @@ class FillView (ModelView):
         'time',
         ('color', Color.code),
     )
-    column_filters = column_list
+    column_filters = column_list[:4]
 #    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
     column_display_all_relations = True
