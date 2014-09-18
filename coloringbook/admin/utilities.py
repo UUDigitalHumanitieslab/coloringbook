@@ -45,7 +45,7 @@ def csvdownload (view):
             for f, v in filters:
                 query = f.apply(query, v)
         buffer = StringIO.StringIO(b'')
-        writer = csv.writer(buffer)
+        writer = csv.writer(buffer, delimiter = ';')
         writer.writerow(headers)
         writer.writerows(query.all())
         filename = '{}_{}_{}.csv'.format(
