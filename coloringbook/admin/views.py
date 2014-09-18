@@ -134,7 +134,7 @@ class FillView (ModelView):
                 Area.name,
                 Subject.id,
                 Fill.time,
-                Color.code )
+                Color.name )
             .select_from(Fill)
             .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
         )
@@ -168,8 +168,8 @@ class FillView (ModelView):
                 Subject.id,
                 subquery.c.time,
                 subquery.c.clicks,
-                Color.code,
-                color_bis.code,
+                Color.name,
+                color_bis.name,
                 Expectation.here,
                 db.case(
                     [
