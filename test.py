@@ -19,7 +19,7 @@ def test_all ( ):
     testmod(coloringbook.admin)
     testmod(coloringbook.admin.utilities)
     testmod(coloringbook.admin.forms)
-    testmod(coloringbook.admin.views)
+    testmod(coloringbook.admin.views, optionflags = ELLIPSIS)
 
 if __name__ == '__main__':
     test_all()

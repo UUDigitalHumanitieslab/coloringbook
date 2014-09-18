@@ -154,17 +154,28 @@ class FillView (ModelView):
         pass
     
     def filters_from_request (self):
-        filters = self._get_list_extra_args()[4]
+        """
+            Parse the request arguments and return flask-admin Filter objects.
+            
+            This is an extract from flask-admin sqla.ModelView.get_list.
+            Example of usage:
+            
+            >>> import coloringbook as cb, coloringbook.testing as t
+            >>> testapp = t.get_fixture_app()
+            >>> s = cb.models.db.session
+            >>> with testapp.test_request_context('?flt1_22=rode'):
+            ...     cb.admin.views.FillView(s).filters_from_request()
+            [(<flask_admin.contrib.sqla.filters.FilterLike object at 0x...>, u'rode')]
+        """
         
+        filters = self._get_list_extra_args()[4]
         applicables = []
 
-        # Determine filters
         if filters and self._filters:
             for idx, value in filters:
                 flt = self._filters[idx]
                 applicables.append((flt, value))
         
-        # Results
         return applicables
     
 class SurveyView (ModelView):
