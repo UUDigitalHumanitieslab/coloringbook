@@ -24,7 +24,7 @@ from flask.ext.admin.babel import gettext
 
 from ..models import *
 
-from .utilities import csvdownload
+from .utilities import csvdownload, filters_from_request
 from .forms import Select2MultipleField
 
 __all__ = [
@@ -138,7 +138,7 @@ class FillView (ModelView):
             .select_from(Fill)
             .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
         )
-        filters = self.filters_from_request()
+        filters = filters_from_request(self)
         for f, v in filters:
             query = f.apply(query, v)
         buffer = StringIO.StringIO(b'')
@@ -174,31 +174,6 @@ class FillView (ModelView):
                 fill_bis.time == Fill.time ))
             .join(Color, Color.id == fill_bis.color_id)
         )
-    
-    def filters_from_request (self):
-        """
-            Parse the request arguments and return flask-admin Filter objects.
-            
-            This is an extract from flask-admin sqla.ModelView.get_list.
-            Example of usage:
-            
-            >>> import coloringbook as cb, coloringbook.testing as t
-            >>> testapp = t.get_fixture_app()
-            >>> s = cb.models.db.session
-            >>> with testapp.test_request_context('?flt1_22=rode'):
-            ...     cb.admin.views.FillView(s).filters_from_request()
-            [(<flask_admin.contrib.sqla.filters.FilterLike object at 0x...>, u'rode')]
-        """
-        
-        filters = self._get_list_extra_args()[4]
-        applicables = []
-
-        if filters and self._filters:
-            for idx, value in filters:
-                flt = self._filters[idx]
-                applicables.append((flt, value))
-        
-        return applicables
     
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
