@@ -31,7 +31,7 @@ def csvdownload (view):
         >>> testresponse
         <Response 22 bytes [200 OK]>
         >>> testresponse.get_data()
-        'code,name\r\n#888,grey\r\n'
+        'code;name\r\n#888;grey\r\n'
         >>> testresponse.mimetype
         u'text/csv'
         >>> testresponse.headers['Content-Disposition']
