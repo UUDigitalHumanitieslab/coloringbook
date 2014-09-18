@@ -145,26 +145,41 @@ class FillView (ModelView):
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
         fill_bis = db.aliased(Fill)
+        subquery = (
+            self.session.query(
+                Fill.survey_id.label('survey_id'),
+                Fill.page_id.label('page_id'),
+                Fill.area_id.label('area_id'),
+                Fill.subject_id.label('subject_id'),
+                db.func.max(Fill.time).label('time'),
+                db.func.count().label('clicks') )
+            .group_by(
+                Fill.survey_id,
+                Fill.page_id,
+                Fill.area_id,
+                Fill.subject_id )
+            .subquery('sub')
+        )
         query = (
             self.session.query(
                 Survey.name,
                 Page.name,
                 Area.name,
                 Subject.id,
-                db.func.max(Fill.time).label('time'),
-                db.func.count().label('clicks'),
+                subquery.c.time,
+                subquery.c.clicks,
                 Color.code )
-            .select_from(Fill)
-            .join(Fill.survey, Fill.page, Fill.area, Fill.subject)
-            .group_by(Survey.id, Page.id, Area.id, Subject.id)
-            .join(fill_bis, db.and_(
-                fill_bis.survey_id == Fill.survey_id,
-                fill_bis.page_id == Fill.page_id,
-                fill_bis.area_id == Fill.area_id,
-                fill_bis.subject_id == Fill.subject_id,
-                fill_bis.time == Fill.time ))
-            .join(Color, Color.id == fill_bis.color_id)
+            .select_from(subquery)
+            .join(Fill, db.and_(
+                subquery.c.survey_id == Fill.survey_id,
+                subquery.c.page_id == Fill.page_id,
+                subquery.c.area_id == Fill.area_id,
+                subquery.c.subject_id == Fill.subject_id,
+                subquery.c.time == Fill.time ))
+            .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
         )
+        headers = 'survey page area subject time clicks color'.split()
+        return query, headers, 'filldata_final'
     
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
