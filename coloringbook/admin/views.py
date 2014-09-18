@@ -145,21 +145,7 @@ class FillView (ModelView):
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
         color_bis = db.aliased(Color)
-        subquery = (
-            self.session.query(
-                Fill.survey_id.label('survey_id'),
-                Fill.page_id.label('page_id'),
-                Fill.area_id.label('area_id'),
-                Fill.subject_id.label('subject_id'),
-                db.func.max(Fill.time).label('time'),
-                db.func.count().label('clicks') )
-            .group_by(
-                Fill.survey_id,
-                Fill.page_id,
-                Fill.area_id,
-                Fill.subject_id )
-            .subquery('sub')
-        )
+        subquery = self.get_core_query()
         query = (
             self.session.query(
                 Survey.name,
@@ -200,6 +186,23 @@ class FillView (ModelView):
                     'color', 'expected', 'here', 'category',
                     ]
         return query, headers, 'filldata_final'
+    
+    def get_core_query (self):
+        return (
+            self.session.query(
+                Fill.survey_id.label('survey_id'),
+                Fill.page_id.label('page_id'),
+                Fill.area_id.label('area_id'),
+                Fill.subject_id.label('subject_id'),
+                db.func.max(Fill.time).label('time'),
+                db.func.count().label('clicks') )
+            .group_by(
+                Fill.survey_id,
+                Fill.page_id,
+                Fill.area_id,
+                Fill.subject_id )
+            .subquery('sub')
+        )
     
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
