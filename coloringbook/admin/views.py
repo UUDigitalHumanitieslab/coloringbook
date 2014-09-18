@@ -165,7 +165,6 @@ class FillView (ModelView):
                                 [(Expectation.here, 'expected')],
                                 else_ = 'misplaced' ),
                         ),
-                        (Expectation.color_id == None, 'unspecified'),
                         (Expectation.here, 'miscolored'),
                     ],
                     else_ = 'unspecified' ) )
