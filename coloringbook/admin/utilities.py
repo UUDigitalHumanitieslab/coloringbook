@@ -15,31 +15,35 @@ def csvdownload (view):
         
         Use this inside a view decorator. Example:
         
-        >>> import coloringbook.testing as t
+        >>> import coloringbook.testing as t, coloringbook.models as m
         >>> site = t.get_fixture_app()
         >>> # using the decorator
         >>> @site.route('/doctest')
         ... @csvdownload
         ... def simpletest (self):
-        ...     return 'name,phone\nAlice,1234567', 'doctest.csv'
+        ...     m.db.session.add(m.Color(code='#888', name='grey'))
+        ...     m.db.session.commit()
+        ...     query = m.db.session.query(m.Color.code, m.Color.name)
+        ...     return query, ['code', 'name'], 'doctest'
         >>> # inspecting what the decorated view function does
         >>> with site.app_context():
         ...     testresponse = simpletest(0)
         >>> testresponse
-        <Response 24 bytes [200 OK]>
+        <Response 22 bytes [200 OK]>
         >>> testresponse.get_data()
-        'name,phone\nAlice,1234567'
+        'code,name\r\n#888,grey\r\n'
         >>> testresponse.mimetype
         u'text/csv'
         >>> testresponse.headers['Content-Disposition']
-        u'attachment; filename="doctest.csv"'
+        u'attachment; filename="..._doctest_.csv"'
     """
 
-    def wrap (self):
+    def wrap (self = None):
         query, headers, filename_core = view(self)
-        filters = filters_from_request(self)
-        for f, v in filters:
-            query = f.apply(query, v)
+        if self:
+            filters = filters_from_request(self)
+            for f, v in filters:
+                query = f.apply(query, v)
         buffer = StringIO.StringIO(b'')
         writer = csv.writer(buffer)
         writer.writerow(headers)
@@ -47,7 +51,7 @@ def csvdownload (view):
         filename = '{}_{}_{}.csv'.format(
             dt.datetime.utcnow().strftime('%y%m%d%H%M'),
             filename_core,
-            request.query_string )
+            request.query_string if self else '' )
         response = make_response(buffer.getvalue())
         response.headers['Cache-Control'] = 'max-age=600'
         response.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
@@ -63,6 +67,7 @@ def filters_from_request (self):
         Example of usage:
         
         >>> import coloringbook as cb, coloringbook.testing as t
+        >>> from coloringbook.admin.views import FillView
         >>> testapp = t.get_fixture_app()
         >>> s = cb.models.db.session
         >>> with testapp.test_request_context('?flt1_22=rode'):
