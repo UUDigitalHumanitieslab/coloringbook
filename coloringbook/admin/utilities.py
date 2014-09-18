@@ -5,7 +5,9 @@
     Helper functions for various purposes.
 """
 
-from flask import make_response
+import StringIO, csv, datetime as dt
+
+from flask import make_response, request
 
 def csvdownload (view):
     r"""
@@ -34,8 +36,19 @@ def csvdownload (view):
     """
 
     def wrap (self):
-        data, filename = view(self)
-        response = make_response(data)
+        query, headers, filename_core = view(self)
+        filters = filters_from_request(self)
+        for f, v in filters:
+            query = f.apply(query, v)
+        buffer = StringIO.StringIO(b'')
+        writer = csv.writer(buffer)
+        writer.writerow(headers)
+        writer.writerows(query.all())
+        filename = '{}_{}_{}.csv'.format(
+            dt.datetime.utcnow().strftime('%y%m%d%H%M'),
+            filename_core,
+            request.query_string )
+        response = make_response(buffer.getvalue())
         response.headers['Cache-Control'] = 'max-age=600'
         response.headers['Content-Disposition'] = 'attachment; filename="{}"'.format(filename)
         response.headers['Content-Type'] = 'text/csv; charset=utf-8'

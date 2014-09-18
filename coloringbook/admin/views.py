@@ -9,7 +9,7 @@
     flask.ext.admin documentation for details.
 """
 
-import os, os.path as op, StringIO, csv, datetime as dt
+import os, os.path as op
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
@@ -24,7 +24,7 @@ from flask.ext.admin.babel import gettext
 
 from ..models import *
 
-from .utilities import csvdownload, filters_from_request
+from .utilities import csvdownload
 from .forms import Select2MultipleField
 
 __all__ = [
@@ -138,16 +138,7 @@ class FillView (ModelView):
             .select_from(Fill)
             .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
         )
-        filters = filters_from_request(self)
-        for f, v in filters:
-            query = f.apply(query, v)
-        buffer = StringIO.StringIO(b'')
-        writer = csv.writer(buffer)
-        writer.writerow(self.column_list)
-        writer.writerows(query.all())
-        return buffer.getvalue(), '{}_filldata_raw_{}.csv'.format(
-            dt.datetime.utcnow().strftime('%y%m%d%H%M'),
-            request.query_string )
+        return query, self.column_list, 'filldata_raw'
     
     @expose('/csv/final')
     @csvdownload
