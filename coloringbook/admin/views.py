@@ -153,7 +153,27 @@ class FillView (ModelView):
     @csvdownload
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
-        pass
+        fill_bis = db.aliased(Fill)
+        query = (
+            self.session.query(
+                Survey.name,
+                Page.name,
+                Area.name,
+                Subject.id,
+                db.func.max(Fill.time).label('time'),
+                db.func.count().label('clicks'),
+                Color.code )
+            .select_from(Fill)
+            .join(Fill.survey, Fill.page, Fill.area, Fill.subject)
+            .group_by(Survey.id, Page.id, Area.id, Subject.id)
+            .join(fill_bis, db.and_(
+                fill_bis.survey_id == Fill.survey_id,
+                fill_bis.page_id == Fill.page_id,
+                fill_bis.area_id == Fill.area_id,
+                fill_bis.subject_id == Fill.subject_id,
+                fill_bis.time == Fill.time ))
+            .join(Color, Color.id == fill_bis.color_id)
+        )
     
     def filters_from_request (self):
         """
