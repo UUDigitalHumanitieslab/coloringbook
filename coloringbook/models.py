@@ -1,8 +1,16 @@
 # (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
-from flask.ext.sqlalchemy import SQLAlchemy
+"""
+    Object relational model and database schema.
+    
+    An organogram will be provided as external documentation of the
+    database structure.
+"""
+
+import flask.ext.sqlalchemy as fsqla
 from sqlalchemy.ext.associationproxy import association_proxy
+from sqlalchemy.ext.declarative import declared_attr
 
 __all__ = [
     'db',
@@ -11,6 +19,7 @@ __all__ = [
     'Language',
     'Drawing',
     'Area',
+    'Sound',
     'Page',
     'Color',
     'Expectation',
@@ -18,10 +27,58 @@ __all__ = [
     'SurveyPage',
     'Fill'              ]
 
-db = SQLAlchemy()  # actual database connection is done in __init__.py
+def TableArgsMeta(parent_class, table_args):
+    """
+        Metaclass generator to set global defaults for __table_args__.
+        
+        See
+        http://stackoverflow.com/questions/25770701/how-to-tell-sqlalchemy-once-that-i-want-innodb-for-the-entire-database
+        for an explanation.
+    """
+
+    class _TableArgsMeta(parent_class):
+
+        def __init__(cls, name, bases, dict_):
+            if (    # Do not extend base class
+                    '_decl_class_registry' not in cls.__dict__ and 
+                    # Missing __tablename_ or equal to None means single table
+                    # inheritance -- no table for it (columns go to table of
+                    # base class)
+                    cls.__dict__.get('__tablename__') and
+                    # Abstract class -- no table for it (columns go to table[s]
+                    # of subclass[es]
+                    not cls.__dict__.get('__abstract__', False)):
+                ta = getattr(cls, '__table_args__', {})
+                if isinstance(ta, dict):
+                    ta = dict(table_args, **ta)
+                    cls.__table_args__ = ta
+                else:
+                    assert isinstance(ta, tuple)
+                    if ta and isinstance(ta[-1], dict):
+                        tad = dict(table_args, **ta[-1])
+                        ta = ta[:-1]
+                    else:
+                        tad = dict(table_args)
+                    cls.__table_args__ = ta + (tad,)
+            super(_TableArgsMeta, cls).__init__(name, bases, dict_)
+
+    return _TableArgsMeta
+
+db = fsqla.SQLAlchemy()  # actual database connection is done in __init__.py
+
+# Code below is a modification of the logic in
+# fsqla.SQLAlchemy.make_declarative_base.
+Base = fsqla.declarative_base(
+    cls = fsqla.Model,
+    name = 'Model',
+    mapper = fsqla.signalling_mapper,
+    metaclass = TableArgsMeta(
+        fsqla._BoundDeclarativeMeta,
+        {'mysql_engine': 'InnoDB'} ) )
+Base.query = fsqla._QueryProperty(db)
 
 class Subject (db.Model):
-    ''' Personal information of a test person. '''
+    """ Personal information of a test person. """
     
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(50), nullable = False)
@@ -35,7 +92,7 @@ class Subject (db.Model):
         return str(self.id)
 
 class SubjectLanguage (db.Model):
-    ''' Association between a Subject and a Language they speak. '''
+    """ Association between a Subject and a Language they speak. """
     
     language_id = db.Column(
         db.Integer,
@@ -61,7 +118,7 @@ class SubjectLanguage (db.Model):
             cascade = 'all, delete-orphan'))
 
 class Language (db.Model):
-    ''' Language that may be associated with a Subject, Survey or Page. '''
+    """ Language that may be associated with a Subject, Survey or Page. """
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
@@ -71,22 +128,27 @@ class Language (db.Model):
     def __str__ (self):
         return self.name
 
-class Drawing (db.Model):
-    ''' Metadata associated with a colorable SVG. '''
+class File (object):
+    """ Common members for Drawing and Sound. """
+    
+    @declared_attr
+    def __tablename__(cls):
+        return cls.__name__.lower()
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False, unique = True)
                                      # filename *without* extension
                                      # database is path-agnostic
     
-    areas = db.relationship('Area', backref = 'drawing', lazy = 'dynamic')
-        # one-many
-    
     def __str__ (self):
         return self.name
 
+class Drawing (File, db.Model):
+    """ Proxy to a colorable SVG. """
+    pass
+
 class Area (db.Model):
-    ''' Colorable part of a Drawing. '''
+    """ Colorable part of a Drawing. """
     
     __tablename__ = 'area'
     __table_args__ = (
@@ -101,24 +163,37 @@ class Area (db.Model):
         db.ForeignKey('drawing.id'),
         nullable = False )
     
+    drawing = db.relationship(
+        'Drawing',
+        backref= db.backref('areas', cascade = 'all, delete-orphan') )
+        # many-one
+    
     def __str__ (self):
         return self.name
 
+class Sound (File, db.Model):
+    """ Proxy to a MP3 file. """
+    pass
+
 class Page (db.Model):
-    ''' Combination of a sentence and a Drawing. '''
+    """ Combination of a sentence and a Drawing. """
 
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(30), nullable = False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
-    sound = db.Column(db.String(30))  # filename *with* extension
-                                      # database is path-agnostic
+    sound_id = db.Column(db.Integer, db.ForeignKey('sound.id'))
     drawing_id = db.Column(db.Integer,
         db.ForeignKey('drawing.id'),
         nullable = False )
     
     language = db.relationship(  # many-one
         'Language',
+        backref = db.backref(
+            'pages',
+            lazy = 'dynamic'))
+    sound = db.relationship(  # many-one
+        'Sound',
         backref = db.backref(
             'pages',
             lazy = 'dynamic'))
@@ -134,7 +209,7 @@ class Page (db.Model):
         return self.name
 
 class Color (db.Model):
-    ''' Color that may be associated with a Fill or Expectation. '''
+    """ Color that may be associated with a Fill or Expectation. """
 
     id = db.Column(db.Integer, primary_key = True)
     code = db.Column(db.String(25), nullable = False)
@@ -145,7 +220,7 @@ class Color (db.Model):
         return self.code
 
 class Expectation (db.Model):
-    ''' Expected Color for a particular Area on a particular Page. '''
+    """ Expected Color for a particular Area on a particular Page. """
 
     page_id = db.Column(
         db.Integer,
@@ -191,7 +266,7 @@ survey_subject = db.Table(
         nullable = False ) )
 
 class Survey (db.Model):
-    ''' Prepared series of Pages that is presented to Subjects. '''
+    """ Prepared series of Pages that is presented to Subjects. """
     
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(40), nullable = False, unique = True)
@@ -211,7 +286,7 @@ class Survey (db.Model):
         return self.name
 
 class SurveyPage (db.Model):
-    ''' Association between a Survey and a Page that is part of it. '''
+    """ Association between a Survey and a Page that is part of it. """
     
     survey_id = db.Column(
         db.Integer,
@@ -237,7 +312,7 @@ class SurveyPage (db.Model):
             cascade = 'all, delete-orphan'))
 
 class Fill (db.Model):
-    ''' The Color a Subject filled an Area of a Page in a Survey with at #ms.'''
+    """ The Color a Subject filled an Area of a Page in a Survey with at #ms."""
     
     survey_id = db.Column(
         db.Integer,
