@@ -53,7 +53,7 @@ init_application = function ( ) {
 	create_swatches(colors);
 	$.ajax({
 		type: 'GET',
-		url: '/static/test.json',
+		url: window.location.pathname,
 		dataType: 'json',
 		success: function (resp, xmlstatus) {
 			for (var l = resp.images.length, i = 0; i < l; ++i) {
