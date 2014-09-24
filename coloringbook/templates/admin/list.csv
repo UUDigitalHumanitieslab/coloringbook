@@ -1,4 +1,0 @@
-{% for c, name in list_columns %}{{ name }};{% endfor %}
-{% for row in data -%}
-{% for c, name in list_columns %}{{ get_value(row, c) }};{% endfor %}
-{% endfor %}
