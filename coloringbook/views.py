@@ -12,7 +12,7 @@
 
 from datetime import date
 
-from flask import Blueprint, render_template, request, json
+from flask import Blueprint, render_template, request, json, abort
 
 from .models import *
 
@@ -23,6 +23,14 @@ site = Blueprint('site', __name__)
 @site.route('/')
 def index():
     return render_template('coloringbook.html')
+
+@site.route('/book/<survey_name>')
+def fetch_coloringbook (survey_name):
+    try:
+        survey = Survey.query.filter_by(name = survey_name).one()
+        return render_template('coloringbook.html')
+    except:
+        abort(404)
 
 @site.route('/submit', methods=['POST'])
 def submit():
