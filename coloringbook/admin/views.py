@@ -165,9 +165,10 @@ class FillView (ModelView):
                                 [(Expectation.here, 'expected')],
                                 else_ = 'misplaced' ),
                         ),
-                        (Expectation.here, 'miscolored'),
+                        (Expectation.here == True, 'miscolored'),
+                        (Expectation.here == False, 'compatible')
                     ],
-                    else_ = 'unspecified' ) )
+                    else_ = 'unspecified' ) )  # Expectation.here == None
             .select_from(subquery)
             .outerjoin(Expectation, db.and_(
                 subquery.c.page_id == Expectation.page_id,
@@ -211,10 +212,15 @@ class FillView (ModelView):
                                 [(Expectation.here, 'expected')],
                                 else_ = 'misplaced' ),
                         ),
-                        (Color.id == None, 'no_data'),
+                        (
+                            Color.id == None,
+                            db.case(
+                                [(Expectation.here, 'not_expected')],
+                                else_ = 'empty' ),
+                        ),
                         (Expectation.here, 'miscolored'),
                     ],
-                    else_ = 'unspecified' ) )
+                    else_ = 'compatible' ) )
             .select_from(Expectation)
             .join(color_bis, color_bis.id == Expectation.color_id)
             .join(Expectation.page, Expectation.area)
