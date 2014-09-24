@@ -53,7 +53,7 @@ init_application = function ( ) {
 	create_swatches(colors);
 	$.ajax({
 		type: 'GET',
-		url: $SCRIPT_ROOT + 'static/test.json',
+		url: '/static/test.json',
 		dataType: 'json',
 		success: function (resp, xmlstatus) {
 			for (i in resp.images) {
@@ -66,7 +66,7 @@ init_application = function ( ) {
 			for (i in pages) {
 				if (pages[i].audio) sounds.push(pages[i].audio);
 			}
-			$.ionSound({ "sounds": sounds, path: $SCRIPT_ROOT + 'static/' });
+			$.ionSound({ "sounds": sounds, path: '/static/' });
 		},
 		error: function (xhr, status, error) {
 			alert(error);
@@ -155,13 +155,13 @@ insert_swatches = function (colors) {
 
 create_swatches = function (colors) {
     insert_swatches(colors);
-    $('.color_choice').last().append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
+    $('.color_choice').last().append('<img src="/static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 }
 
 load_image = function (url, data, name) {
 	$.ajax({
 		type: 'GET',
-		url: $SCRIPT_ROOT + 'static/' + url,
+		url: '/static/' + url,
 		data: data,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
@@ -219,7 +219,7 @@ send_data = function ( ) {
 	};
 	$.ajax({
 		type: 'POST',
-		url: $SCRIPT_ROOT + 'submit',
+		url: '/submit',
 		'data': JSON.stringify(data),
 		contentType: 'application/json',
 		success: function (result) {
