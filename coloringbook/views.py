@@ -12,7 +12,7 @@
 
 from datetime import date
 
-from flask import Blueprint, render_template, request, json
+from flask import Blueprint, render_template, request, json, abort, jsonify
 
 from .models import *
 
@@ -24,24 +24,62 @@ site = Blueprint('site', __name__)
 def index():
     return render_template('coloringbook.html')
 
-@site.route('/submit', methods=['POST'])
-def submit():
+def get_survey_pages (survey):
+    """ Returns all pages that are associated with a survey. """
+    return (
+        Page.query
+        .join(*Page.surveys.attr)
+        .filter(Survey.id == survey.id)
+        .order_by(SurveyPage.ordering)
+        .all()
+    )
+    
+@site.route('/book/<survey_name>')
+def fetch_coloringbook (survey_name):
+    """
+        Depending on whether the current request is XHR, either render
+        the coloringbook HTML backbone (if not XHR) or render the
+        pages associated with the current survey in JSON format (if
+        XHR).
+    """
+    try:
+        survey = Survey.query.filter_by(name = survey_name).one()
+        if request.is_xhr:
+            pages = get_survey_pages(survey)
+            page_list = []
+            audio_set = set()
+            image_set = set()
+            for p in pages:
+                image = p.drawing.name + '.svg'
+                sound = p.sound.name
+                page_list.append({
+                    'text': p.text,
+                    'image': image,
+                    'sound': sound,
+                })
+                audio_set.add(sound)
+                image_set.add(image)
+            return jsonify(
+                images = [i for i in image_set],
+                sounds = [s for s in audio_set],
+                pages = page_list )
+        else:
+            return render_template('coloringbook.html')
+    except Exception as e:
+        abort(404)
+
+@site.route('/book/<survey_name>/submit', methods=['POST'])
+def submit(survey_name):
     """ Parse and store data sent by the test subject, all in one go. """
     
     s = db.session
     try:
+        survey = Survey.query.filter_by(name = survey_name).one()
         data = request.get_json()
         subject = subject_from_json(data['subject'])
         s.add(subject)
-        survey = Survey.query.filter_by(name = data['survey']).one()
         survey.subjects.append(subject)
-        pages = (
-            Page.query
-            .join(*Page.surveys.attr)
-            .filter(Survey.id == survey.id)
-            .order_by(SurveyPage.ordering)
-            .all()
-        )
+        pages = get_survey_pages(survey)
         results = data['results']
         assert len(pages) == len(results)
         for page, result in zip(pages, results):
