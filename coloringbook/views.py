@@ -36,6 +36,12 @@ def get_survey_pages (survey):
     
 @site.route('/book/<survey_name>')
 def fetch_coloringbook (survey_name):
+    """
+        Depending on whether the current request is XHR, either render
+        the coloringbook HTML backbone (if not XHR) or render the
+        pages associated with the current survey in JSON format (if
+        XHR).
+    """
     try:
         survey = Survey.query.filter_by(name = survey_name).one()
         if request.is_xhr:
