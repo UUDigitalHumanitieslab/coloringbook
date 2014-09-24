@@ -68,16 +68,16 @@ def fetch_coloringbook (survey_name):
     except Exception as e:
         abort(404)
 
-@site.route('/submit', methods=['POST'])
-def submit():
+@site.route('/book/<survey_name>/submit', methods=['POST'])
+def submit(survey_name):
     """ Parse and store data sent by the test subject, all in one go. """
     
     s = db.session
     try:
+        survey = Survey.query.filter_by(name = survey_name).one()
         data = request.get_json()
         subject = subject_from_json(data['subject'])
         s.add(subject)
-        survey = Survey.query.filter_by(name = data['survey']).one()
         survey.subjects.append(subject)
         pages = get_survey_pages(survey)
         results = data['results']

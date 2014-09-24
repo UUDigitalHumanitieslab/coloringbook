@@ -207,13 +207,12 @@ end_page = function ( ) {
 
 send_data = function ( ) {
 	var data = {
-		survey: 'test',
 		subject: form_data,
 		results: page_data
 	};
 	$.ajax({
 		type: 'POST',
-		url: '/submit',
+		url: window.location.pathname + '/submit',
 		'data': JSON.stringify(data),
 		contentType: 'application/json',
 		success: function (result) {
