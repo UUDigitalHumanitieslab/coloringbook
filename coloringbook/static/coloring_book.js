@@ -56,17 +56,12 @@ init_application = function ( ) {
 		url: '/static/test.json',
 		dataType: 'json',
 		success: function (resp, xmlstatus) {
-			for (i in resp.images) {
-				var image = resp.images[i];
-				load_image(image.url, image.data, image.id);
+			for (var l = resp.images.length, i = 0; i < l; ++i) {
+				load_image(resp.images[i]);
 			}
 			image_count = resp.images.length;
 			pages = resp.pages;
-			var sounds = [];
-			for (i in pages) {
-				if (pages[i].audio) sounds.push(pages[i].audio);
-			}
-			$.ionSound({ "sounds": sounds, path: '/static/' });
+			$.ionSound({ "sounds": resp.sounds, path: '/static/' });
 		},
 		error: function (xhr, status, error) {
 			alert(error);
@@ -158,11 +153,10 @@ create_swatches = function (colors) {
     $('.color_choice').last().append('<img src="/static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 }
 
-load_image = function (url, data, name) {
+load_image = function (name) {
 	$.ajax({
 		type: 'GET',
-		url: '/static/' + url,
-		data: data,
+		url: '/static/' + name,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
 			images[name] = svg_resp;
