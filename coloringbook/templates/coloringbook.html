@@ -66,6 +66,10 @@ input.error {
 <body onload="init_application();">
 
 <form id="starting_form">
+	<h2>Kleurgeheugenexperiment</h2>
+	<br>
+	Welkom bij coloringbook.
+	Zou je alstublieft het volgende formulier willen invullen?<br><br>
 	<label for="name">Naam</label><input type="text" name="name" id="name" required="required" size="30"/><br />
 	<label for="numeral">Studentnummer</label><input type="number" name="numeral" id="numeral" inputmode="number"/><br />
 	<label for="birth">Geboortedatum</label><input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
@@ -79,10 +83,16 @@ input.error {
 </form>
 
 <p id="instructions">
-	Je krijgt straks steeds 5 seconden lang een zin te zien.
-	Hierna verschijnt een kleurplaat.
-	Kleur de kleurplaat in zoals beschreven in de zin.
-	Druk daarna op "klaar", je krijgt dan de volgende zin te zien.<br />
+	Je krijgt straks steeds een zin te zien of te horen waarin een aantal kleuren voorkomen.
+	Bijvoorbeeld: &ldquo;een vrouw met een kort rokje en rode schoenen staat naast een vrouw met een blauwe handtas&rdquo;.
+	Lees of luister de zin zorgvuldig en probeer hem te onthouden.
+	Na 3 seconden verdwijnt de zin en verschijnt een kleurplaat die bij de zin past.
+	Gebruik de knoppen onderaan het scherm om een kleur te kiezen en vul de juiste vakjes van de tekening in met de laatstgekozen kleur door erin te klikken.
+	In de voorbeeldzin zou je de schoenen van de vrouw met het korte rokje rood inkleuren en zou je de tas van de vrouw ernaast blauw inkleuren.<br><br>
+	Vervolgens druk je op &ldquo;klaar&rdquo;, je krijgt dan de volgende zin te zien.
+	Je kunt niet terugkijken of later van gedachten veranderen.
+	Let op: dezelfde kleurplaat kan meerdere keren voorkomen met verschillende zinnen.<br><br>
+	Succes!<br />
 	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
 </p>
 
