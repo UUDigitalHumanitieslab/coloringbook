@@ -5,6 +5,7 @@
 
 var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
 var color_chosen;
+var simultaneous = false;
 var first_command = null;
 var last_command = null;
 var page_onset;
@@ -66,6 +67,10 @@ init_application = function ( ) {
 			image_count = resp.images.length;
 			pages = resp.pages;
 			$.ionSound({ "sounds": resp.sounds, path: '/static/' });
+			if (resp.simultaneous) {
+			    simultaneous = true;
+			    sentence_image_delay = 0; // show image at same time as sentence
+			}
 		},
 		error: function (xhr, status, error) {
 			alert(error);
@@ -192,7 +197,7 @@ start_image = function ( ) {
 	image.append(images[page.image]);
 	set_image_dimensions();
 	add_coloring_book_events();
-	$('#sentence').hide();
+	if (! simultaneous) $('#sentence').hide();
 	$('#controls').show();
 	$(document).scrollTop(400);
 	page_onset = $.now();
