@@ -72,7 +72,7 @@ def filters_from_request (self):
         >>> s = cb.models.db.session
         >>> with testapp.test_request_context('?flt1_22=rode'):
         ...     cb.admin.utilities.filters_from_request(FillView(s))
-        [(<flask_admin.contrib.sqla.filters.FilterLike object at 0x...>, u'rode')]
+        [(<flask_admin.contrib.sqla.filters.FilterEqual object at 0x...>, u'rode')]
     """
     
     filters = self._get_list_extra_args()[4]
