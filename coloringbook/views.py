@@ -51,14 +51,17 @@ def fetch_coloringbook (survey_name):
             image_set = set()
             for p in pages:
                 image = p.drawing.name + '.svg'
-                sound = p.sound.name
-                page_list.append({
-                    'text': p.text,
-                    'image': image,
-                    'sound': sound,
-                })
-                audio_set.add(sound)
                 image_set.add(image)
+                page = {'image': image}
+                if p.sound:
+                    sound = p.sound.name
+                    audio_set.add(sound)
+                    page['audio'] = sound
+                if p.text:
+                    page['text'] = p.text
+                else:
+                    page['text'] = ''
+                page_list.append(page)
             return jsonify(
                 images = [i for i in image_set],
                 sounds = [s for s in audio_set],

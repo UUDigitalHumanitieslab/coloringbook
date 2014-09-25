@@ -183,7 +183,7 @@ start_page = function ( ) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
-	$.ionSound.play(page.audio);
+	if (page.audio) $.ionSound.play(page.audio);
 }
 
 start_image = function ( ) {
