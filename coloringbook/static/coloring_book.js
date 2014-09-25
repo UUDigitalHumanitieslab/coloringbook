@@ -11,7 +11,7 @@ var page_onset;
 var page, pages;
 var pagenum = 0;
 var page_data = [];
-var form_data;
+var form_data, evaluation_data = {};
 var images = {};
 var image_count = 0;
 var sentence_image_delay = 500;  // milliseconds
@@ -48,6 +48,10 @@ init_application = function ( ) {
 	            daterange: [century_ago.toShortString(), now.toShortString()]
 	        }
 	    }
+	});
+	$('#ending_form').hide().validate({
+	    submitHandler: handle_evaluation,
+	    onkeyup: false
 	});
 	init_controls();
 	create_swatches(colors);
@@ -201,14 +205,23 @@ end_page = function ( ) {
 		first_command = last_command = null;
 		start_page();
 	} else {
-		send_data();
+		$('#ending_form').show();
 	}
+}
+
+handle_evaluation = function (form) {
+    var raw_data = $(form).serializeArray();
+    for (var l = raw_data.length, i = 0; i < l; ++i) {
+        evaluation_data[raw_data[i].name] = raw_data[i].value;
+    }
+    send_data();
 }
 
 send_data = function ( ) {
 	var data = {
 		subject: form_data,
-		results: page_data
+		results: page_data,
+		evaluation: evaluation_data
 	};
 	$.ajax({
 		type: 'POST',
@@ -217,6 +230,7 @@ send_data = function ( ) {
 		contentType: 'application/json',
 		success: function (result) {
 			var inst = $('#instructions');
+			$('#ending_form').hide();
 			if (result == 'Success') {
 			    inst.html(
 			        'Dank voor je deelname aan dit experiment.<br/>' +

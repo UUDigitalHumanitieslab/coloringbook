@@ -24,6 +24,7 @@ __all__ = [
     'Color',
     'Expectation',
     'Survey',
+    'SurveySubject',
     'SurveyPage',
     'Fill'              ]
 
@@ -39,6 +40,7 @@ class Subject (db.Model):
     eyesight = db.Column(db.String(100))  # medical conditions
     
     languages = association_proxy('subject_languages', 'language')  # many-many
+    surveys = association_proxy('subject_surveys', 'survey')  # many-many
     
     def __str__ (self):
         return str(self.id)
@@ -202,21 +204,6 @@ class Expectation (db.Model):
             self.page,
             '' if self.here else 'not ' )
 
-survey_subject = db.Table(
-    'survey_subject',
-    db.Column(
-        'survey_id',
-        db.Integer,
-        db.ForeignKey('survey.id'),
-        primary_key = True,
-        nullable = False ),
-    db.Column(
-        'subject_id',
-        db.Integer,
-        db.ForeignKey('subject.id'),
-        primary_key = True,
-        nullable = False ) )
-
 class Survey (db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
@@ -229,13 +216,29 @@ class Survey (db.Model):
     
     language = db.relationship('Language', backref = 'surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
-    subjects = db.relationship(  # many-many
-        'Subject',
-        secondary = survey_subject,
-        backref = db.backref('surveys', lazy = 'dynamic') )
+    subjects = association_proxy('survey_subjects', 'subject')  # many-many
     
     def __str__ (self):
         return self.name
+
+class SurveySubject (db.Model):
+    """ Participation of a Subject in a Survey, with evaluation data. """
+    
+    # association
+    survey_id = db.Column(db.ForeignKey('survey.id'), primary_key = True)
+    subject_id = db.Column(db.ForeignKey('subject.id'), primary_key = True)
+    # evaluation
+    difficulty = db.Column(db.Integer)
+    topic = db.Column(db.String(60))
+    comments = db.Column(db.Text)
+    
+    # two many-one relationships, both of which facilitate many-many
+    survey = db.relationship('Survey', backref = db.backref(
+        'survey_subjects',
+        cascade = 'all, delete-orphan' ))
+    subject = db.relationship('Subject', backref = db.backref(
+        'subject_surveys',
+        cascade = 'all, delete-orphan' ))
 
 class SurveyPage (db.Model):
     """ Association between a Survey and a Page that is part of it. """

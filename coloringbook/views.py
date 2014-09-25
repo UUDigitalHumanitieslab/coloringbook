@@ -78,7 +78,7 @@ def submit(survey_name):
         data = request.get_json()
         subject = subject_from_json(data['subject'])
         s.add(subject)
-        survey.subjects.append(subject)
+        bind_survey_subject(survey, subject, data['evaluation'])
         pages = get_survey_pages(survey)
         results = data['results']
         assert len(pages) == len(results)
@@ -155,6 +155,47 @@ def subject_from_json (data):
         SubjectLanguage(subject = subject, language = language, level = level)
     
     return subject
+
+def bind_survey_subject (survey, subject, evaluation):
+    """
+        Create the association between a Survey and a Subject, with associated evaluation data from a parsed JSON dictionary.
+        
+        Example of usage:
+        
+        >>> import coloringbook.models as m, coloringbook.testing as t
+        >>> from flask import jsonify
+        >>> from datetime import datetime
+        >>> app = t.get_fixture_app()
+        >>> testsurvey = m.Survey(name = 'test')
+        >>> testsubject = m.Subject(name = 'Koos', birth = datetime.now())
+        >>> testevaluation = {
+        ...     'difficulty': 5,
+        ...     'topic': 'was this about anything?',
+        ...     'comments': 'no comment.',
+        ... }
+        >>> with app.app_context():
+        ...     bind_survey_subject(testsurvey, testsubject, testevaluation)
+        
+        >>> testsurvey.subjects[0].name
+        'Koos'
+        >>> testsurvey.survey_subjects[0].difficulty
+        5
+        >>> testsurvey.survey_subjects[0].topic
+        'was this about anything?'
+        >>> testsurvey.survey_subjects[0].comments
+        'no comment.'
+        >>> testsubject.surveys[0].name
+        'test'
+        >>> testsubject.subject_surveys[0].difficulty
+        5
+    """
+    binding = SurveySubject(survey = survey, subject = subject)
+    if 'difficulty' in evaluation:
+        binding.difficulty = evaluation['difficulty']
+    if 'topic' in evaluation:
+        binding.topic = evaluation['topic']
+    if 'comments' in evaluation:
+        binding.comments = evaluation['comments']
     
 def fills_from_json (survey, page, subject, data):
     """
