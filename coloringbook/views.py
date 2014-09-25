@@ -10,7 +10,7 @@
     http://flask.pocoo.org/docs/0.10/patterns/packages/.
 """
 
-from datetime import date
+from datetime import date, datetime
 
 from flask import Blueprint, render_template, request, json, abort, jsonify
 
@@ -44,6 +44,10 @@ def fetch_coloringbook (survey_name):
     """
     try:
         survey = Survey.query.filter_by(name = survey_name).one()
+        today = datetime.today()
+        if (survey.end and survey.end < today or
+                survey.begin and survey.begin > today):
+            raise RuntimeError('Survey not available at this time.')
         if request.is_xhr:
             pages = get_survey_pages(survey)
             page_list = []
