@@ -24,6 +24,7 @@ __all__ = [
     'Color',
     'Expectation',
     'Survey',
+    'SurveySubject',
     'SurveyPage',
     'Fill'              ]
 
