@@ -11,7 +11,7 @@ var page_onset;
 var page, pages;
 var pagenum = 0;
 var page_data = [];
-var form_data, evaluation_data;
+var form_data, evaluation_data = {};
 var images = {};
 var image_count = 0;
 var sentence_image_delay = 500;  // milliseconds
