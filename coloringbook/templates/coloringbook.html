@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 <!--
     (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
     Author: Julian Gonggrijp, j.gonggrijp@uu.nl
@@ -13,12 +14,10 @@
 * {
 	margin: 0;
 	padding: 0;
+	font-size: 24pt;
 }
 body {
 	padding: 50px;
-}
-#starting_form, #instructions {
-	font-size: 24pt;
 }
 input {
 	font-size: 18pt;
@@ -38,6 +37,10 @@ input {
 label {
 	display: inline-block;
 	width: 15ex;
+}
+#ending_form label {
+    display: block;
+    width: auto;
 }
 label.error {
     width: 20em;
@@ -60,19 +63,22 @@ input.error {
   url_for('static', filename='jquery.validate.min.js') }}"></script>
 <script src="{{
   url_for('static', filename='messages_nl.min.js') }}"></script>
-<script>
-  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-</script>
 <script src="{{
   url_for('static', filename='coloring_book.js') }}"></script>
+
 </head>
 <body onload="init_application();">
 
 <form id="starting_form">
+	<h2>Kleurgeheugenexperiment</h2>
+	<br>
+	Welkom bij coloringbook.
+	Zou je alstublieft het volgende formulier willen invullen?<br><br>
 	<label for="name">Naam</label><input type="text" name="name" id="name" required="required" size="30"/><br />
 	<label for="numeral">Studentnummer</label><input type="number" name="numeral" id="numeral" inputmode="number"/><br />
 	<label for="birth">Geboortedatum</label><input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
-	<label for="eyesight">Oogafwijkingen</label><input type="text" name="eyesight" id="eyesight"/><br />
+	<label for="eyesight">Bijzonderheden</label><input type="text" name="eyesight" id="eyesight"/><br />
+	<label for="eyesight" style="width: auto;">(kleurenblind, slechtziend, enzovoorts)</label><br>
 	<label for="nativelang">Moedertaal</label><input type="text" name="nativelang" id="nativelang" required="required"/><br />
 	Spreek je nog andere talen?<br />
 	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
@@ -82,10 +88,17 @@ input.error {
 </form>
 
 <p id="instructions">
-	Je krijgt straks steeds 5 seconden lang een zin te zien.
-	Hierna verschijnt een kleurplaat.
-	Kleur de kleurplaat in zoals beschreven in de zin.
-	Druk daarna op "klaar", je krijgt dan de volgende zin te zien.<br />
+	Je krijgt straks steeds een zin te zien of te horen waarin een aantal kleuren voorkomen.
+	Bijvoorbeeld: &ldquo;een vrouw met een kort rokje en rode schoenen staat naast een vrouw met een blauwe handtas&rdquo;.
+	Lees of luister de zin zorgvuldig en probeer hem te onthouden.
+	Na 3 seconden verdwijnt de zin en verschijnt een kleurplaat die bij de zin past.
+	Gebruik de knoppen onderaan het scherm om een kleur te kiezen en vul de juiste vakjes van de tekening in met de laatstgekozen kleur door erin te klikken.
+	In de voorbeeldzin zou je de schoenen van de vrouw met het korte rokje rood inkleuren en zou je de tas van de vrouw ernaast blauw inkleuren.<br><br>
+	Vervolgens druk je op &ldquo;klaar&rdquo;, je krijgt dan de volgende zin te zien.
+	Aan het einde stellen we nog een paar vragen ter evaluatie.
+	Je kunt niet terugkijken of later van gedachten veranderen.
+	Let op: dezelfde kleurplaat kan meerdere keren voorkomen met verschillende zinnen.<br><br>
+	Succes!<br />
 	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
 </p>
 
@@ -98,5 +111,18 @@ input.error {
 		<input type="button" value="klaar" onclick="end_page();"/>
 	</p>
 </div>
+
+<form id="ending_form">
+    Ter evaluatie zouden we je graag nog een paar laatste vragen willen stellen.<br><br>
+    <label for="difficulty">Hoe moeilijk vond je het om de zinnen en kleuren te onthouden?
+    Kies 1 voor heel makkelijk en 10 voor heel moeilijk.</label>
+    <input type="number" id="difficulty" name="difficulty" min="1" max="10" step="1"><br>
+    <label for="topic">Waarover denk je dat deze test gaat?</label>
+    <input type="text" id="topic" name="topic" size="30"><br><br>
+    <label for="comments">Andere opmerkingen:</label>
+    <textarea id="comments" name="comments" rows="3" cols="30"></textarea><br>
+    <input type="submit">
+</form>
+
 </body>
 </html>

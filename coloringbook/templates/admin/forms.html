@@ -1,0 +1,32 @@
+{#
+    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+#}
+
+{% macro hide ( ) %}
+    <div style="display: none;">
+        {{ caller() }}
+    </div>
+{% endmacro %}
+
+{% macro enable_select2multiple ( ) %}
+    <script>
+        $('input[data-choices]').each(function ( ) {
+            var self = $(this);
+            self.select2({
+                data:self.data().choices,
+                multiple:true,
+                sortable:true,
+                width:'220px'
+            });
+            self.on("change", function() {
+                $("#" + self.id + "_val").html(self.val());
+            });
+            self.select2("container").find("ul.select2-choices").sortable({
+                containment: 'parent',
+                start: function() { self.select2("onSortStart"); },
+                update: function() { self.select2("onSortEnd"); }
+            });
+        });
+    </script>
+{% endmacro %}

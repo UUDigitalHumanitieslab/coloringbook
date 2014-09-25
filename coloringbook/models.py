@@ -24,6 +24,7 @@ __all__ = [
     'Color',
     'Expectation',
     'Survey',
+    'SurveySubject',
     'SurveyPage',
     'Fill'              ]
 
@@ -64,18 +65,21 @@ def TableArgsMeta(parent_class, table_args):
 
     return _TableArgsMeta
 
-db = fsqla.SQLAlchemy()  # actual database connection is done in __init__.py
+class InnoDBSQLAlchemy (fsqla.SQLAlchemy):
+    """ Subclass in order to enable TableArgsMeta. """
+    def make_declarative_base(self):
+        """Creates the declarative base."""
+        base = fsqla.declarative_base(
+            cls = fsqla.Model,
+            name = 'Model',
+            mapper = fsqla.signalling_mapper,
+            metaclass = TableArgsMeta(
+                fsqla._BoundDeclarativeMeta,
+                {'mysql_engine': 'InnoDB'} ) )
+        base.query = fsqla._QueryProperty(self)
+        return base
 
-# Code below is a modification of the logic in
-# fsqla.SQLAlchemy.make_declarative_base.
-Base = fsqla.declarative_base(
-    cls = fsqla.Model,
-    name = 'Model',
-    mapper = fsqla.signalling_mapper,
-    metaclass = TableArgsMeta(
-        fsqla._BoundDeclarativeMeta,
-        {'mysql_engine': 'InnoDB'} ) )
-Base.query = fsqla._QueryProperty(db)
+db = InnoDBSQLAlchemy()  # actual database connection is done in __init__.py
 
 class Subject (db.Model):
     """ Personal information of a test person. """
@@ -87,6 +91,7 @@ class Subject (db.Model):
     eyesight = db.Column(db.String(100))  # medical conditions
     
     languages = association_proxy('subject_languages', 'language')  # many-many
+    surveys = association_proxy('subject_surveys', 'survey')  # many-many
     
     def __str__ (self):
         return str(self.id)
@@ -217,7 +222,7 @@ class Color (db.Model):
     name = db.Column(db.String(20), nullable = False)  # mnemonic
     
     def __str__ (self):
-        return self.code
+        return self.name
 
 class Expectation (db.Model):
     """ Expected Color for a particular Area on a particular Page. """
@@ -250,21 +255,6 @@ class Expectation (db.Model):
             self.page,
             '' if self.here else 'not ' )
 
-survey_subject = db.Table(
-    'survey_subject',
-    db.Column(
-        'survey_id',
-        db.Integer,
-        db.ForeignKey('survey.id'),
-        primary_key = True,
-        nullable = False ),
-    db.Column(
-        'subject_id',
-        db.Integer,
-        db.ForeignKey('subject.id'),
-        primary_key = True,
-        nullable = False ) )
-
 class Survey (db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
@@ -273,17 +263,34 @@ class Survey (db.Model):
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     begin = db.Column(db.DateTime)
     end = db.Column(db.DateTime)
+    simultaneous = db.Column(db.Boolean, nullable = False)
     information = db.Column(db.String(500))
     
     language = db.relationship('Language', backref = 'surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
-    subjects = db.relationship(  # many-many
-        'Subject',
-        secondary = survey_subject,
-        backref = db.backref('surveys', lazy = 'dynamic') )
+    subjects = association_proxy('survey_subjects', 'subject')  # many-many
     
     def __str__ (self):
         return self.name
+
+class SurveySubject (db.Model):
+    """ Participation of a Subject in a Survey, with evaluation data. """
+    
+    # association
+    survey_id = db.Column(db.ForeignKey('survey.id'), primary_key = True)
+    subject_id = db.Column(db.ForeignKey('subject.id'), primary_key = True)
+    # evaluation
+    difficulty = db.Column(db.Integer)
+    topic = db.Column(db.String(60))
+    comments = db.Column(db.Text)
+    
+    # two many-one relationships, both of which facilitate many-many
+    survey = db.relationship('Survey', backref = db.backref(
+        'survey_subjects',
+        cascade = 'all, delete-orphan' ))
+    subject = db.relationship('Subject', backref = db.backref(
+        'subject_surveys',
+        cascade = 'all, delete-orphan' ))
 
 class SurveyPage (db.Model):
     """ Association between a Survey and a Page that is part of it. """

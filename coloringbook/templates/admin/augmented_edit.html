@@ -5,12 +5,7 @@
 
 {% extends 'admin/model/edit.html' %}
 {% import 'admin/drawing.html' as drawing %}
-
-{% macro hide ( ) %}
-    <div style="display: none;">
-        {{ caller() }}
-    </div>
-{% endmacro %}
+{% import 'admin/forms.html' as forms %}
 
 {% block head_css %}
     {{ super() }}
@@ -25,23 +20,6 @@
             url_for('static', filename='jquery.validate.min.js') }}"></script>
     <script src="/static/coloring_book.js"></script>
     <script src="/static/admin/drawing.js"></script>
-    <script>
-        $('input[data-choices]').each(function ( ) {
-            var self = $(this);
-            self.select2({
-                data:self.data().choices,
-                multiple:true,
-                sortable:true,
-                width:'220px'
-            });
-            self.on("change", function() {
-                $("#" + self.id + "_val").html(self.val());
-            });
-            self.select2("container").find("ul.select2-choices").sortable({
-                containment: 'parent',
-                start: function() { self.select2("onSortStart"); },
-                update: function() { self.select2("onSortEnd"); }
-            });
-        });
-    </script>
+    
+    {{ forms.enable_select2multiple() }}
 {% endblock %}

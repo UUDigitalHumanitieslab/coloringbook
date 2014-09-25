@@ -4,6 +4,8 @@ Coloringbook
 A web-based coloringbook survey application
 by Digital Humanities Lab, Utrecht University
 
+**Note**: this Readme may be outdated.
+
 
 Why does it exist?
 ------------------

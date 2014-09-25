@@ -32,7 +32,10 @@ __all__ = [
     'SurveyView',
     'PageView',
     'DrawingView',
-    'SoundView'     ]
+    'SoundView',
+    'ColorView',
+    'LanguageView',
+]
 
 file_path = op.join(op.dirname(__file__), '..', 'static')
 
@@ -114,7 +117,7 @@ class FillView (ModelView):
         'time',
         ('color', Color.code),
     )
-    column_filters = column_list
+    column_filters = column_list[:4]
 #    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
     column_display_all_relations = True
@@ -123,126 +126,162 @@ class FillView (ModelView):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
     
     @expose('/csv/raw')
-    @csvdownload('filldata_raw.csv')
+    @csvdownload
     def export_raw (self):
         """ Render a CSV, similar in operation to BaseModelView.index_view. """
         
-        return self.render(
-            'admin/list.csv',
-            data = self.full_query().all(),
-            list_columns = self._list_columns,
-            get_value = self.get_list_value )
+        query = (
+            self.session.query(
+                Survey.name,
+                Page.name,
+                Area.name,
+                Subject.id,
+                Fill.time,
+                Color.name )
+            .select_from(Fill)
+            .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
+        )
+        return query, self.column_list, 'filldata_raw'
     
     @expose('/csv/final')
-    @csvdownload('filldata_final.csv')
+    @csvdownload
     def export_final (self):
         """ Render a CSV with only the final color of each area. """
-        
-        full = self.model
-        fnl = self.get_final_q().subquery('final')
-        
-        print self.full_query().statement
-
-        merged = (
-            self.session.query(full)
-            .join(
-                fnl,
-                db.and_(
-                    full.survey_id == fnl.c.survey_id,
-                    full.page_id == fnl.c.page_id,
-                    full.area_id == fnl.c.area_id,
-                    full.subject_id == fnl.c.subject_id,
-                    full.time == fnl.c.time ) )
+        color_bis = db.aliased(Color)
+        subquery = self.get_core_query()
+        query = (
+            self.session.query(
+                Survey.name,
+                Page.name,
+                Area.name,
+                Subject.id,
+                subquery.c.time,
+                subquery.c.clicks,
+                Color.name,
+                color_bis.name,
+                Expectation.here,
+                db.case(
+                    [
+                        (
+                            Color.id == Expectation.color_id,
+                            db.case(
+                                [(Expectation.here, 'expected')],
+                                else_ = 'misplaced' ),
+                        ),
+                        (Expectation.here == True, 'miscolored'),
+                        (Expectation.here == False, 'compatible')
+                    ],
+                    else_ = 'unspecified' ) )  # Expectation.here == None
+            .select_from(subquery)
+            .outerjoin(Expectation, db.and_(
+                subquery.c.page_id == Expectation.page_id,
+                subquery.c.area_id == Expectation.area_id ))
+            .join(Fill, db.and_(
+                subquery.c.survey_id == Fill.survey_id,
+                subquery.c.page_id == Fill.page_id,
+                subquery.c.area_id == Fill.area_id,
+                subquery.c.subject_id == Fill.subject_id,
+                subquery.c.time == Fill.time ))
+            .join(Fill.survey, Fill.page, Fill.area, Fill.subject, Fill.color)
+            .outerjoin(color_bis, color_bis.id == Expectation.color_id)
         )
-        
-        print '-----'
-        print merged.statement
-        
-#         survey_1 = db.aliased(Survey, name = 'survey_1')
-#         page_1 = db.aliased(Page, name = 'page_1')
-#         area_1 = db.aliased(Area, name = 'area_1')
-#         subject_1 = db.aliased(Subject, name = 'subject_1')
-#         color_1 = db.aliased(Color, name = 'color_1')
-#         
-#         next_step = (
-#             merged.outerjoin(survey_1, page_1, area_1, subject_1, color_1)
-#             .add_entity(survey_1)
-#             .add_entity(page_1)
-#             .add_entity(area_1)
-#             .add_entity(subject_1)
-#             .add_entity(color_1)
-#         )
-        
-        next_step = (
-            self.full_query()
-            .reset_joinpoint()
-            .select_entity_from(merged.subquery('fill'))
+        headers = [ 'survey', 'page', 'area', 'subject', 'time', 'clicks',
+                    'color', 'expected', 'here', 'category',
+                    ]
+        return query, headers, 'filldata_final'
+    
+    @expose('/csv/comparison')
+    @csvdownload
+    def export_comparison (self):
+        """ Render a CSV with expected colors compared to actual final data. """
+        color_bis = db.aliased(Color)
+        subquery = self.get_core_query()
+        query = (
+            self.session.query(
+                Survey.name,
+                Page.name,
+                Area.name,
+                Subject.id,
+                subquery.c.time,
+                subquery.c.clicks,
+                color_bis.name,
+                Expectation.here,
+                Color.name,
+                db.case(
+                    [
+                        (
+                            Color.id == Expectation.color_id,
+                            db.case(
+                                [(Expectation.here, 'expected')],
+                                else_ = 'misplaced' ),
+                        ),
+                        (
+                            Color.id == None,
+                            db.case(
+                                [(Expectation.here, 'not_expected')],
+                                else_ = 'empty' ),
+                        ),
+                        (Expectation.here, 'miscolored'),
+                    ],
+                    else_ = 'compatible' ) )
+            .select_from(Expectation)
+            .join(color_bis, color_bis.id == Expectation.color_id)
+            .join(Expectation.page, Expectation.area)
+            .outerjoin(subquery, db.and_(
+                subquery.c.page_id == Expectation.page_id,
+                subquery.c.area_id == Expectation.area_id ))
+            .outerjoin(Fill, db.and_(
+                subquery.c.survey_id == Fill.survey_id,
+                subquery.c.page_id == Fill.page_id,
+                subquery.c.area_id == Fill.area_id,
+                subquery.c.subject_id == Fill.subject_id,
+                subquery.c.time == Fill.time ))
+            .outerjoin(
+                Fill.survey,
+                Fill.subject,
+                Fill.color )
         )
-        
-        print '-----'
-        print next_step.statement
-        
-        return self.render(
-            'admin/list.csv',
-            data = next_step.all(),
-            list_columns = self._list_columns,
-            get_value = self.get_list_value )
+        headers = [ 'survey', 'page', 'area', 'subject', 'time', 'clicks',
+                    'expected', 'here', 'color', 'category',
+                    ]
+        return query, headers, 'filldata_comparison'
     
-    def full_query (self):
-        """ Get the un-paged query for the currently displayed data. """
-        
-        page, sort_idx, sort_desc, search, filters = self._get_list_extra_args()
-        
-        # Map column index to column name
-        sort_column = self._get_column_by_idx(sort_idx)
-        if sort_column is not None:
-            sort_column = sort_column[0]
-
-        # Get count and query
-        count, query = self.get_list(
-            None,
-            sort_column,
-            sort_desc,
-            search,
-            filters,
-            False )
-        return query.limit(None)
-    
-    def get_final_q (self):
-        """ Get the query for the final Color of each Area. """
-        
+    def get_core_query (self):
         return (
-            self.session
-            .query(
-                self.model.survey_id,
-                self.model.page_id,
-                self.model.area_id,
-                self.model.subject_id,
-                db.func.max(self.model.time).label('time') )
+            self.session.query(
+                Fill.survey_id.label('survey_id'),
+                Fill.page_id.label('page_id'),
+                Fill.area_id.label('area_id'),
+                Fill.subject_id.label('subject_id'),
+                db.func.max(Fill.time).label('time'),
+                db.func.count().label('clicks') )
             .group_by(
-                self.model.survey_id,
-                self.model.page_id,
-                self.model.area_id,
-                self.model.subject_id )
+                Fill.survey_id,
+                Fill.page_id,
+                Fill.area_id,
+                Fill.subject_id )
+            .subquery('sub')
         )
-
+    
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
     
     edit_template = 'admin/augmented_edit.html'
+    create_template = 'admin/augmented_create.html'
     can_delete = False
-    column_list = 'name language begin end information'.split()
+    column_list = 'name language begin end simultaneous information'.split()
     column_sortable_list = (
         ('name', Survey.name),
         ('language', Language.name),
         'begin',
         'end',
+        'simultaneous',
     )
     column_auto_select_related = True
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
+    form_columns = ('name', 'language', 'begin', 'end', 'simultaneous', 'information', 'page_list')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
     }
@@ -292,12 +331,12 @@ class PageView(ModelView):
     form_create_rules = form_columns[:5]  # up to sound
     form_edit_rules = (
         'name',
-        rules.Container('hide', rules.Field('drawing')),
+        rules.Container('forms.hide', rules.Field('drawing')),
         'language',
         'text',
         'sound',
-        rules.Container('hide', rules.Field('fname')),
-        rules.Container('hide', rules.Field('expect_list')),
+        rules.Container('forms.hide', rules.Field('fname')),
+        rules.Container('forms.hide', rules.Field('expect_list')),
         rules.Macro('drawing.edit_expectations'),
     )
     
@@ -350,8 +389,8 @@ class DrawingView(ModelView):
     }
     form_create_rules = ('file',)
     form_edit_rules = (
-        rules.Container('hide', rules.Field('area_list')),
-        rules.Container('hide', rules.Field('svg_source')),
+        rules.Container('forms.hide', rules.Field('area_list')),
+        rules.Container('forms.hide', rules.Field('svg_source')),
         rules.Macro('drawing.edit_areas'),
     )
         
@@ -429,3 +468,19 @@ def delete_sound(mapper, connection, target):
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
+
+class ColorView(ModelView):
+    """ Lookup table of colors with associated codes. """
+    can_edit = False
+    can_create = False
+    can_delete = False
+    column_list = ('name', 'code')
+    def __init__ (self, session, **kwargs):
+        super(ColorView, self).__init__(Color, session, name='Colors', **kwargs)
+    
+class LanguageView(ModelView):
+    """ Lookup table of languages that allows edits and additions. """
+    can_delete = False  # necessary because this may cause information loss
+    def __init__ (self, session, **kwargs):
+        super(LanguageView, self).__init__(Language, session, name='Languages', **kwargs)
+    

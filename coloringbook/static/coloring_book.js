@@ -5,13 +5,14 @@
 
 var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
 var color_chosen;
+var simultaneous = false;
 var first_command = null;
 var last_command = null;
 var page_onset;
 var page, pages;
 var pagenum = 0;
 var page_data = [];
-var form_data;
+var form_data, evaluation_data = {};
 var images = {};
 var image_count = 0;
 var sentence_image_delay = 500;  // milliseconds
@@ -49,24 +50,27 @@ init_application = function ( ) {
 	        }
 	    }
 	});
+	$('#ending_form').hide().validate({
+	    submitHandler: handle_evaluation,
+	    onkeyup: false
+	});
 	init_controls();
 	create_swatches(colors);
 	$.ajax({
 		type: 'GET',
-		url: $SCRIPT_ROOT + 'static/test.json',
+		url: window.location.pathname,
 		dataType: 'json',
 		success: function (resp, xmlstatus) {
-			for (i in resp.images) {
-				var image = resp.images[i];
-				load_image(image.url, image.data, image.id);
+			for (var l = resp.images.length, i = 0; i < l; ++i) {
+				load_image(resp.images[i]);
 			}
 			image_count = resp.images.length;
 			pages = resp.pages;
-			var sounds = [];
-			for (i in pages) {
-				if (pages[i].audio) sounds.push(pages[i].audio);
+			$.ionSound({ "sounds": resp.sounds, path: '/static/' });
+			if (resp.simultaneous) {
+			    simultaneous = true;
+			    sentence_image_delay = 0; // show image at same time as sentence
 			}
-			$.ionSound({ "sounds": sounds, path: $SCRIPT_ROOT + 'static/' });
 		},
 		error: function (xhr, status, error) {
 			alert(error);
@@ -133,7 +137,9 @@ set_image_dimensions = function ( ) {
 	var image = $('svg');
 	var win = $(window);
 	var padding = $('body').css('padding').split('px')[0];
-	image.css('max-height', win.height() - padding - $('.color_choice').outerHeight() + 'px');
+	var maxheight = win.height() - 2 * padding - 50 - $('.color_choice').outerHeight();
+	if (simultaneous) maxheight -= $('#sentence').outerHeight();
+	image.css('max-height', maxheight + 'px');
 	image.css('max-width', win.width() - 2 * padding + 'px');
 }
 
@@ -155,14 +161,13 @@ insert_swatches = function (colors) {
 
 create_swatches = function (colors) {
     insert_swatches(colors);
-    $('.color_choice').last().append('<img src="' + $SCRIPT_ROOT + 'static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
+    $('.color_choice').last().append('<img src="/static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 }
 
-load_image = function (url, data, name) {
+load_image = function (name) {
 	$.ajax({
 		type: 'GET',
-		url: $SCRIPT_ROOT + 'static/' + url,
-		data: data,
+		url: '/static/' + name,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
 			images[name] = svg_resp;
@@ -185,18 +190,17 @@ start_page = function ( ) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
-	$.ionSound.play(page.audio);
+	if (page.audio) $.ionSound.play(page.audio);
 }
 
 start_image = function ( ) {
 	var image = $('#coloring_book_image');
 	image.empty();
 	image.append(images[page.image]);
+	if (! simultaneous) $('#sentence').hide();
+	$('#controls').show();
 	set_image_dimensions();
 	add_coloring_book_events();
-	$('#sentence').hide();
-	$('#controls').show();
-	$(document).scrollTop(400);
 	page_onset = $.now();
 }
 
@@ -207,23 +211,32 @@ end_page = function ( ) {
 		first_command = last_command = null;
 		start_page();
 	} else {
-		send_data();
+		$('#ending_form').show();
 	}
+}
+
+handle_evaluation = function (form) {
+    var raw_data = $(form).serializeArray();
+    for (var l = raw_data.length, i = 0; i < l; ++i) {
+        evaluation_data[raw_data[i].name] = raw_data[i].value;
+    }
+    send_data();
 }
 
 send_data = function ( ) {
 	var data = {
-		survey: 'test',
 		subject: form_data,
-		results: page_data
+		results: page_data,
+		evaluation: evaluation_data
 	};
 	$.ajax({
 		type: 'POST',
-		url: $SCRIPT_ROOT + 'submit',
+		url: window.location.pathname + '/submit',
 		'data': JSON.stringify(data),
 		contentType: 'application/json',
 		success: function (result) {
 			var inst = $('#instructions');
+			$('#ending_form').hide();
 			if (result == 'Success') {
 			    inst.html(
 			        'Dank voor je deelname aan dit experiment.<br/>' +

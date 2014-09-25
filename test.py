@@ -17,7 +17,7 @@ def test_all ( ):
     testmod(coloringbook.models)
     testmod(coloringbook.views, optionflags = ELLIPSIS)
     testmod(coloringbook.admin)
-    testmod(coloringbook.admin.utilities)
+    testmod(coloringbook.admin.utilities, optionflags = ELLIPSIS)
     testmod(coloringbook.admin.forms)
     testmod(coloringbook.admin.views)
 

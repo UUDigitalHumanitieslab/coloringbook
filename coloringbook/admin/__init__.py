@@ -44,6 +44,6 @@ def create_admin (app):
     admin.add_view(PageView(sess))
     admin.add_view(DrawingView(sess))
     admin.add_view(SoundView(sess))
-    admin.add_view(ModelView(Color, sess, name = 'Colors'))
-    admin.add_view(ModelView(Language, sess, name = 'Languages'))
+    admin.add_view(ColorView(sess))
+    admin.add_view(LanguageView(sess))
     return admin

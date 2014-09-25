@@ -10,9 +10,9 @@
     http://flask.pocoo.org/docs/0.10/patterns/packages/.
 """
 
-from datetime import date
+from datetime import date, datetime
 
-from flask import Blueprint, render_template, request, json
+from flask import Blueprint, render_template, request, json, abort, jsonify
 
 from .models import *
 
@@ -24,24 +24,70 @@ site = Blueprint('site', __name__)
 def index():
     return render_template('coloringbook.html')
 
-@site.route('/submit', methods=['POST'])
-def submit():
+def get_survey_pages (survey):
+    """ Returns all pages that are associated with a survey. """
+    return (
+        Page.query
+        .join(*Page.surveys.attr)
+        .filter(Survey.id == survey.id)
+        .order_by(SurveyPage.ordering)
+        .all()
+    )
+    
+@site.route('/book/<survey_name>')
+def fetch_coloringbook (survey_name):
+    """
+        Depending on whether the current request is XHR, either render
+        the coloringbook HTML backbone (if not XHR) or render the
+        pages associated with the current survey in JSON format (if
+        XHR).
+    """
+    try:
+        survey = Survey.query.filter_by(name = survey_name).one()
+        today = datetime.today()
+        if (survey.end and survey.end < today or
+                survey.begin and survey.begin > today):
+            raise RuntimeError('Survey not available at this time.')
+        if request.is_xhr:
+            pages = get_survey_pages(survey)
+            page_list = []
+            audio_set = set()
+            image_set = set()
+            for p in pages:
+                image = p.drawing.name + '.svg'
+                image_set.add(image)
+                page = {'image': image}
+                if p.sound:
+                    sound = p.sound.name
+                    audio_set.add(sound)
+                    page['audio'] = sound
+                if p.text:
+                    page['text'] = p.text
+                else:
+                    page['text'] = ''
+                page_list.append(page)
+            return jsonify(
+                simultaneous = survey.simultaneous,
+                images = [i for i in image_set],
+                sounds = [s for s in audio_set],
+                pages = page_list )
+        else:
+            return render_template('coloringbook.html')
+    except Exception as e:
+        abort(404)
+
+@site.route('/book/<survey_name>/submit', methods=['POST'])
+def submit(survey_name):
     """ Parse and store data sent by the test subject, all in one go. """
     
     s = db.session
     try:
+        survey = Survey.query.filter_by(name = survey_name).one()
         data = request.get_json()
         subject = subject_from_json(data['subject'])
         s.add(subject)
-        survey = Survey.query.filter_by(name = data['survey']).one()
-        survey.subjects.append(subject)
-        pages = (
-            Page.query
-            .join(*Page.surveys.attr)
-            .filter(Survey.id == survey.id)
-            .order_by(SurveyPage.ordering)
-            .all()
-        )
+        bind_survey_subject(survey, subject, data['evaluation'])
+        pages = get_survey_pages(survey)
         results = data['results']
         assert len(pages) == len(results)
         for page, result in zip(pages, results):
@@ -117,6 +163,47 @@ def subject_from_json (data):
         SubjectLanguage(subject = subject, language = language, level = level)
     
     return subject
+
+def bind_survey_subject (survey, subject, evaluation):
+    """
+        Create the association between a Survey and a Subject, with associated evaluation data from a parsed JSON dictionary.
+        
+        Example of usage:
+        
+        >>> import coloringbook.models as m, coloringbook.testing as t
+        >>> from flask import jsonify
+        >>> from datetime import datetime
+        >>> app = t.get_fixture_app()
+        >>> testsurvey = m.Survey(name = 'test')
+        >>> testsubject = m.Subject(name = 'Koos', birth = datetime.now())
+        >>> testevaluation = {
+        ...     'difficulty': 5,
+        ...     'topic': 'was this about anything?',
+        ...     'comments': 'no comment.',
+        ... }
+        >>> with app.app_context():
+        ...     bind_survey_subject(testsurvey, testsubject, testevaluation)
+        
+        >>> testsurvey.subjects[0].name
+        'Koos'
+        >>> testsurvey.survey_subjects[0].difficulty
+        5
+        >>> testsurvey.survey_subjects[0].topic
+        'was this about anything?'
+        >>> testsurvey.survey_subjects[0].comments
+        'no comment.'
+        >>> testsubject.surveys[0].name
+        'test'
+        >>> testsubject.subject_surveys[0].difficulty
+        5
+    """
+    binding = SurveySubject(survey = survey, subject = subject)
+    if 'difficulty' in evaluation:
+        binding.difficulty = evaluation['difficulty']
+    if 'topic' in evaluation:
+        binding.topic = evaluation['topic']
+    if 'comments' in evaluation:
+        binding.comments = evaluation['comments']
     
 def fills_from_json (survey, page, subject, data):
     """
