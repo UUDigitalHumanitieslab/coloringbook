@@ -1,12 +1,37 @@
 # Coloringbook -- current version #
 
-## 0.1a -- deployment ##
+## 0.3b ##
+
+This beta release is complete enough to be usable in principle. Apart
+from some dots and crosses, the only functionality that is still
+really missing is an admin model view of subjects with export options.
+
+Additions and improvements in this version: restriction of editing
+capabilities in the Color and Language admin model views, strongly
+improved and extended CSV export, possibility to display a sentence
+simultaneously with the drawing, better modularity of admin templates,
+explicit usage of the InnoDB engine for all database tables, addition
+of the evaluation form, better scaling of the drawing to fit the
+viewport, authentic instructions and form texts, and dynamic fetching
+of surveys by URL.
+
+
+# Version history #
+
+## 0.2a ##
+
+This alpha release adds improved documentation with doctest, a
+minimalist testing infrastructure, improved configuration handling,
+more customized model views, adherence to PEP 257, the possibility to
+edit drawings, pages and page expectations from the admin interface,
+uploading of sound recordings, a File abstraction that both Drawing
+and Sound ORMs derive from, and better colors.
+
+
+## 0.1a ##
 
 This alpha release contains the necessary infrastructure to enable
 deployment on an Apache server. It also implements most of the
 application functionality. Still lacking are the possibility to define
 pages for custom drawings, as well as the possibility to serve
 customized surveys to test subjects.
-
-
-# Version history #
