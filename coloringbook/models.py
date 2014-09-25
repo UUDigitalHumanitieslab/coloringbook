@@ -222,7 +222,7 @@ class Color (db.Model):
     name = db.Column(db.String(20), nullable = False)  # mnemonic
     
     def __str__ (self):
-        return self.code
+        return self.name
 
 class Expectation (db.Model):
     """ Expected Color for a particular Area on a particular Page. """
