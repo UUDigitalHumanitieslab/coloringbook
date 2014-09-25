@@ -266,18 +266,19 @@ class SurveyView (ModelView):
     edit_template = 'admin/augmented_edit.html'
     create_template = 'admin/augmented_create.html'
     can_delete = False
-    column_list = 'name language begin end information'.split()
+    column_list = 'name language begin end simultaneous information'.split()
     column_sortable_list = (
         ('name', Survey.name),
         ('language', Language.name),
         'begin',
         'end',
+        'simultaneous',
     )
     column_auto_select_related = True
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'information', 'page_list')
+    form_columns = ('name', 'language', 'begin', 'end', 'simultaneous', 'information', 'page_list')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
     }
