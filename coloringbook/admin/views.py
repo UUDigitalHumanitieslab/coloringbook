@@ -327,12 +327,12 @@ class PageView(ModelView):
     form_create_rules = form_columns[:5]  # up to sound
     form_edit_rules = (
         'name',
-        rules.Container('hide', rules.Field('drawing')),
+        rules.Container('forms.hide', rules.Field('drawing')),
         'language',
         'text',
         'sound',
-        rules.Container('hide', rules.Field('fname')),
-        rules.Container('hide', rules.Field('expect_list')),
+        rules.Container('forms.hide', rules.Field('fname')),
+        rules.Container('forms.hide', rules.Field('expect_list')),
         rules.Macro('drawing.edit_expectations'),
     )
     
@@ -385,8 +385,8 @@ class DrawingView(ModelView):
     }
     form_create_rules = ('file',)
     form_edit_rules = (
-        rules.Container('hide', rules.Field('area_list')),
-        rules.Container('hide', rules.Field('svg_source')),
+        rules.Container('forms.hide', rules.Field('area_list')),
+        rules.Container('forms.hide', rules.Field('svg_source')),
         rules.Macro('drawing.edit_areas'),
     )
         

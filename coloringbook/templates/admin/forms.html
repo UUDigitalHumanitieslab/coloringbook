@@ -1,3 +1,9 @@
+{% macro hide ( ) %}
+    <div style="display: none;">
+        {{ caller() }}
+    </div>
+{% endmacro %}
+
 {% macro enable_select2multiple ( ) %}
     <script>
         $('input[data-choices]').each(function ( ) {
