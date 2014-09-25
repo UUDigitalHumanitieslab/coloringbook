@@ -137,7 +137,9 @@ set_image_dimensions = function ( ) {
 	var image = $('svg');
 	var win = $(window);
 	var padding = $('body').css('padding').split('px')[0];
-	image.css('max-height', win.height() - padding - $('.color_choice').outerHeight() + 'px');
+	var maxheight = win.height() - 2 * padding - 50 - $('.color_choice').outerHeight();
+	if (simultaneous) maxheight -= $('#sentence').outerHeight();
+	image.css('max-height', maxheight + 'px');
 	image.css('max-width', win.width() - 2 * padding + 'px');
 }
 
@@ -195,11 +197,10 @@ start_image = function ( ) {
 	var image = $('#coloring_book_image');
 	image.empty();
 	image.append(images[page.image]);
-	set_image_dimensions();
-	add_coloring_book_events();
 	if (! simultaneous) $('#sentence').hide();
 	$('#controls').show();
-	$(document).scrollTop(400);
+	set_image_dimensions();
+	add_coloring_book_events();
 	page_onset = $.now();
 }
 
