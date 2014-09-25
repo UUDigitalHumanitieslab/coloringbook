@@ -32,7 +32,10 @@ __all__ = [
     'SurveyView',
     'PageView',
     'DrawingView',
-    'SoundView'     ]
+    'SoundView',
+    'ColorView',
+    'LanguageView',
+]
 
 file_path = op.join(op.dirname(__file__), '..', 'static')
 
@@ -465,3 +468,19 @@ def delete_sound(mapper, connection, target):
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
+
+class ColorView(ModelView):
+    """ Lookup table of colors with associated codes. """
+    can_edit = False
+    can_create = False
+    can_delete = False
+    column_list = ('name', 'code')
+    def __init__ (self, session, **kwargs):
+        super(ColorView, self).__init__(Color, session, name='Colors', **kwargs)
+    
+class LanguageView(ModelView):
+    """ Lookup table of languages that allows edits and additions. """
+    can_delete = False  # necessary because this may cause information loss
+    def __init__ (self, session, **kwargs):
+        super(LanguageView, self).__init__(Language, session, name='Languages', **kwargs)
+    
