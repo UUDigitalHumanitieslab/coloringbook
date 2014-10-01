@@ -268,7 +268,6 @@ class SurveyView (ModelView):
     
     edit_template = 'admin/augmented_edit.html'
     create_template = 'admin/augmented_create.html'
-    can_delete = False
     column_list = 'name language begin end simultaneous information'.split()
     column_sortable_list = (
         ('name', Survey.name),
