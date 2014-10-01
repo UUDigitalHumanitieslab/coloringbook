@@ -1,5 +1,13 @@
 # Coloringbook -- current version #
 
+## 0.3b1 ##
+
+This hotfix release fixes some issues that caused the application to
+work in Flask-SQLAlchemy version 0.16, but not in version 1.0.
+
+
+# Version history #
+
 ## 0.3b ##
 
 This beta release is complete enough to be usable in principle. Apart
@@ -15,8 +23,6 @@ of the evaluation form, better scaling of the drawing to fit the
 viewport, authentic instructions and form texts, and dynamic fetching
 of surveys by URL.
 
-
-# Version history #
 
 ## 0.2a ##
 
