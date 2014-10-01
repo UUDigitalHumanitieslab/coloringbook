@@ -30,6 +30,7 @@ from .forms import Select2MultipleField
 
 __all__ = [
     'FillView',
+    'SubjectView',
     'SurveyView',
     'PageView',
     'DrawingView',
@@ -105,7 +106,7 @@ class ModelView (sqla.ModelView):
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
     
-    list_template = 'admin/augmented_list.html'
+    list_template = 'admin/fill_list.html'
     can_create = False
     can_edit = False
     can_delete = False
@@ -269,6 +270,74 @@ class FillView (ModelView):
                 Fill.subject_id )
             .subquery('sub')
         )
+    
+class SubjectView (ModelView):
+    can_edit = False
+    can_create = False
+    list_template = 'admin/subject_list.html'
+    column_display_pk = True
+    column_auto_select_related = True
+    column_labels = {'id': 'ID'}
+    column_filters = (
+        filters.FilterEqual(Subject.id, 'ID'),
+        filters.FilterNotEqual(Subject.id, 'ID'),
+        'name',
+        'birth',
+        'eyesight',
+    )
+    
+    def __init__ (self, session, **kwargs):
+        super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
+    
+    @expose('/csv/subjects')
+    @csvdownload
+    def export_subjects (self):
+        """ Export personals, language summary and survey evaluation. """
+        
+        language_primary = db.aliased(SubjectLanguage)
+        query = (
+            self.session.query(
+                Subject.id,
+                Subject.name,
+                Subject.numeral,
+                Subject.birth,
+                Subject.eyesight,
+                db.func.count(SubjectLanguage.language_id),
+                db.func.concat(Language.name, ','),
+                Survey.name,
+                SurveySubject.difficulty,
+                SurveySubject.topic,
+                SurveySubject.comments )
+            .select_from(SurveySubject)
+            .join(SurveySubject.subject)
+            .join(SurveySubject.survey)
+            .join(Subject.subject_languages)
+            .group_by(Subject.id, Survey.id)
+            .join(language_primary, Subject.id == language_primary.subject_id)
+            .filter(language_primary.level == 10)
+            .join(language_primary.language)
+            .group_by(Subject.id, Survey.id)
+        )
+        headers = (
+            'id', 'name', 'numeral', 'birth', 'eyesight',
+            '#lang', 'nativelang', 'survey', 'difficulty', 'topic', 'comments',
+        )
+        return query, headers, 'subjectdata'
+    
+    @expose('/csv/languages')
+    @csvdownload
+    def export_languages (self):
+        """ Export complete language data from the database. """
+        query = (
+            self.session.query(
+                SubjectLanguage.subject_id,
+                Language.name,
+                SubjectLanguage.level )
+            .select_from(SubjectLanguage)
+            .join(SubjectLanguage.language)
+        )
+        headers = 'id language level'.split()
+        return query, headers, 'subject-languagedata'
     
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
