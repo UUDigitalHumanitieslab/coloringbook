@@ -17,6 +17,7 @@ from wtforms import fields
 from flask import request, url_for, redirect, flash, json
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
+import flask.ext.admin.contrib.sqla.filters as filters
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts, rules
 from flask.ext.admin.model.helpers import get_mdict_item_or_list
@@ -117,7 +118,13 @@ class FillView (ModelView):
         'time',
         ('color', Color.code),
     )
-    column_filters = column_list[:4]
+    column_filters = (
+        'survey',
+        'page',
+        'area',
+        filters.FilterEqual(Fill.subject_id, 'Subject / ID'),
+        filters.FilterNotEqual(Fill.subject_id, 'Subject / ID'),
+    )
 #    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
     column_display_all_relations = True
