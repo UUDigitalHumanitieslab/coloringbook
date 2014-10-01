@@ -289,7 +289,7 @@ class SubjectView (ModelView):
     def __init__ (self, session, **kwargs):
         super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
     
-    @expose('/csv')
+    @expose('/csv/subjects')
     @csvdownload
     def export_subjects (self):
         """ Export personals, language summary and survey evaluation. """
@@ -323,6 +323,21 @@ class SubjectView (ModelView):
             '#lang', 'nativelang', 'survey', 'difficulty', 'topic', 'comments',
         )
         return query, headers, 'subjectdata'
+    
+    @expose('/csv/languages')
+    @csvdownload
+    def export_languages (self):
+        """ Export complete language data from the database. """
+        query = (
+            self.session.query(
+                SubjectLanguage.subject_id,
+                Language.name,
+                SubjectLanguage.level )
+            .select_from(SubjectLanguage)
+            .join(SubjectLanguage.language)
+        )
+        headers = 'id language level'.split()
+        return query, headers, 'subject-languagedata'
     
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
