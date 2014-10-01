@@ -7,9 +7,17 @@
 
 {% block model_menu_bar %}
     <div class="dropdown pull-right">
-        <a href="javascript:document.location.pathname += 'csv';">
+        <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
             Export
         </a>
+        <b class="caret"></b>
+        <ul class="dropdown-menu">
+            <li><a href="javascript:document.location.pathname += 'csv/subjects';">
+                Per-subject summary
+            </a></li>
+            <li><a href="javascript:document.location.pathname += 'csv/languages';">
+                Full language information
+            </a></li>
     </div>
     {{ super() }}
 {% endblock %}
