@@ -274,7 +274,7 @@ class FillView (ModelView):
 class SubjectView (ModelView):
     can_edit = False
     can_create = False
-    #list_template = 'admin/subject_list.html'
+    list_template = 'admin/subject_list.html'
     column_display_pk = True
     column_auto_select_related = True
     column_labels = {'id': 'ID'}

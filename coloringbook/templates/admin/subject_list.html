@@ -1,0 +1,15 @@
+{#
+    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+#}
+
+{% extends 'admin/model/list.html' %}
+
+{% block model_menu_bar %}
+    <div class="dropdown pull-right">
+        <a href="javascript:document.location.pathname += 'csv';">
+            Export
+        </a>
+    </div>
+    {{ super() }}
+{% endblock %}
