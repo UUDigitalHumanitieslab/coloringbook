@@ -30,6 +30,7 @@ from .forms import Select2MultipleField
 
 __all__ = [
     'FillView',
+    'SubjectView',
     'SurveyView',
     'PageView',
     'DrawingView',
@@ -269,6 +270,24 @@ class FillView (ModelView):
                 Fill.subject_id )
             .subquery('sub')
         )
+    
+class SubjectView (ModelView):
+    can_edit = False
+    can_create = False
+    #list_template = 'admin/subject_list.html'
+    column_display_pk = True
+    column_auto_select_related = True
+    column_labels = {'id': 'ID'}
+    column_filters = (
+        filters.FilterEqual(Subject.id, 'ID'),
+        filters.FilterNotEqual(Subject.id, 'ID'),
+        'name',
+        'birth',
+        'eyesight',
+    )
+    
+    def __init__ (self, session, **kwargs):
+        super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
     
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """

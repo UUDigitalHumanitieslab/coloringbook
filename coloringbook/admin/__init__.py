@@ -40,6 +40,7 @@ def create_admin (app):
     with app.app_context():
         from .views import *
     admin.add_view(FillView(sess))
+    admin.add_view(SubjectView(sess))
     admin.add_view(SurveyView(sess))
     admin.add_view(PageView(sess))
     admin.add_view(DrawingView(sess))
