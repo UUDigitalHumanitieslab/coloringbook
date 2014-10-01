@@ -4,10 +4,10 @@
 #}
 
 {% extends 'admin/model/edit.html' %}
-{% import 'admin/select2multiple.html' as select %}
+{% import 'admin/forms.html' as forms %}
 
 {% block tail %}
     {{ super() }}
     <script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
-    {{ select.enable_select2multiple() }}
+    {{ forms.enable_select2multiple() }}
 {% endblock %}

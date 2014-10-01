@@ -72,7 +72,6 @@ class InnoDBSQLAlchemy (fsqla.SQLAlchemy):
         base = fsqla.declarative_base(
             cls = fsqla.Model,
             name = 'Model',
-            mapper = fsqla.signalling_mapper,
             metaclass = TableArgsMeta(
                 fsqla._BoundDeclarativeMeta,
                 {'mysql_engine': 'InnoDB'} ) )
