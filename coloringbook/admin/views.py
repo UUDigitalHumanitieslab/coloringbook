@@ -106,7 +106,7 @@ class ModelView (sqla.ModelView):
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
     
-    list_template = 'admin/augmented_list.html'
+    list_template = 'admin/fill_list.html'
     can_create = False
     can_edit = False
     can_delete = False
