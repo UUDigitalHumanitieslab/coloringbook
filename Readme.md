@@ -4,8 +4,6 @@ Coloringbook
 A web-based coloringbook survey application
 by Digital Humanities Lab, Utrecht University
 
-**Note**: this Readme may be outdated.
-
 
 Why does it exist?
 ------------------
@@ -18,11 +16,11 @@ What does it do?
 
 Test subjects are presented with a subscription form, instructions, a series of coloringbook pages and finally an evaluation form. After both forms have been completed and all pages have been colored, all data are submitted to the server at once.
 
-When a coloringbook page is presented, initially a sentence is displayed, in written text, sound or both. Then, the drawing is shown and the subject is given the means to pick colors and fill areas of the drawing by point-and-click. This also works on touch devices. All data for the coloringbook pages are downloaded to the client side at once before the survey starts.
+When a coloringbook page is presented, initially a sentence is displayed, in written text, sound or both. Then, the drawing is shown and the subject is given the means to pick colors and fill areas of the drawing by point-and-click. The researcher may also opt to offer the sentence simultaneously with the drawing. This also works on touch devices. All data for the coloringbook pages are downloaded to the client side at once before the survey starts.
 
 On the server side, all coloring data are collected in a table that can be filtered by survey, page, area and subject. Each individual fill action is recorded with the color and the exact elapsed time since the drawing appeared on screen. Researchers can also define expected results for each page and compare the data with their expectations. Tables can be exported to CSV for further processing in any spreadsheet or statistics software.
 
-Researchers will be able to compose their own surveys with custom images and sounds. The surveys are made available to test subjects through a fixed URL. This functionality is not fully implemented yet.
+Researchers can compose their own surveys with custom images and sounds. The surveys are made available to test subjects through a fixed URL.
 
 
 How to deploy?
@@ -35,10 +33,10 @@ On the server side, Coloringbook is a WSGI application, which means that it will
   - Python 2.6 or later (Python 3 not supported)
   - MySQL 5.5 or later
   - MySQL-Python
-  - SQLAlchemy 0.7 or later
-  - Flask 0.8 or later
-  - Flask-Admin
-  - Flask-SQLAlchemy
+  - SQLAlchemy 0.9 or later
+  - Flask 0.10 or later
+  - Flask-Admin 1.0 or later
+  - Flask-SQLAlchemy 1.0 or later
 
 You may also need `pip` in order to install some of these packages.
 
@@ -49,11 +47,12 @@ Assuming you opt to use MySQL (or anything other than SQLite), you need to creat
 
 **Note** that you should not use the password quoted above. You can choose the name of the database and the name of the user freely as well.
 
-Coloringbook obtains the necessary information to connect to the database from a user-provided configuration file. Optionally, you may also set a [`SECRET_KEY`](http://flask.pocoo.org/docs/api/?highlight=secret%20key#flask.Flask.secret_key). This is what the file contents should minimally look like:
+Coloringbook obtains the necessary information to connect to the database from a user-provided configuration file. This is what the file contents should minimally look like:
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
+    SECRET_KEY = '12345678901234567890'
 
-This file should be saved with a `.py` extension. The absolute path to the file needs to be available from the environment variable `COLORINGBOOK_CONFIG` when the application starts.
+This file should be saved with a `.py` extension. The WSGI script should import this module and pass it as the only argument to coloringbook.create_app. Please refer 
 
 To use Coloringbook with Apache and mod_wsgi, copy, rename and edit the `apache-template.conf` file to suit your needs and insert your edited version into the `conf.d` subdirectory of wherever Apache happens to be installed on your server. Your application will be running after you restart Apache.
 
