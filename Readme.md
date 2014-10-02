@@ -52,7 +52,7 @@ Coloringbook obtains the necessary information to connect to the database from a
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
 
-This file should be saved with a `.py` extension. The WSGI script should import this module and pass it as the only argument to coloringbook.create_app. Please refer 
+This file should be saved with a `.py` extension. The WSGI script should import this module and pass it as the only argument to coloringbook.create_app. Please refer to the example WSGI script for details.
 
 To use Coloringbook with Apache and mod_wsgi, copy, rename and edit the `apache-template.conf` file to suit your needs and insert your edited version into the `conf.d` subdirectory of wherever Apache happens to be installed on your server. Your application will be running after you restart Apache.
 
@@ -60,3 +60,8 @@ The application does not take care of authentication or authorization. You shoul
 
 For development, you may run a local test server by invoking the included `run.py` script. This will also switch on debugging settings. It does not require Apache or any other proper webserver. The application will run on `localhost:5000`.
 
+
+Development
+-----------
+
+An overview of the database layout is given in `Database.svg`. For the complete specification, refer to `coloringbook/models.py`. Anything in `admin` subfolders is specific to the admin interface. Everything else in the `coloringbook` package is involved in delivering surveys to subjects and receiving data from them. Motivations are documented throughout the code in comments; with some referencing to documentation for Flask, SQLAlchemy and jQuery, you should be able to find your way.
