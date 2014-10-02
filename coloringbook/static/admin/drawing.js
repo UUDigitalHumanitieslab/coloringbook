@@ -174,8 +174,8 @@
     }
     
     // Visually display the expectation for a given $(path): solid
-    // fill if the given color is expected in the given path, a spiky
-    // dashed stroke if the color is expected elsewhere.
+    // fill if the given color is expected in the given path, slightly
+    // translucent fill if the color is expected elsewhere.
     function render_expectation (path, color, here) {
         if (! color) {
             // This might be risky.
