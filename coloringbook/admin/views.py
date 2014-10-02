@@ -424,7 +424,11 @@ class PageView(ModelView):
             new_expectations = json.loads(form.expect_list.data)
             for area_name, settings in new_expectations.iteritems():
                 color = Color.query.filter_by(code = settings['color']).one()
-                area = Area.query.filter_by(name = area_name).one()
+                area = (
+                    Area.query
+                    .filter_by(name = area_name, drawing = model.drawing)
+                    .one()
+                )
                 model.expectations.append(Expectation(
                     area = area,
                     color = color,
