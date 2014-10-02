@@ -287,6 +287,7 @@ class SubjectView (ModelView):
         'birth',
         'eyesight',
     )
+    page_size = 100
     
     def __init__ (self, session, **kwargs):
         super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
