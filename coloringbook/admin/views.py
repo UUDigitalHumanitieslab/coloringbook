@@ -125,6 +125,7 @@ class FillView (ModelView):
         'area',
         filters.FilterEqual(Fill.subject_id, 'Subject / ID'),
         filters.FilterNotEqual(Fill.subject_id, 'Subject / ID'),
+        'subject',
     )
 #    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
@@ -286,6 +287,7 @@ class SubjectView (ModelView):
         'birth',
         'eyesight',
     )
+    page_size = 100
     
     def __init__ (self, session, **kwargs):
         super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
@@ -422,7 +424,11 @@ class PageView(ModelView):
             new_expectations = json.loads(form.expect_list.data)
             for area_name, settings in new_expectations.iteritems():
                 color = Color.query.filter_by(code = settings['color']).one()
-                area = Area.query.filter_by(name = area_name).one()
+                area = (
+                    Area.query
+                    .filter_by(name = area_name, drawing = model.drawing)
+                    .one()
+                )
                 model.expectations.append(Expectation(
                     area = area,
                     color = color,

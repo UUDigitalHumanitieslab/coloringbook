@@ -133,7 +133,11 @@
                 form_namefield.focus();
                 return;
             }
-            current_path.addClass('colorable');
+            if (current_path.attr('class')) {
+                current_path.addClass('colorable');
+            } else {
+                current_path.attr('class', 'colorable');
+            }
             current_path.attr('fill', 'white');
             current_path.attr('id', newname);
             if (oldname) delete areas[oldname];
