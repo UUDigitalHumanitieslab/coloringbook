@@ -125,6 +125,7 @@ class FillView (ModelView):
         'area',
         filters.FilterEqual(Fill.subject_id, 'Subject / ID'),
         filters.FilterNotEqual(Fill.subject_id, 'Subject / ID'),
+        'subject',
     )
 #    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
