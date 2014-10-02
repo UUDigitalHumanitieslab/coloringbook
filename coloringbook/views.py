@@ -22,7 +22,7 @@ site = Blueprint('site', __name__)
 
 @site.route('/')
 def index():
-    return render_template('coloringbook.html')
+    return 'Welkom bij Coloringbook.'
 
 def get_survey_pages (survey):
     """ Returns all pages that are associated with a survey. """
