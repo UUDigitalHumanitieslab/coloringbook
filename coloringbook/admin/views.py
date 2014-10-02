@@ -272,6 +272,7 @@ class FillView (ModelView):
         )
     
 class SubjectView (ModelView):
+    """ Custom admin table view of Subject data. """
     can_edit = False
     can_create = False
     list_template = 'admin/subject_list.html'
