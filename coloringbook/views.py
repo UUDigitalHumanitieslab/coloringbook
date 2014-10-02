@@ -22,7 +22,7 @@ site = Blueprint('site', __name__)
 
 @site.route('/')
 def index():
-    return render_template('coloringbook.html')
+    return 'Welkom bij Coloringbook.'
 
 def get_survey_pages (survey):
     """ Returns all pages that are associated with a survey. """
@@ -224,7 +224,7 @@ def fills_from_json (survey, page, subject, data):
         >>> testdrawing.areas.append(cb.models.Area(name='left door'))
         >>> testdrawing.areas.append(cb.models.Area(name='right door'))
         >>> testpage = cb.models.Page(name='page1', drawing=testdrawing, text='test 123')
-        >>> testsurvey = cb.models.Survey(name='test')
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous = False)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[

@@ -17,6 +17,7 @@ from wtforms import fields
 from flask import request, url_for, redirect, flash, json
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib import sqla
+import flask.ext.admin.contrib.sqla.filters as filters
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts, rules
 from flask.ext.admin.model.helpers import get_mdict_item_or_list
@@ -29,6 +30,7 @@ from .forms import Select2MultipleField
 
 __all__ = [
     'FillView',
+    'SubjectView',
     'SurveyView',
     'PageView',
     'DrawingView',
@@ -104,7 +106,7 @@ class ModelView (sqla.ModelView):
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
     
-    list_template = 'admin/augmented_list.html'
+    list_template = 'admin/fill_list.html'
     can_create = False
     can_edit = False
     can_delete = False
@@ -117,7 +119,14 @@ class FillView (ModelView):
         'time',
         ('color', Color.code),
     )
-    column_filters = column_list[:4]
+    column_filters = (
+        'survey',
+        'page',
+        'area',
+        filters.FilterEqual(Fill.subject_id, 'Subject / ID'),
+        filters.FilterNotEqual(Fill.subject_id, 'Subject / ID'),
+        'subject',
+    )
 #    column_default_sort = 'survey'  # doesn't work for some reason
     page_size = 100
     column_display_all_relations = True
@@ -263,12 +272,81 @@ class FillView (ModelView):
             .subquery('sub')
         )
     
+class SubjectView (ModelView):
+    """ Custom admin table view of Subject data. """
+    can_edit = False
+    can_create = False
+    list_template = 'admin/subject_list.html'
+    column_display_pk = True
+    column_auto_select_related = True
+    column_labels = {'id': 'ID'}
+    column_filters = (
+        filters.FilterEqual(Subject.id, 'ID'),
+        filters.FilterNotEqual(Subject.id, 'ID'),
+        'name',
+        'birth',
+        'eyesight',
+    )
+    page_size = 100
+    
+    def __init__ (self, session, **kwargs):
+        super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
+    
+    @expose('/csv/subjects')
+    @csvdownload
+    def export_subjects (self):
+        """ Export personals, language summary and survey evaluation. """
+        
+        language_primary = db.aliased(SubjectLanguage)
+        query = (
+            self.session.query(
+                Subject.id,
+                Subject.name,
+                Subject.numeral,
+                Subject.birth,
+                Subject.eyesight,
+                db.func.count(SubjectLanguage.language_id),
+                db.func.concat(Language.name, ','),
+                Survey.name,
+                SurveySubject.difficulty,
+                SurveySubject.topic,
+                SurveySubject.comments )
+            .select_from(SurveySubject)
+            .join(SurveySubject.subject)
+            .join(SurveySubject.survey)
+            .join(Subject.subject_languages)
+            .group_by(Subject.id, Survey.id)
+            .join(language_primary, Subject.id == language_primary.subject_id)
+            .filter(language_primary.level == 10)
+            .join(language_primary.language)
+            .group_by(Subject.id, Survey.id)
+        )
+        headers = (
+            'id', 'name', 'numeral', 'birth', 'eyesight',
+            '#lang', 'nativelang', 'survey', 'difficulty', 'topic', 'comments',
+        )
+        return query, headers, 'subjectdata'
+    
+    @expose('/csv/languages')
+    @csvdownload
+    def export_languages (self):
+        """ Export complete language data from the database. """
+        query = (
+            self.session.query(
+                SubjectLanguage.subject_id,
+                Language.name,
+                SubjectLanguage.level )
+            .select_from(SubjectLanguage)
+            .join(SubjectLanguage.language)
+        )
+        headers = 'id language level'.split()
+        return query, headers, 'subject-languagedata'
+    
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
     
     edit_template = 'admin/augmented_edit.html'
     create_template = 'admin/augmented_create.html'
-    can_delete = False
     column_list = 'name language begin end simultaneous information'.split()
     column_sortable_list = (
         ('name', Survey.name),
@@ -346,7 +424,11 @@ class PageView(ModelView):
             new_expectations = json.loads(form.expect_list.data)
             for area_name, settings in new_expectations.iteritems():
                 color = Color.query.filter_by(code = settings['color']).one()
-                area = Area.query.filter_by(name = area_name).one()
+                area = (
+                    Area.query
+                    .filter_by(name = area_name, drawing = model.drawing)
+                    .one()
+                )
                 model.expectations.append(Expectation(
                     area = area,
                     color = color,

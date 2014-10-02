@@ -1,6 +1,8 @@
 /*
     (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
     Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+    
+    It is helpful to think of this script as an event-driven state machine.
 */
 
 var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
@@ -15,8 +17,10 @@ var page_data = [];
 var form_data, evaluation_data = {};
 var images = {};
 var image_count = 0;
-var sentence_image_delay = 500;  // milliseconds
+var sentence_image_delay = 3000;  // milliseconds
 
+// Generates the HTML code for the form fields that let the subject
+// add another language (i.e. the `count`th language).
 lang_field = function (count) {
 	var lang = '="language' + count + '"';
 	var level = '="level' + count + '"';
@@ -26,6 +30,7 @@ lang_field = function (count) {
 		'<input type="number" name' + level + 'id' + level + ' min="1" max="10" step="1"/><br/>';
 }
 
+// Generates the HTML code for a swatch.
 button = function (color) {
 	return $('<span class="color_choice" style="background-color: ' +
 			color +
@@ -34,6 +39,7 @@ button = function (color) {
 			'"/>').data('color', color);
 }
 
+// All the things that need to be done after the DOM is ready.
 init_application = function ( ) {
 	$('#instructions').hide();
 	$('#sentence').hide();
@@ -56,6 +62,8 @@ init_application = function ( ) {
 	});
 	init_controls();
 	create_swatches(colors);
+	
+	// The part below retrieves the data about the coloringbook pages.
 	$.ajax({
 		type: 'GET',
 		url: window.location.pathname,
@@ -78,11 +86,13 @@ init_application = function ( ) {
 	});
 }
 
+// Return strings of the format YYYY-MM-DD.
 Date.prototype.toShortString = function ( ) {
     return this.toISOString().substring(0, 10);
 }
 
-// adopted from http://stackoverflow.com/questions/3761185/jquery-validate-date-range
+// Daterange checker for jQuery.validate.
+// adapted from http://stackoverflow.com/questions/3761185/jquery-validate-date-range
 $.validator.addMethod('daterange', function(value, element, arg) {
     if (this.optional(element)) return true;
 
@@ -95,6 +105,8 @@ $.validator.addMethod('daterange', function(value, element, arg) {
     return ((startDate <= enteredDate) && (enteredDate <= endDate));
 }, $.validator.format("De datum moet tussen {0} en {1} liggen."))
 
+// Put personalia form data into compact JSON format.
+// Result saved globally.
 handle_form = function (form) {
 	$(form).hide();
 	$('#instructions').show();
@@ -114,6 +126,7 @@ handle_form = function (form) {
 	}
 }
 
+// Event handler for the "klaar" button.
 finish_instructions = function ( ) {
 	$('#instructions').hide();
 	if (image_count > 0 && Object.keys(images).length == image_count) {
@@ -123,6 +136,7 @@ finish_instructions = function ( ) {
 	}
 }
 
+// Add more language fields when requested.
 init_controls = function ( ) {
 	$('#starting_form >[name="more"]').click(function () {
 		var self = $(this);
@@ -133,6 +147,7 @@ init_controls = function ( ) {
 	});
 }
 
+// Ensure that the page fills the screen exactly by scaling the SVG image.
 set_image_dimensions = function ( ) {
 	var image = $('svg');
 	var win = $(window);
@@ -143,6 +158,9 @@ set_image_dimensions = function ( ) {
 	image.css('max-width', win.width() - 2 * padding + 'px');
 }
 
+// Insert swatch buttons into the appropriate container element,
+// adding click event handlers as well as a white button.
+// Also sets the initially selected color.
 insert_swatches = function (colors) {
 	var swatches = $('#swatches');
 	swatches.empty();
@@ -159,11 +177,13 @@ insert_swatches = function (colors) {
 	color_chosen.click();
 }
 
+// Insert swatches and disguise the last (white) swatch as an eraser.
 create_swatches = function (colors) {
     insert_swatches(colors);
     $('.color_choice').last().append('<img src="/static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
 }
 
+// Retrieve an SVG image by filename.
 load_image = function (name) {
 	$.ajax({
 		type: 'GET',
@@ -178,6 +198,7 @@ load_image = function (name) {
 	});
 }
 
+// Add click event handlers to all .colorable areas in the SVG.
 add_coloring_book_events = function ( ) {
 	$('path[class~="colorable"]').click(function (event) {
 		event.preventDefault();  // helpful on touchscreen devices
@@ -186,6 +207,8 @@ add_coloring_book_events = function ( ) {
 	});
 }
 
+// Start a new coloring page by (dis)playing the sentence and set a
+// timeout for displaying the image (possibly zero).
 start_page = function ( ) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
@@ -193,6 +216,8 @@ start_page = function ( ) {
 	if (page.audio) $.ionSound.play(page.audio);
 }
 
+// Display the colorable image and prepare it for coloring.
+// Initializes the clock for coloring actions.
 start_image = function ( ) {
 	var image = $('#coloring_book_image');
 	image.empty();
@@ -204,6 +229,9 @@ start_image = function ( ) {
 	page_onset = $.now();
 }
 
+// Serialize data and do some cleanup after the subject is done
+// coloring the page. Prepare for the next stage, i.e. either another
+// coloring page or the evaluation form.
 end_page = function ( ) {
 	$('#controls').hide();
 	page_data.push(serialize_commands(first_command));
@@ -215,6 +243,7 @@ end_page = function ( ) {
 	}
 }
 
+// Serialize the evaluation form data and trigger uploading of all data.
 handle_evaluation = function (form) {
     var raw_data = $(form).serializeArray();
     for (var l = raw_data.length, i = 0; i < l; ++i) {
@@ -223,6 +252,7 @@ handle_evaluation = function (form) {
     send_data();
 }
 
+// Upload all data and handle possible failure.
 send_data = function ( ) {
 	var data = {
 		subject: form_data,
@@ -259,6 +289,7 @@ send_data = function ( ) {
 	});
 }
 
+// Abstraction of an action taken by a test subject.
 command = function (previous) {
 	if (previous) {
 		this.prev = previous;
@@ -271,6 +302,12 @@ command = function (previous) {
 	this.do = function ( ) { };
 }
 
+// Create a command object for filling a particular area in the
+// drawing with a particular color.
+// 
+// Note of historical interest: there used to be other types of
+// commands, but they became irrelevant when the user interface was
+// simplified.
 launch_fill_command = function (target, value) {
 	var cmd = new command(last_command);
 	cmd.target = target;
@@ -287,6 +324,8 @@ launch_fill_command = function (target, value) {
 	last_command = cmd;
 }
 
+// Serialize all actions taken by the test subject (since
+// `current_cmd`) into a single array, and return said array.
 serialize_commands = function (current_cmd) {
 	sequence = [];
 	while (current_cmd) {

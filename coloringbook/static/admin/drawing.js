@@ -133,7 +133,11 @@
                 form_namefield.focus();
                 return;
             }
-            current_path.addClass('colorable');
+            if (current_path.attr('class')) {
+                current_path.addClass('colorable');
+            } else {
+                current_path.attr('class', 'colorable');
+            }
             current_path.attr('fill', 'white');
             current_path.attr('id', newname);
             if (oldname) delete areas[oldname];
@@ -174,8 +178,8 @@
     }
     
     // Visually display the expectation for a given $(path): solid
-    // fill if the given color is expected in the given path, a spiky
-    // dashed stroke if the color is expected elsewhere.
+    // fill if the given color is expected in the given path, slightly
+    // translucent fill if the color is expected elsewhere.
     function render_expectation (path, color, here) {
         if (! color) {
             // This might be risky.

@@ -1,12 +1,23 @@
 # Coloringbook -- current version #
 
+## 1.0 ##
+
+The finished application, ready for deployment.
+
+Additions and improvements in this version: more documentation,
+including a visual representation of the database layout and a short
+manual in the admin interface, license terms, a subjects tab in the
+admin interface with export option, filtering subjects by ID, and
+removal of the coloringbook harness from the domain root.
+
+
+# Version history #
+
 ## 0.3b1 ##
 
 This hotfix release fixes some issues that caused the application to
 work in Flask-SQLAlchemy version 0.16, but not in version 1.0.
 
-
-# Version history #
 
 ## 0.3b ##
 
