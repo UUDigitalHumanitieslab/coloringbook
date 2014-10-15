@@ -120,7 +120,7 @@
     // field when applicable.
     function save_area ( ) {
         var oldname = current_path.attr('id'),
-            newname = form_namefield.val();
+            newname = form_namefield.val().replace(' ', '_');
         if (form_checkbox[0].checked) {
             if (! newname) {
                 alert('You really have to provide a name.');
