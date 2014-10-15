@@ -17,7 +17,7 @@ var page_data = [];
 var form_data, evaluation_data = {};
 var images = {};
 var image_count = 0;
-var sentence_image_delay = 3000;  // milliseconds
+var sentence_image_delay = 6000;  // milliseconds
 
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
@@ -234,6 +234,7 @@ start_image = function ( ) {
 // coloring page or the evaluation form.
 end_page = function ( ) {
 	$('#controls').hide();
+	$('#sentence').hide();
 	page_data.push(serialize_commands(first_command));
 	if (++pagenum < pages.length) {
 		first_command = last_command = null;

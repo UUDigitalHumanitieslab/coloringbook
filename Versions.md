@@ -1,5 +1,20 @@
 # Coloringbook -- current version #
 
+## 1.0.1 ##
+
+Small bugfix and enhancement release. Changes:
+
+  * Spaces in area names are automatically changed into underscores, in
+    order to prevent the issue where expectations are not pre-rendered in
+    the expectation editing form.
+  * Non-simultaneous sentences are displayed for six seconds instead of
+    three.
+  * Simultaneous sentences are removed before the final evaluation form
+    is shown.
+
+
+# Version history #
+
 ## 1.0 ##
 
 The finished application, ready for deployment.
@@ -10,8 +25,6 @@ manual in the admin interface, license terms, a subjects tab in the
 admin interface with export option, filtering subjects by ID, and
 removal of the coloringbook harness from the domain root.
 
-
-# Version history #
 
 ## 0.3b1 ##
 
