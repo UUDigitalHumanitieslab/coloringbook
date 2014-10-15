@@ -234,6 +234,7 @@ start_image = function ( ) {
 // coloring page or the evaluation form.
 end_page = function ( ) {
 	$('#controls').hide();
+	$('#sentence').hide();
 	page_data.push(serialize_commands(first_command));
 	if (++pagenum < pages.length) {
 		first_command = last_command = null;
