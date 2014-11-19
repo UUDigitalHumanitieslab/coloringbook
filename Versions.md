@@ -1,5 +1,18 @@
 # Coloringbook -- current version #
 
+## 1.1 ##
+
+A few small but important improvements:
+
+  * Addition of a privacy statement.
+  * Addition of a favicon and an application icon for the iPad.
+  * Use of the mousedown event instead of the click event, for faster 
+    response on touch devices.
+  * Font size adjustments.
+
+
+# Version history #
+
 ## 1.0.1 ##
 
 Small bugfix and enhancement release. Changes:
@@ -12,8 +25,6 @@ Small bugfix and enhancement release. Changes:
   * Simultaneous sentences are removed before the final evaluation form
     is shown.
 
-
-# Version history #
 
 ## 1.0 ##
 
