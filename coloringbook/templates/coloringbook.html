@@ -10,17 +10,19 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Kleurplaat</title>
+<link rel="icon" type="image/png" href="/static/favicon32.png" />
+<link rel="apple-touch-icon-precomposed" href="/static/favicon152.png" />
 <style type="text/css">
 * {
 	margin: 0;
 	padding: 0;
-	font-size: 24pt;
+	font-size: 18pt;
 }
 body {
 	padding: 50px;
 }
 input {
-	font-size: 18pt;
+	font-size: 14pt;
 }
 #swatches input {
 	font-size: 1px;
@@ -84,7 +86,9 @@ input.error {
 	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
 	(1: redelijk &ndash; 10: moedertaalniveau).<br />
 	<input type="button" name="more" value="+"/><br/>
-	<input type="submit"/>
+	<input type="submit"/><br /><br />
+	PRIVACY<br />
+    De gegevens die wij met deze app verzamelen zullen vertrouwelijk worden behandeld. Persoonlijke gegevens zullen niet worden vermeld, noch tijdens de studie, noch bij een eventuele publicatie van de resultaten van dit onderzoek.
 </form>
 
 <p id="instructions">
@@ -102,7 +106,7 @@ input.error {
 	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
 </p>
 
-<p id="sentence" style="font-size: 48pt; text-align: center; margin: auto;"></p>
+<p id="sentence" style="text-align: center; margin: auto;"></p>
 
 <div id="controls" style="padding-bottom: 50px;">
 	<div id="coloring_book_image"></div>

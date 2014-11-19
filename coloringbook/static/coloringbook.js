@@ -78,6 +78,9 @@ init_application = function ( ) {
 			if (resp.simultaneous) {
 			    simultaneous = true;
 			    sentence_image_delay = 0; // show image at same time as sentence
+			    $('#sentence').css('font-size', '24pt');
+			} else {
+			    $('#sentence').css('font-size', '48pt');
 			}
 		},
 		error: function (xhr, status, error) {
@@ -169,12 +172,12 @@ insert_swatches = function (colors) {
 	}
 	$(button('#fff')).appendTo(swatches);
 	color_chosen = $('.color_choice').first();
-	$('.color_choice').click(function (event) {
+	$('.color_choice').mousedown(function (event) {
 		color_chosen.css('border-color', '#fff');
 		color_chosen = $(this);
 		color_chosen.css('border-color', '#000');
 	});
-	color_chosen.click();
+	color_chosen.mousedown();
 }
 
 // Insert swatches and disguise the last (white) swatch as an eraser.
@@ -200,7 +203,7 @@ load_image = function (name) {
 
 // Add click event handlers to all .colorable areas in the SVG.
 add_coloring_book_events = function ( ) {
-	$('path[class~="colorable"]').click(function (event) {
+	$('path[class~="colorable"]').mousedown(function (event) {
 		event.preventDefault();  // helpful on touchscreen devices
 		launch_fill_command(this, color_chosen.data('color'));
 		$('#undo_redo').attr('value', 'Herstel');
