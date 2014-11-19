@@ -78,6 +78,9 @@ init_application = function ( ) {
 			if (resp.simultaneous) {
 			    simultaneous = true;
 			    sentence_image_delay = 0; // show image at same time as sentence
+			    $('#sentence').css('font-size', '24pt');
+			} else {
+			    $('#sentence').css('font-size', '48pt');
 			}
 		},
 		error: function (xhr, status, error) {
