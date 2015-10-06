@@ -28,17 +28,7 @@ How to deploy?
 
 On the client side, test subjects just need to run a HTML5 capable browser.
 
-On the server side, Coloringbook is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. An example configuration file for Apache with mod_wsgi is included. Apart from a WSGI-enabled webserver, Coloringbook has the following installation dependencies (assuming you will use MySQL as the database backend):
-
-  - Python 2.6 or later (Python 3 not supported)
-  - MySQL 5.5 or later
-  - MySQL-Python
-  - SQLAlchemy 0.9 or later
-  - Flask 0.10 or later
-  - Flask-Admin 1.0 or later
-  - Flask-SQLAlchemy 1.0 or later
-
-You may also need `pip` in order to install some of these packages.
+On the server side, Coloringbook is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. An example configuration file for Apache with mod_wsgi is included. Apart from a WSGI-enabled webserver, install the dependencies using `pip install -r requirements.txt`.
 
 Assuming you opt to use MySQL (or anything other than SQLite), you need to create an empty database with pre-configured access rights for the Coloringbook application to use. For example by entering the following commands while running `mysql` as root user:
 
