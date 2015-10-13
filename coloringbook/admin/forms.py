@@ -20,9 +20,12 @@ class Select2MultipleWidget(widgets.HiddenInput):
         By default, the `_value()` method will be called upon the
         associated field to provide the ``value=`` HTML attribute.
     """
+    
+    input_type = 'select2multiple'  # see flask-admin issue #511
 
     def __call__(self, field, **kwargs):
         kwargs.setdefault('data-choices', self.json_choices(field))
+        kwargs.setdefault('type', 'hidden')  # see flask-admin issue #511
         return super(Select2MultipleWidget, self).__call__(field, **kwargs)
     
     @staticmethod

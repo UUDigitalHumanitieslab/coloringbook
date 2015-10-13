@@ -70,16 +70,16 @@ def filters_from_request (self):
         >>> from coloringbook.admin.views import FillView
         >>> testapp = t.get_fixture_app()
         >>> s = cb.models.db.session
-        >>> with testapp.test_request_context('?flt1_22=rode'):
+        >>> with testapp.test_request_context('?flt1_39=rode'):
         ...     cb.admin.utilities.filters_from_request(FillView(s))
         [(<flask_admin.contrib.sqla.filters.FilterEqual object at 0x...>, u'rode')]
     """
     
-    filters = self._get_list_extra_args()[4]
+    filters = self._get_list_filter_args()
     applicables = []
 
     if filters and self._filters:
-        for idx, value in filters:
+        for idx, name, value in filters:
             flt = self._filters[idx]
             applicables.append((flt, value))
     
