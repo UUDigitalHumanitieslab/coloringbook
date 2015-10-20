@@ -73,8 +73,12 @@ init_application = function ( ) {
 				load_image(resp.images[i]);
 			}
 			image_count = resp.images.length;
+            var sounds = [];
+            for (var n = resp.sounds.length, i = 0; i < n; ++i) {
+                sounds.push({name: resp.sounds[i]});
+            }
+			ion.sound({"sounds": sounds, path: '/static/', preload: true});
 			pages = resp.pages;
-			$.ionSound({ "sounds": resp.sounds, path: '/static/' });
 			if (resp.simultaneous) {
 			    simultaneous = true;
 			    sentence_image_delay = 0; // show image at same time as sentence
@@ -216,7 +220,7 @@ start_page = function ( ) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
-	if (page.audio) $.ionSound.play(page.audio);
+	if (page.audio) ion.sound.play(page.audio);
 }
 
 // Display the colorable image and prepare it for coloring.
