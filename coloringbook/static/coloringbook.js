@@ -229,9 +229,9 @@ start_page = function ( ) {
 	if (page.audio) {
 		ion.sound.play(page.audio);
 		if (simultaneous) {
-			$('<button>').click(function() {
+			$('#speaker-icon').clone().attr({id: null}).click(function() {
 				ion.sound.play(page.audio);
-			}).prependTo('#sentence');
+			}).show().prependTo('#sentence');
 		}
 	}
 }
