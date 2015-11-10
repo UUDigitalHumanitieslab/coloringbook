@@ -226,7 +226,14 @@ start_page = function ( ) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
-	if (page.audio) ion.sound.play(page.audio);
+	if (page.audio) {
+		ion.sound.play(page.audio);
+		if (simultaneous) {
+			$('<button>').click(function() {
+				ion.sound.play(page.audio);
+			}).prependTo('#sentence');
+		}
+	}
 }
 
 // Display the colorable image and prepare it for coloring.
