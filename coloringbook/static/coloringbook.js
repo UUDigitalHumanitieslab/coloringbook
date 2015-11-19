@@ -5,6 +5,11 @@
     It is helpful to think of this script as an event-driven state machine.
 */
 
+var base = (function() {
+	var endpos = location.pathname.search('/book');
+	if (endpos == -1) endpos = location.pathname.search('/admin');
+	return location.pathname.slice(0, endpos);
+}());
 var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
 var color_chosen;
 var simultaneous = false;
@@ -73,8 +78,12 @@ init_application = function ( ) {
 				load_image(resp.images[i]);
 			}
 			image_count = resp.images.length;
+            var sounds = [];
+            for (var n = resp.sounds.length, i = 0; i < n; ++i) {
+                sounds.push({name: resp.sounds[i]});
+            }
+			ion.sound({"sounds": sounds, path: base + '/static/', preload: true});
 			pages = resp.pages;
-			$.ionSound({ "sounds": resp.sounds, path: '/static/' });
 			if (resp.simultaneous) {
 			    simultaneous = true;
 			    sentence_image_delay = 0; // show image at same time as sentence
@@ -183,14 +192,15 @@ insert_swatches = function (colors) {
 // Insert swatches and disguise the last (white) swatch as an eraser.
 create_swatches = function (colors) {
     insert_swatches(colors);
-    $('.color_choice').last().append('<img src="/static/lmproulx_eraser.png" title="Gum" alt="Gum"/>');
+		var eraser_path = base + '/static/lmproulx_eraser.png';
+    $('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
 // Retrieve an SVG image by filename.
 load_image = function (name) {
 	$.ajax({
 		type: 'GET',
-		url: '/static/' + name,
+		url: base + '/static/' + name,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
 			images[name] = svg_resp;
@@ -216,7 +226,14 @@ start_page = function ( ) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
-	if (page.audio) $.ionSound.play(page.audio);
+	if (page.audio) {
+		ion.sound.play(page.audio);
+		if (simultaneous) {
+			$('#speaker-icon').clone().attr({id: null}).click(function() {
+				ion.sound.play(page.audio);
+			}).show().prependTo('#sentence');
+		}
+	}
 }
 
 // Display the colorable image and prepare it for coloring.

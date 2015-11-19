@@ -1,5 +1,19 @@
 # Coloringbook -- current version #
 
+## 1.2 ##
+
+Update and enhancement release.
+
+  * pip requirements are pinned using `pip-compile`.
+  * All external dependencies were updated.
+  * Application can now be served from a non-root location (e.g. under
+    yourdomain.edu/coloringbook/)
+  * Sounds can be replayed with a button.
+  * Sounds should play more reliably on iPad.
+
+
+# Version history #
+
 ## 1.1 ##
 
 A few small but important improvements:
@@ -10,8 +24,6 @@ A few small but important improvements:
     response on touch devices.
   * Font size adjustments.
 
-
-# Version history #
 
 ## 1.0.1 ##
 

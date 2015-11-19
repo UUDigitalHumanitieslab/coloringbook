@@ -10,8 +10,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Kleurplaat</title>
-<link rel="icon" type="image/png" href="/static/favicon32.png" />
-<link rel="apple-touch-icon-precomposed" href="/static/favicon152.png" />
+<link rel="icon" type="image/png" href="{{
+	url_for('static', filename='favicon32.png')
+}}" />
+<link rel="apple-touch-icon-precomposed" href="{{
+	url_for('static', filename='favicon152.png')
+}}" />
 <style type="text/css">
 * {
 	margin: 0;
@@ -58,7 +62,7 @@ input.error {
 }
 </style>
 <script src="{{
-  url_for('static', filename='jquery-2.1.1.min.js') }}"></script>
+  url_for('static', filename='jquery-2.1.4.min.js') }}"></script>
 <script src="{{
   url_for('static', filename='ion.sound.min.js') }}"></script>
 <script src="{{
@@ -127,6 +131,8 @@ input.error {
     <textarea id="comments" name="comments" rows="3" cols="30"></textarea><br>
     <input type="submit">
 </form>
+
+<img src="//upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/36px-Speaker_Icon.svg.png" style="display: none; margin-right: 24pt; vertical-align: -8px;" id="speaker-icon">
 
 </body>
 </html>
