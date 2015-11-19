@@ -8,8 +8,12 @@
 {% block head %}
     {{ super() }}
     
-    <link rel="icon" type="image/png" href="/static/favicon32.png" />
-    <link rel="apple-touch-icon-precomposed" href="/static/favicon152.png" />
+    <link rel="icon" type="image/png" href="{{
+        url_for('static', filename='favicon32.png')
+    }}" />
+    <link rel="apple-touch-icon-precomposed" href="{{
+        url_for('static', filename='favicon152.png')
+    }}" />
 {% endblock head %}
 
 {% block head_css %}
@@ -49,8 +53,10 @@
     
     <p>The name of a survey also determines the URL at which your survey becomes available to test subjects (between the optional begin and end dates). For example, if your survey is called &ldquo;example&rdquo;, then test subjects have to follow this link in order to take it:</p>
     
-    <blockquote><a href="/book/example" id="replace_origin">
-        http://yourdomain.org/book/example
+    <blockquote><a href="{{ 
+        url_for('site.fetch_coloringbook', survey_name='example')
+    }}">
+        {{ url_for('site.fetch_coloringbook', survey_name='example') }}
     </a></blockquote>
     
     <p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
@@ -98,14 +104,3 @@
         <tr><th>comments</th><td>any other remarks that the subject may have (evaluation)</td></tr>
     </table>
 {% endblock body %}
-
-{% block tail %}
-    {{ super() }}
-    
-    <script>
-        (function ($) {
-            var example_anchor = $('#replace_origin');
-            example_anchor.text(window.location.origin + example_anchor.attr('href'));
-        })(window.jQuery);
-    </script>
-{% endblock tail %}
