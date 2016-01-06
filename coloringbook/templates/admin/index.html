@@ -54,9 +54,9 @@
     <p>The name of a survey also determines the URL at which your survey becomes available to test subjects (between the optional begin and end dates). For example, if your survey is called &ldquo;example&rdquo;, then test subjects have to follow this link in order to take it:</p>
     
     <blockquote><a href="{{ 
-        url_for('site.fetch_coloringbook', survey_name='example')
+        url_for('site.fetch_coloringbook', survey_name='example', _external=True)
     }}">
-        {{ url_for('site.fetch_coloringbook', survey_name='example') }}
+        {{ url_for('site.fetch_coloringbook', survey_name='example', _external=True) }}
     </a></blockquote>
     
     <p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
