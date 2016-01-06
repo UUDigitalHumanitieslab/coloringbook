@@ -1,5 +1,12 @@
 # Coloringbook -- current version #
 
+## 1.2.1 ##
+
+Hotfix release to repair the links on the admin homepage.
+
+
+# Version history #
+
 ## 1.2 ##
 
 Update and enhancement release.
@@ -11,8 +18,6 @@ Update and enhancement release.
   * Sounds can be replayed with a button.
   * Sounds should play more reliably on iPad.
 
-
-# Version history #
 
 ## 1.1 ##
 
