@@ -4,7 +4,7 @@
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
-    Script for running the Coloringbook application in a local test server.
+    Management script for running a local test server.
     
     Note that this script relies on the presence of a
     COLORINGBOOK_CONFIG environment variable which contains the name
@@ -19,7 +19,7 @@
     
     export PYTHONPATH=/etc/www
     export COLORINGBOOK_CONFIG=coloring
-    python run.py
+    python manage.py
 """
 
 from coloringbook import create_app
