@@ -46,7 +46,7 @@ def create_app (config):
     # default settings.
     ## app.config.from_object('coloringbook.defaults')
     
-    app.config.from_object(config)
+    app.config.from_pyfile(config)
 
     db.init_app(app)
     db.create_all(app = app)  # pass app because of Flask-SQLAlchemy contexts

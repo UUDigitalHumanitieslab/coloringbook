@@ -22,10 +22,12 @@
     python manage.py
 """
 
+from flask.ext.script import Manager
+
 from coloringbook import create_app
-import os
+
+manager = Manager(create_app)
+manager.add_option('-c', '--config', dest='config')
 
 if __name__ == '__main__':
-    app = create_app(__import__(os.environ['COLORINGBOOK_CONFIG']))
-    app.debug = True
-    app.run()
+    manager.run()
