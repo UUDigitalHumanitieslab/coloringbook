@@ -33,12 +33,15 @@
 """
 
 from flask import Flask
+from flask_migrate import Migrate
 
 from .models import db
 from .views import site
 from .admin import create_admin
 
-def create_app (config):
+migrate = Migrate()
+
+def create_app (config, disable_admin=False):
     app = Flask(__name__)
     
     # The following line may be uncommented, and the corresponding 
@@ -49,9 +52,10 @@ def create_app (config):
     app.config.from_pyfile(config)
 
     db.init_app(app)
-    db.create_all(app = app)  # pass app because of Flask-SQLAlchemy contexts
-    create_admin(app)
+    migrate.init_app(app, db)
     app.register_blueprint(site)
+    if not disable_admin:
+        create_admin(app)
     
     return app
 
