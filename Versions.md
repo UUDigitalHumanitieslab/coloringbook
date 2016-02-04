@@ -1,11 +1,21 @@
 # Coloringbook -- current version #
 
+## 1.2.2 ##
+
+Bugfix and maintenance release.
+
+  * The per-subject summary export problem was resolved.
+  * Migrations were enabled on the database, making future maintenance easier.
+  * File name lengths were expanded and enforced on the upload forms.
+  * Area name lengths were expanded and enforced on the editing form.
+
+
+# Version history #
+
 ## 1.2.1 ##
 
 Hotfix release to repair the links on the admin homepage.
 
-
-# Version history #
 
 ## 1.2 ##
 
