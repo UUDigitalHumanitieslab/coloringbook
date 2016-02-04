@@ -4,7 +4,7 @@
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
-    Script for running the Coloringbook application in a local test server.
+    Management script for running a local test server.
     
     Note that this script relies on the presence of a
     COLORINGBOOK_CONFIG environment variable which contains the name
@@ -19,13 +19,18 @@
     
     export PYTHONPATH=/etc/www
     export COLORINGBOOK_CONFIG=coloring
-    python run.py
+    python manage.py
 """
 
-from coloringbook import create_app
-import os
+from flask.ext.script import Manager
+from flask_migrate import MigrateCommand
+
+from coloringbook import create_app, db
+
+manager = Manager(create_app)
+manager.add_option('-c', '--config', dest='config')
+manager.add_option('-A', '--no-admin', dest='disable_admin', default=False, action='store_true')
+manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
-    app = create_app(__import__(os.environ['COLORINGBOOK_CONFIG']))
-    app.debug = True
-    app.run()
+    manager.run()

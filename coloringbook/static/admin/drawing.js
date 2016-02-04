@@ -9,6 +9,8 @@
 
 (function ($) {
     'use strict';
+    
+    var areaNameMaxLength = 40;
 
     // Some quick tricks to simulate a set datastructure using plain objects.
     function string2set (str) {
@@ -130,6 +132,12 @@
             if (newname != oldname && newname in areas) {
                 alert('This name is already taken by another area.\n' +
                         'Please provide a different name.');
+                form_namefield.focus();
+                return;
+            }
+            if (newname.length > areaNameMaxLength) {
+                alert('The name cannot be longer than ' + areaNameMaxLength +
+                        ' characters.');
                 form_namefield.focus();
                 return;
             }

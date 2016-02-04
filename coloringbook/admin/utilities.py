@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
@@ -8,6 +9,30 @@
 import StringIO, csv, datetime as dt
 
 from flask import make_response, request
+
+
+def maybe_utf8(value):
+    """
+        Returns UTF-8 encoded byte strings for unicode strings.
+        
+        For other types of objects, returns the value unchanged.
+        
+        >>> maybe_utf8(u'Magda Szábo')
+        'Magda Sz\\xc3\\x83\\xc2\\xa1bo'
+        >>> maybe_utf8(10)
+        10
+    """
+    if type(value) == unicode:
+        return value.encode('utf-8')
+    else:
+        return value
+
+
+def convert_utf8(table):
+    """ Apply maybe_utf8 to all values in an iterable of iterables and return a generator of lists. """
+    for row in table:
+        yield map(maybe_utf8, row)
+
 
 def csvdownload (view):
     r"""
@@ -47,7 +72,7 @@ def csvdownload (view):
         buffer = StringIO.StringIO(b'')
         writer = csv.writer(buffer, delimiter = ';')
         writer.writerow(headers)
-        writer.writerows(query.all())
+        writer.writerows(convert_utf8(query.all()))
         filename = '{}_{}_{}.csv'.format(
             dt.datetime.utcnow().strftime('%y%m%d%H%M'),
             filename_core,

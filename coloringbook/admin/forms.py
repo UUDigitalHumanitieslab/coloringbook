@@ -2,13 +2,15 @@
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
-    Logic and boilerplate code for custom WTForms form fields.
+    Logic and boilerplate code for custom WTForms form fields and validators.
     
     Please refer to the WTForms documentation for details.
 """
 
 from wtforms import fields, widgets
+from wtforms.validators import ValidationError, Length
 from flask.ext.admin._compat import text_type, as_unicode
+
 
 class Select2MultipleWidget(widgets.HiddenInput):
     """
@@ -32,6 +34,7 @@ class Select2MultipleWidget(widgets.HiddenInput):
     def json_choices (field):
         objects = ('{{"id": {}, "text": "{}"}}'.format(*c) for c in field.iter_choices())
         return '[' + ','.join(objects) + ']'
+
 
 class Select2MultipleField(fields.SelectMultipleField):
     """
@@ -90,3 +93,29 @@ class Select2MultipleField(fields.SelectMultipleField):
     
     def _value (self):
         return ','.join(map(str, self.data))
+
+
+class FileNameLength(Length):
+    """
+    Validates the length of a file name.
+    """
+    def get_length(self, form, field):
+        return field.data and len(field.data.filename) or 0
+
+    # If WTForms adopts our changes, this method need not be overridden anymore.
+    def __call__(self, form, field):
+        l = self.get_length(form, field)
+        if l < self.min or self.max != -1 and l > self.max:
+            message = self.message
+            if message is None:
+                if self.max == -1:
+                    message = field.ngettext('Field must be at least %(min)d character long.',
+                                             'Field must be at least %(min)d characters long.', self.min)
+                elif self.min == -1:
+                    message = field.ngettext('Field cannot be longer than %(max)d character.',
+                                             'Field cannot be longer than %(max)d characters.', self.max)
+                else:
+                    message = field.gettext('Field must be between %(min)d and %(max)d characters long.')
+
+            raise ValidationError(message % dict(min=self.min, max=self.max, length=l))
+
