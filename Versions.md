@@ -1,5 +1,12 @@
 # Coloringbook -- current version #
 
+## 1.2.3 ##
+
+Hotfix release to add Flask-Script and Flask-Migrate to the requirements.
+
+
+# Version history #
+
 ## 1.2.2 ##
 
 Bugfix and maintenance release.
@@ -9,8 +16,6 @@ Bugfix and maintenance release.
   * File name lengths were expanded and enforced on the upload forms.
   * Area name lengths were expanded and enforced on the editing form.
 
-
-# Version history #
 
 ## 1.2.1 ##
 

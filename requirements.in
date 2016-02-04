@@ -1,5 +1,7 @@
 Flask
 Flask-Admin
 Flask-SQLAlchemy
+Flask-Script
+Flask-Migrate
 MySQL-Python
 SQLAlchemy
