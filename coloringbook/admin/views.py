@@ -26,7 +26,7 @@ from flask.ext.admin.babel import gettext
 from ..models import *
 
 from .utilities import csvdownload
-from .forms import Select2MultipleField
+from .forms import Select2MultipleField, FileNameLength
 
 __all__ = [
     'FillView',
@@ -464,6 +464,10 @@ class DrawingView(ModelView):
     form_extra_fields = {
         'file': form.FileUploadField(
             'Drawing',
+            validators = (FileNameLength(
+                max=54, 
+                message='File name cannot be longer than %(max)d characters (extension included).'
+            ),),
             base_path = file_path,
             allowed_extensions = ('svg',) ),
         'area_list': fields.HiddenField(),
@@ -531,6 +535,10 @@ class SoundView(ModelView):
     form_extra_fields = {
         'file': form.FileUploadField(
             'Sound',
+            validators = (FileNameLength(
+                max=54, 
+                message='File name cannot be longer than %(max)d characters (extension included).'
+            ),),
             base_path = file_path,
             allowed_extensions = ('mp3',) ),
     }
