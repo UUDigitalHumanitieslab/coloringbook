@@ -28,7 +28,7 @@ How to deploy?
 
 On the client side, test subjects just need to run a HTML5 capable browser.
 
-On the server side, Coloringbook is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. An example configuration file for Apache with mod_wsgi is included. Apart from a WSGI-enabled webserver, install the dependencies using `pip install -r requirements.txt`.
+On the server side, Coloringbook is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. Apart from a WSGI-enabled webserver, install the dependencies using `pip install -r requirements.txt` or preferably `pip-sync` from the pip-tools package.
 
 Assuming you opt to use MySQL (or anything other than SQLite), you need to create an empty database with pre-configured access rights for the Coloringbook application to use. For example by entering the following commands while running `mysql` as root user:
 
@@ -42,16 +42,24 @@ Coloringbook obtains the necessary information to connect to the database from a
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
 
-This file should be saved with a `.py` extension. The WSGI script should import this module and pass it as the only argument to coloringbook.create_app. Please refer to the example WSGI script for details.
+This file should be saved with a `.py` extension. Your WSGI startup module should pass the absolute path to this file as the first argument to `coloringbook.create_app`.
 
-To use Coloringbook with Apache and mod_wsgi, copy, rename and edit the `apache-template.conf` file to suit your needs and insert your edited version into the `conf.d` subdirectory of wherever Apache happens to be installed on your server. Your application will be running after you restart Apache.
+Before running the application, you need to run the database migrations. Use the following command:
+
+    python manage.py -A -c CONFIG db upgrade
+
+where `CONFIG` is the path to your local configuration file, either relative to the `coloringbook` package or absolute. Replace the last part of the command by `db -?` to get a summary of possible database manipulations.
 
 The application does not take care of authentication or authorization. You should configure this directly on the webserver by restricting access to `/admin/`, for example using LDAP.
 
-For development, you may run a local test server by invoking the included `run.py` script. This will also switch on debugging settings. It does not require Apache or any other proper webserver. The application will run on `localhost:5000`.
+For development, you may run a local test server by invoking
+
+    python manage.py -c CONFIG runserver -dr
+
+The `-dr` flags switch on debugging settings and autoreloading. The application will run on `localhost:5000` by default, but you can change this by passing appropriate flags to the command. See the `-?` flag for details.
 
 
 Development
 -----------
 
-An overview of the database layout is given in `Database.svg`. For the complete specification, refer to `coloringbook/models.py`. Anything in `admin` subfolders is specific to the admin interface. Everything else in the `coloringbook` package is involved in delivering surveys to subjects and receiving data from them. Motivations are documented throughout the code in comments; with some referencing to documentation for Flask, SQLAlchemy and jQuery, you should be able to find your way.
+An overview of the database layout is given in `Database.svg`. For the complete specification, refer to `coloringbook/models.py`. Anything in `admin` subfolders is specific to the admin interface. Everything else in the `coloringbook` package is involved in delivering surveys to subjects and receiving data from them. Run `python test.py` for doctest-based testing. Motivations are documented throughout the code in comments; with some referencing to documentation for Flask, SQLAlchemy and jQuery, you should be able to find your way.
