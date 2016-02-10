@@ -16,7 +16,7 @@ from jinja2 import Markup
 from wtforms import fields
 from flask import request, url_for, redirect, flash, json
 from flask.ext.admin import expose, form
-from flask.ext.admin.contrib import sqla
+from flask.ext.admin.contrib.sqla import ModelView
 import flask.ext.admin.contrib.sqla.filters as filters
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts, rules
@@ -40,68 +40,6 @@ __all__ = [
 ]
 
 file_path = op.join(op.dirname(__file__), '..', 'static')
-
-class ModelView (sqla.ModelView):
-    """
-        Shallow subclass that provides the on_form_prefill hook.
-
-        This hook attachment code has been submitted as a patch for
-        flask.ext.admin.model.base.BaseModelView to Flask-Admin and
-        was accepted. When the patched version finds its way to the
-        next release version of Flask-Admin, this class becomes
-        obsolete and we can switch back to directly using
-        sqla.Modelview.
-    """
-    
-    @expose('/edit/', methods=('GET', 'POST'))
-    def edit_view(self):
-        """
-            Edit model view
-        """
-        return_url = get_redirect_target() or url_for('.index_view')
-
-        if not self.can_edit:
-            return redirect(return_url)
-
-        id = get_mdict_item_or_list(request.args, 'id')
-        if id is None:
-            return redirect(return_url)
-
-        model = self.get_one(id)
-
-        if model is None:
-            return redirect(return_url)
-
-        form = self.edit_form(obj=model)
-
-        if validate_form_on_submit(form):
-            if self.update_model(form, model):
-                if '_continue_editing' in request.form:
-                    flash(gettext('Model was successfully saved.'))
-                    return redirect(request.url)
-                else:
-                    return redirect(return_url)
-        
-        if request.method == 'GET':
-            self.on_form_prefill(form, id)
-        
-        form_opts = FormOpts(widget_args=self.form_widget_args,
-                             form_rules=self._form_edit_rules)
-
-        return self.render(self.edit_template,
-                           model=model,
-                           form=form,
-                           form_opts=form_opts,
-                           return_url=return_url)
-    
-    def on_form_prefill (self, form, id):
-        """ Perform additional actions to pre-fill the edit form.
-        
-        You only need to override this if you have added custom fields
-        that depend on the database contents in a way that Flask-admin
-        can't figure out by itself. Fields that were added by name of
-        a normal column or relationship should work out of the box. """
-        pass
 
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
