@@ -25,7 +25,7 @@
 from flask.ext.script import Manager
 from flask_migrate import MigrateCommand
 
-from coloringbook import create_app, db
+from coloringbook import create_app
 
 manager = Manager(create_app)
 manager.add_option('-c', '--config', dest='config')
