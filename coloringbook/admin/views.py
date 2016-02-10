@@ -14,7 +14,7 @@ import os, os.path as op
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
 from wtforms import fields, validators
-from flask import request, url_for, redirect, flash, json
+from flask import request, url_for, redirect, flash, json, current_app
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib.sqla import ModelView
 import flask.ext.admin.contrib.sqla.filters as filters
@@ -38,8 +38,6 @@ __all__ = [
     'ColorView',
     'LanguageView',
 ]
-
-file_path = op.join(op.dirname(__file__), '..', 'static')
 
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
@@ -417,7 +415,7 @@ class DrawingView(ModelView):
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = file_path,
+            base_path = current_app.instance_path,
             allowed_extensions = ('svg',) ),
         'area_list': fields.HiddenField(),
         'svg_source': fields.HiddenField(),
@@ -445,18 +443,15 @@ class DrawingView(ModelView):
             added_areas = new_area_set - old_area_set
             for area in added_areas:
                 model.areas.append(Area(name = area))
-            open(op.join(file_path, model.name) + '.svg', 'w').write(
+            current_app.open_instance_resource(model.name + '.svg', 'w').write(
                 form.svg_source.data )
     
     def on_form_prefill (self, form, id):
         form.svg_source.process_data(
-            open(
-                op.join(
-                    file_path,
-                    self.session.query(Drawing.name).filter_by(id = id).scalar()
-                ) + '.svg'
-            )
-            .read()
+            current_app.open_instance_resource(
+                self.session.query(Drawing.name).filter_by(id = id).scalar()
+                + '.svg'
+            ).read()
         )
         form.area_list.process_data(','.join(x[0] for x in
             self.session.query(Area.name)
@@ -471,7 +466,7 @@ class DrawingView(ModelView):
 def delete_drawing(mapper, connection, target):
     # Delete image
     try:
-        os.remove(op.join(file_path, target.name + '.svg'))
+        os.remove(op.join(current_app.instance_path, target.name + '.svg'))
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
@@ -488,7 +483,7 @@ class SoundView(ModelView):
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = file_path,
+            base_path = current_app.instance_path,
             allowed_extensions = ('mp3',) ),
     }
     
@@ -503,7 +498,7 @@ class SoundView(ModelView):
 def delete_sound(mapper, connection, target):
     # Delete image
     try:
-        os.remove(op.join(file_path, target.name + '.mp3'))
+        os.remove(op.join(current_app.instance_path, target.name + '.mp3'))
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
