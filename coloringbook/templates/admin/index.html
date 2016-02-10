@@ -3,18 +3,7 @@
     Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 #}
 
-{% extends 'admin/master.html' %}
-
-{% block head %}
-    {{ super() }}
-    
-    <link rel="icon" type="image/png" href="{{
-        url_for('static', filename='favicon32.png')
-    }}" />
-    <link rel="apple-touch-icon-precomposed" href="{{
-        url_for('static', filename='favicon152.png')
-    }}" />
-{% endblock head %}
+{% extends 'admin/style_master.html' %}
 
 {% block head_css %}
     {{ super() }}
