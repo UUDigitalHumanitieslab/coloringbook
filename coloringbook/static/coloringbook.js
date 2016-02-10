@@ -89,6 +89,7 @@ init_application = function ( ) {
 				sentence_image_delay = 0; // show image at same time as sentence
 				$('#sentence').css('font-size', '24pt');
 			} else {
+				sentence_image_delay = resp.duration;
 				$('#sentence').css('font-size', '48pt');
 			}
 		},

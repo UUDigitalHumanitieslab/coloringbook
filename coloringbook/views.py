@@ -68,6 +68,7 @@ def fetch_coloringbook (survey_name):
                 page_list.append(page)
             return jsonify(
                 simultaneous = survey.simultaneous,
+                duration = survey.duration,
                 images = [i for i in image_set],
                 sounds = [s for s in audio_set],
                 pages = page_list )
