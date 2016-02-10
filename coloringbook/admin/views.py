@@ -13,7 +13,7 @@ import os, os.path as op
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
-from wtforms import fields
+from wtforms import fields, validators
 from flask import request, url_for, redirect, flash, json
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib.sqla import ModelView
@@ -306,6 +306,11 @@ class SurveyView (ModelView):
     form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+    }
+    form_args = {
+        'duration': {
+            'validators': [validators.NumberRange(min=0, max=60000)],
+        },
     }
         
     def on_model_change (self, form, model, is_created = False):
