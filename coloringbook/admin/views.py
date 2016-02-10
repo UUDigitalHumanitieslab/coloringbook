@@ -289,7 +289,7 @@ class SurveyView (ModelView):
     column_descriptions = {
         'begin': 'First date of availability (immediate if empty)',
         'end': 'Last date of availability (forever if empty)',
-        'duration': 'Duration of sentence display in milliseconds',
+        'duration': 'Duration of sentence display in milliseconds before the drawing is shown (1000 ms = 1 s)',
         'simultaneous': 'Whether the sentence is presented at the same time as the drawing',
     }
     column_sortable_list = (
