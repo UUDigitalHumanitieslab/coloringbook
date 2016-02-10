@@ -285,7 +285,13 @@ class SurveyView (ModelView):
     
     edit_template = 'admin/augmented_edit.html'
     create_template = 'admin/augmented_create.html'
-    column_list = 'name language begin end simultaneous information'.split()
+    column_list = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information')
+    column_descriptions = {
+        'begin': 'First date of availability (immediate if empty)',
+        'end': 'Last date of availability (forever if empty)',
+        'duration': 'Duration of sentence display in milliseconds',
+        'simultaneous': 'Whether the sentence is presented at the same time as the drawing',
+    }
     column_sortable_list = (
         ('name', Survey.name),
         ('language', Language.name),
@@ -297,7 +303,7 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'simultaneous', 'information', 'page_list')
+    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
     }

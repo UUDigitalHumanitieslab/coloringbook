@@ -262,6 +262,7 @@ class Survey (db.Model):
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     begin = db.Column(db.DateTime)
     end = db.Column(db.DateTime)
+    duration = db.Column(db.Integer, nullable = False, default = 6000)
     simultaneous = db.Column(db.Boolean, nullable = False)
     information = db.Column(db.String(500))
     
