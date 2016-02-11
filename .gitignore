@@ -1,4 +1,3 @@
 *.pyc
 /config.py
-*.svg
-*.mp3
+/instance

@@ -82,7 +82,7 @@ init_application = function ( ) {
 			for (var n = resp.sounds.length, i = 0; i < n; ++i) {
 				sounds.push({name: resp.sounds[i]});
 			}
-			ion.sound({"sounds": sounds, path: base + '/static/', preload:true});
+			ion.sound({"sounds": sounds, path: base + '/media/', preload:true});
 			pages = resp.pages;
 			if (resp.simultaneous) {
 				simultaneous = true;
@@ -202,7 +202,7 @@ create_swatches = function (colors) {
 load_image = function (name) {
 	$.ajax({
 		type: 'GET',
-		url: base + '/static/' + name,
+		url: base + '/media/' + name,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
 			images[name] = svg_resp;

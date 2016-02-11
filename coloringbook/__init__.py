@@ -41,8 +41,8 @@ from .admin import create_admin
 
 migrate = Migrate()
 
-def create_app (config, disable_admin=False):
-    app = Flask(__name__)
+def create_app (config, disable_admin=False, instance=None):
+    app = Flask(__name__, instance_path=instance)
     
     # The following line may be uncommented, and the corresponding 
     # file created, if we ever decide that the application needs
