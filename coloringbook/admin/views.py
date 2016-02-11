@@ -13,10 +13,10 @@ import os, os.path as op
 
 from sqlalchemy.event import listens_for
 from jinja2 import Markup
-from wtforms import fields
-from flask import request, url_for, redirect, flash, json
+from wtforms import fields, validators
+from flask import request, url_for, redirect, flash, json, current_app
 from flask.ext.admin import expose, form
-from flask.ext.admin.contrib import sqla
+from flask.ext.admin.contrib.sqla import ModelView
 import flask.ext.admin.contrib.sqla.filters as filters
 from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
 from flask.ext.admin.form import FormOpts, rules
@@ -38,70 +38,6 @@ __all__ = [
     'ColorView',
     'LanguageView',
 ]
-
-file_path = op.join(op.dirname(__file__), '..', 'static')
-
-class ModelView (sqla.ModelView):
-    """
-        Shallow subclass that provides the on_form_prefill hook.
-
-        This hook attachment code has been submitted as a patch for
-        flask.ext.admin.model.base.BaseModelView to Flask-Admin and
-        was accepted. When the patched version finds its way to the
-        next release version of Flask-Admin, this class becomes
-        obsolete and we can switch back to directly using
-        sqla.Modelview.
-    """
-    
-    @expose('/edit/', methods=('GET', 'POST'))
-    def edit_view(self):
-        """
-            Edit model view
-        """
-        return_url = get_redirect_target() or url_for('.index_view')
-
-        if not self.can_edit:
-            return redirect(return_url)
-
-        id = get_mdict_item_or_list(request.args, 'id')
-        if id is None:
-            return redirect(return_url)
-
-        model = self.get_one(id)
-
-        if model is None:
-            return redirect(return_url)
-
-        form = self.edit_form(obj=model)
-
-        if validate_form_on_submit(form):
-            if self.update_model(form, model):
-                if '_continue_editing' in request.form:
-                    flash(gettext('Model was successfully saved.'))
-                    return redirect(request.url)
-                else:
-                    return redirect(return_url)
-        
-        if request.method == 'GET':
-            self.on_form_prefill(form, id)
-        
-        form_opts = FormOpts(widget_args=self.form_widget_args,
-                             form_rules=self._form_edit_rules)
-
-        return self.render(self.edit_template,
-                           model=model,
-                           form=form,
-                           form_opts=form_opts,
-                           return_url=return_url)
-    
-    def on_form_prefill (self, form, id):
-        """ Perform additional actions to pre-fill the edit form.
-        
-        You only need to override this if you have added custom fields
-        that depend on the database contents in a way that Flask-admin
-        can't figure out by itself. Fields that were added by name of
-        a normal column or relationship should work out of the box. """
-        pass
 
 class FillView (ModelView):
     """ Custom admin table view of Fill objects. """
@@ -347,7 +283,13 @@ class SurveyView (ModelView):
     
     edit_template = 'admin/augmented_edit.html'
     create_template = 'admin/augmented_create.html'
-    column_list = 'name language begin end simultaneous information'.split()
+    column_list = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information')
+    column_descriptions = {
+        'begin': 'First date of availability (immediate if empty)',
+        'end': 'Last date of availability (forever if empty)',
+        'duration': 'Duration of sentence display in milliseconds before the drawing is shown (1000 ms = 1 s)',
+        'simultaneous': 'Whether the sentence is presented at the same time as the drawing',
+    }
     column_sortable_list = (
         ('name', Survey.name),
         ('language', Language.name),
@@ -359,9 +301,14 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'simultaneous', 'information', 'page_list')
+    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+    }
+    form_args = {
+        'duration': {
+            'validators': [validators.NumberRange(min=0, max=60000)],
+        },
     }
         
     def on_model_change (self, form, model, is_created = False):
@@ -468,7 +415,7 @@ class DrawingView(ModelView):
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = file_path,
+            base_path = current_app.instance_path,
             allowed_extensions = ('svg',) ),
         'area_list': fields.HiddenField(),
         'svg_source': fields.HiddenField(),
@@ -496,18 +443,15 @@ class DrawingView(ModelView):
             added_areas = new_area_set - old_area_set
             for area in added_areas:
                 model.areas.append(Area(name = area))
-            open(op.join(file_path, model.name) + '.svg', 'w').write(
+            current_app.open_instance_resource(model.name + '.svg', 'w').write(
                 form.svg_source.data )
     
     def on_form_prefill (self, form, id):
         form.svg_source.process_data(
-            open(
-                op.join(
-                    file_path,
-                    self.session.query(Drawing.name).filter_by(id = id).scalar()
-                ) + '.svg'
-            )
-            .read()
+            current_app.open_instance_resource(
+                self.session.query(Drawing.name).filter_by(id = id).scalar()
+                + '.svg'
+            ).read()
         )
         form.area_list.process_data(','.join(x[0] for x in
             self.session.query(Area.name)
@@ -522,7 +466,7 @@ class DrawingView(ModelView):
 def delete_drawing(mapper, connection, target):
     # Delete image
     try:
-        os.remove(op.join(file_path, target.name + '.svg'))
+        os.remove(op.join(current_app.instance_path, target.name + '.svg'))
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
@@ -539,7 +483,7 @@ class SoundView(ModelView):
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = file_path,
+            base_path = current_app.instance_path,
             allowed_extensions = ('mp3',) ),
     }
     
@@ -554,7 +498,7 @@ class SoundView(ModelView):
 def delete_sound(mapper, connection, target):
     # Delete image
     try:
-        os.remove(op.join(file_path, target.name + '.mp3'))
+        os.remove(op.join(current_app.instance_path, target.name + '.mp3'))
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass

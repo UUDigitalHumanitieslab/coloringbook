@@ -12,7 +12,7 @@
 
 from datetime import date, datetime
 
-from flask import Blueprint, render_template, request, json, abort, jsonify
+from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app
 
 from .models import *
 
@@ -23,6 +23,10 @@ site = Blueprint('site', __name__)
 @site.route('/')
 def index():
     return 'Welkom bij Coloringbook.'
+
+@site.route('/media/<file_name>')
+def fetch_media (file_name):
+    return send_from_directory(current_app.instance_path, file_name)
 
 def get_survey_pages (survey):
     """ Returns all pages that are associated with a survey. """
@@ -68,6 +72,7 @@ def fetch_coloringbook (survey_name):
                 page_list.append(page)
             return jsonify(
                 simultaneous = survey.simultaneous,
+                duration = survey.duration,
                 images = [i for i in image_set],
                 sounds = [s for s in audio_set],
                 pages = page_list )

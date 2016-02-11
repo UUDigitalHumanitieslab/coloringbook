@@ -1,8 +1,8 @@
 /*
-    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
-    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
-    
-    It is helpful to think of this script as an event-driven state machine.
+	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+	
+	It is helpful to think of this script as an event-driven state machine.
 */
 
 var base = (function() {
@@ -53,17 +53,17 @@ init_application = function ( ) {
 	    century_ago = new Date();
 	century_ago.setFullYear(now.getFullYear() - 100);
 	$('#starting_form').validate({
-	    submitHandler: handle_form,
-	    onkeyup: false,
-	    rules: {
-	        birth: {
-	            daterange: [century_ago.toShortString(), now.toShortString()]
-	        }
-	    }
+		submitHandler: handle_form,
+		onkeyup: false,
+		rules: {
+			birth: {
+				daterange: [century_ago.toShortString(), now.toShortString()]
+			}
+		}
 	});
 	$('#ending_form').hide().validate({
-	    submitHandler: handle_evaluation,
-	    onkeyup: false
+		submitHandler: handle_evaluation,
+		onkeyup: false
 	});
 	init_controls();
 	create_swatches(colors);
@@ -78,43 +78,45 @@ init_application = function ( ) {
 				load_image(resp.images[i]);
 			}
 			image_count = resp.images.length;
-            var sounds = [];
-            for (var n = resp.sounds.length, i = 0; i < n; ++i) {
-                sounds.push({name: resp.sounds[i]});
-            }
-			ion.sound({"sounds": sounds, path: base + '/static/', preload: true});
+			var sounds = [];
+			for (var n = resp.sounds.length, i = 0; i < n; ++i) {
+				sounds.push({name: resp.sounds[i]});
+			}
+			ion.sound({"sounds": sounds, path: base + '/media/', preload:true});
 			pages = resp.pages;
 			if (resp.simultaneous) {
-			    simultaneous = true;
-			    sentence_image_delay = 0; // show image at same time as sentence
-			    $('#sentence').css('font-size', '24pt');
+				simultaneous = true;
+				sentence_image_delay = 0; // show image at same time as sentence
+				$('#sentence').css('font-size', '24pt');
 			} else {
-			    $('#sentence').css('font-size', '48pt');
+				sentence_image_delay = resp.duration;
+				$('#sentence').css('font-size', '48pt');
 			}
 		},
 		error: function (xhr, status, error) {
 			alert(error);
+			console.log(xhr);
 		}
 	});
 }
 
 // Return strings of the format YYYY-MM-DD.
 Date.prototype.toShortString = function ( ) {
-    return this.toISOString().substring(0, 10);
+	return this.toISOString().substring(0, 10);
 }
 
 // Daterange checker for jQuery.validate.
 // adapted from http://stackoverflow.com/questions/3761185/jquery-validate-date-range
 $.validator.addMethod('daterange', function(value, element, arg) {
-    if (this.optional(element)) return true;
+	if (this.optional(element)) return true;
 
-    var startDate = Date.parse(arg[0]),
-        endDate = Date.parse(arg[1]),
-        enteredDate = Date.parse(value);       
+	var startDate = Date.parse(arg[0]),
+		endDate = Date.parse(arg[1]),
+		enteredDate = Date.parse(value);
 
-    if(isNaN(enteredDate)) return false;
+	if(isNaN(enteredDate)) return false;
 
-    return ((startDate <= enteredDate) && (enteredDate <= endDate));
+	return ((startDate <= enteredDate) && (enteredDate <= endDate));
 }, $.validator.format("De datum moet tussen {0} en {1} liggen."))
 
 // Put personalia form data into compact JSON format.
@@ -125,16 +127,16 @@ handle_form = function (form) {
 	var raw_form = $(form).serializeArray();
 	form_data = { languages: [] };
 	for (i in raw_form) {
-	    if (raw_form[i].name == 'nativelang') {
-	        form_data.languages.push([raw_form[i].value, 10]);
-	    } else if (raw_form[i].name.match('language[0-9]')) {
-	        form_data.languages.push([raw_form[i].value]);
-	    } else if (RegExp('[0-9]+').test(raw_form[i].name)) {
-	        var level = RegExp('[0-9]+').exec(raw_form[i].name);
-	        form_data.languages[level].push(parseInt(raw_form[i].value, 10));
-	    } else {
-	        form_data[raw_form[i].name] = raw_form[i].value;
-	    }
+		if (raw_form[i].name == 'nativelang') {
+			form_data.languages.push([raw_form[i].value, 10]);
+		} else if (raw_form[i].name.match('language[0-9]')) {
+			form_data.languages.push([raw_form[i].value]);
+		} else if (RegExp('[0-9]+').test(raw_form[i].name)) {
+			var level = RegExp('[0-9]+').exec(raw_form[i].name);
+			form_data.languages[level].push(parseInt(raw_form[i].value, 10));
+		} else {
+			form_data[raw_form[i].name] = raw_form[i].value;
+		}
 	}
 }
 
@@ -191,16 +193,16 @@ insert_swatches = function (colors) {
 
 // Insert swatches and disguise the last (white) swatch as an eraser.
 create_swatches = function (colors) {
-    insert_swatches(colors);
+	insert_swatches(colors);
 		var eraser_path = base + '/static/lmproulx_eraser.png';
-    $('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
+	$('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
 // Retrieve an SVG image by filename.
 load_image = function (name) {
 	$.ajax({
 		type: 'GET',
-		url: base + '/static/' + name,
+		url: base + '/media/' + name,
 		dataType: 'html',
 		success: function (svg_resp, xmlstatus) {
 			images[name] = svg_resp;
@@ -266,11 +268,11 @@ end_page = function ( ) {
 
 // Serialize the evaluation form data and trigger uploading of all data.
 handle_evaluation = function (form) {
-    var raw_data = $(form).serializeArray();
-    for (var l = raw_data.length, i = 0; i < l; ++i) {
-        evaluation_data[raw_data[i].name] = raw_data[i].value;
-    }
-    send_data();
+	var raw_data = $(form).serializeArray();
+	for (var l = raw_data.length, i = 0; i < l; ++i) {
+		evaluation_data[raw_data[i].name] = raw_data[i].value;
+	}
+	send_data();
 }
 
 // Upload all data and handle possible failure.
@@ -289,21 +291,22 @@ send_data = function ( ) {
 			var inst = $('#instructions');
 			$('#ending_form').hide();
 			if (result == 'Success') {
-			    inst.html(
-			        'Dank voor je deelname aan dit experiment.<br/>' +
-                    'Je invoer is opgeslagen. ' +
-                    'Je kunt het venster nu sluiten.' );
+				inst.html(
+					'Dank voor je deelname aan dit experiment.<br/>' +
+					'Je invoer is opgeslagen. ' +
+					'Je kunt het venster nu sluiten.'
+				);
 			} else {
-			    inst.html(
-			        'Dank voor je deelname aan dit experiment.<br/>' +
-			        'Door een technisch probleem is het opslaan van ' +
-			        'je invoer helaas niet gelukt. Zou je de inhoud ' +
-			        'van onderstaand kader willen kopiëren en opslaan, ' +
-			        'en dit als bijlage willen opsturen naar ' +
-			        'j.gonggrijp@uu.nl?<br/> Bij voorbaat dank!<br/>' +
-			        '<textarea id="errorbox"></textarea>'
-			    )
-			    $('#errorbox').width(300).height(200).val(JSON.stringify(data));
+				inst.html(
+					'Dank voor je deelname aan dit experiment.<br/>' +
+					'Door een technisch probleem is het opslaan van ' +
+					'je invoer helaas niet gelukt. Zou je de inhoud ' +
+					'van onderstaand kader willen kopiëren en opslaan, ' +
+					'en dit als bijlage willen opsturen naar ' +
+					'j.gonggrijp@uu.nl?<br/> Bij voorbaat dank!<br/>' +
+					'<textarea id="errorbox"></textarea>'
+				);
+				$('#errorbox').width(300).height(200).val(JSON.stringify(data));
 			}
 			inst.show();
 		}
