@@ -1,11 +1,19 @@
-# Coloringbook -- current version #
+# Coloringbook -- version history #
+
+## 1.3 (current) ##
+
+Enhancement release.
+
+  * Favicon is now visible on all admin pages.
+  * The `on_form_prefill` hook was accepted into Flask-Admin, so it was removed from our own codebase.
+  * The delay between sentence display/playback and image visibility is now customizable per survey.
+  * User-contributed content is now kept separate from the application source directory.
+
 
 ## 1.2.3 ##
 
 Hotfix release to add Flask-Script and Flask-Migrate to the requirements.
 
-
-# Version history #
 
 ## 1.2.2 ##
 
