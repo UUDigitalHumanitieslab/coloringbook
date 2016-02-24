@@ -18,4 +18,5 @@ def get_fixture_app ( ):
     class config:
         SQLALCHEMY_DATABASE_URI = 'sqlite://'
         SECRET_KEY = '1234567890'
+        SQLALCHEMY_TRACK_MODIFICATIONS = False
     return coloringbook.create_app(config, create_db=True)
