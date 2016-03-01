@@ -29,18 +29,6 @@ from .utilities import csvdownload
 from .forms import Select2MultipleField, FileNameLength
 
 
-__all__ = [
-    'FillView',
-    'SubjectView',
-    'SurveyView',
-    'PageView',
-    'DrawingView',
-    'SoundView',
-    'ColorView',
-    'LanguageView',
-]
-
-
 class FillView(ModelView):
     """ Custom admin table view of Fill objects. """
     

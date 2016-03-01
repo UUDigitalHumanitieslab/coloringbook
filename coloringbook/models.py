@@ -12,22 +12,6 @@ import flask.ext.sqlalchemy as fsqla
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
 
-__all__ = [
-    'db',
-    'Subject',
-    'SubjectLanguage',
-    'Language',
-    'Drawing',
-    'Area',
-    'Sound',
-    'Page',
-    'Color',
-    'Expectation',
-    'Survey',
-    'SurveySubject',
-    'SurveyPage',
-    'Fill'              ]
-
 
 def TableArgsMeta(parent_class, table_args):
     """
