@@ -28,6 +28,7 @@ __all__ = [
     'SurveyPage',
     'Fill'              ]
 
+
 def TableArgsMeta(parent_class, table_args):
     """
         Metaclass generator to set global defaults for __table_args__.
@@ -65,7 +66,8 @@ def TableArgsMeta(parent_class, table_args):
 
     return _TableArgsMeta
 
-class InnoDBSQLAlchemy (fsqla.SQLAlchemy):
+
+class InnoDBSQLAlchemy(fsqla.SQLAlchemy):
     """ Subclass in order to enable TableArgsMeta. """
     def make_declarative_base(self, metadata=None):
         """Creates the declarative base."""
@@ -81,7 +83,8 @@ class InnoDBSQLAlchemy (fsqla.SQLAlchemy):
 
 db = InnoDBSQLAlchemy()  # actual database connection is done in __init__.py
 
-class Subject (db.Model):
+
+class Subject(db.Model):
     """ Personal information of a test person. """
     
     id = db.Column(db.Integer, primary_key = True)
@@ -93,10 +96,11 @@ class Subject (db.Model):
     languages = association_proxy('subject_languages', 'language')  # many-many
     surveys = association_proxy('subject_surveys', 'survey')  # many-many
     
-    def __str__ (self):
+    def __str__(self):
         return str(self.id)
 
-class SubjectLanguage (db.Model):
+
+class SubjectLanguage(db.Model):
     """ Association between a Subject and a Language they speak. """
     
     language_id = db.Column(
@@ -122,7 +126,8 @@ class SubjectLanguage (db.Model):
             'language_subjects',
             cascade = 'all, delete-orphan'))
 
-class Language (db.Model):
+
+class Language(db.Model):
     """ Language that may be associated with a Subject, Survey or Page. """
 
     id = db.Column(db.Integer, primary_key = True)
@@ -130,10 +135,11 @@ class Language (db.Model):
     
     subjects = association_proxy('language_subjects', 'subject')  # many-many
     
-    def __str__ (self):
+    def __str__(self):
         return self.name
 
-class File (object):
+
+class File(object):
     """ Common members for Drawing and Sound. """
     
     @declared_attr
@@ -145,14 +151,16 @@ class File (object):
                                      # filename *without* extension
                                      # database is path-agnostic
     
-    def __str__ (self):
+    def __str__(self):
         return self.name
 
-class Drawing (File, db.Model):
+
+class Drawing(File, db.Model):
     """ Proxy to a colorable SVG. """
     pass
 
-class Area (db.Model):
+
+class Area(db.Model):
     """ Colorable part of a Drawing. """
     
     __tablename__ = 'area'
@@ -173,14 +181,16 @@ class Area (db.Model):
         backref= db.backref('areas', cascade = 'all, delete-orphan') )
         # many-one
     
-    def __str__ (self):
+    def __str__(self):
         return self.name
 
-class Sound (File, db.Model):
+
+class Sound(File, db.Model):
     """ Proxy to a MP3 file. """
     pass
 
-class Page (db.Model):
+
+class Page(db.Model):
     """ Combination of a sentence and a Drawing. """
 
     id = db.Column(db.Integer, primary_key = True)
@@ -210,10 +220,11 @@ class Page (db.Model):
     expectations = db.relationship('Expectation', backref = 'page')  # one-many
     surveys = association_proxy('page_surveys', 'survey')  # many-many
     
-    def __str__ (self):
+    def __str__(self):
         return self.name
 
-class Color (db.Model):
+
+class Color(db.Model):
     """ Color that may be associated with a Fill or Expectation. """
 
     id = db.Column(db.Integer, primary_key = True)
@@ -221,10 +232,11 @@ class Color (db.Model):
                                         # RGB code as used at the client side
     name = db.Column(db.String(20), nullable = False)  # mnemonic
     
-    def __str__ (self):
+    def __str__(self):
         return self.name
 
-class Expectation (db.Model):
+
+class Expectation(db.Model):
     """ Expected Color for a particular Area on a particular Page. """
 
     page_id = db.Column(
@@ -248,14 +260,15 @@ class Expectation (db.Model):
     area = db.relationship('Area', backref = 'expectations')  # many-one
     color = db.relationship('Color')  # many-one, no backref
     
-    def __repr__ (self):
+    def __repr__(self):
         return '<Expectation {0} {3}in {1}, {2}>'.format(
             self.color,
             self.area,
             self.page,
             '' if self.here else 'not ' )
 
-class Survey (db.Model):
+
+class Survey(db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
     id = db.Column(db.Integer, primary_key = True)
@@ -271,10 +284,11 @@ class Survey (db.Model):
     pages = association_proxy('survey_pages', 'page')  # many-many
     subjects = association_proxy('survey_subjects', 'subject')  # many-many
     
-    def __str__ (self):
+    def __str__(self):
         return self.name
 
-class SurveySubject (db.Model):
+
+class SurveySubject(db.Model):
     """ Participation of a Subject in a Survey, with evaluation data. """
     
     # association
@@ -293,7 +307,8 @@ class SurveySubject (db.Model):
         'subject_surveys',
         cascade = 'all, delete-orphan' ))
 
-class SurveyPage (db.Model):
+
+class SurveyPage(db.Model):
     """ Association between a Survey and a Page that is part of it. """
     
     survey_id = db.Column(
@@ -319,7 +334,8 @@ class SurveyPage (db.Model):
             'page_surveys',
             cascade = 'all, delete-orphan'))
 
-class Fill (db.Model):
+
+class Fill(db.Model):
     """ The Color a Subject filled an Area of a Page in a Survey with at #ms."""
     
     survey_id = db.Column(
@@ -366,7 +382,7 @@ class Fill (db.Model):
         backref = db.backref('fills', lazy = 'dynamic') )
     color = db.relationship('Color')  # many-one, no backref
     
-    def __repr__ (self):
+    def __repr__(self):
         return '<Fill {0} with {1} after {5} ms by {2} at {3} of {4}>'.format(
             self.area,
             self.color,

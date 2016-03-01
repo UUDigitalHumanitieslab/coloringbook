@@ -14,7 +14,8 @@
 
 import coloringbook
 
-def get_fixture_app ( ):
+
+def get_fixture_app():
     class config:
         SQLALCHEMY_DATABASE_URI = 'sqlite://'
         SECRET_KEY = '1234567890'

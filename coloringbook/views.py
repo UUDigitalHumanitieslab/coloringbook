@@ -16,19 +16,23 @@ from flask import Blueprint, render_template, request, json, abort, jsonify, sen
 
 from .models import *
 
+
 MAX_AGE_TOLERANCE = 36524  # approx. number of days in 100 years
 
 site = Blueprint('site', __name__)
+
 
 @site.route('/')
 def index():
     return 'Welkom bij Coloringbook.'
 
+
 @site.route('/media/<file_name>')
-def fetch_media (file_name):
+def fetch_media(file_name):
     return send_from_directory(current_app.instance_path, file_name)
 
-def get_survey_pages (survey):
+
+def get_survey_pages(survey):
     """ Returns all pages that are associated with a survey. """
     return (
         Page.query
@@ -37,9 +41,10 @@ def get_survey_pages (survey):
         .order_by(SurveyPage.ordering)
         .all()
     )
-    
+
+
 @site.route('/book/<survey_name>')
-def fetch_coloringbook (survey_name):
+def fetch_coloringbook(survey_name):
     """
         Depending on whether the current request is XHR, either render
         the coloringbook HTML backbone (if not XHR) or render the
@@ -81,6 +86,7 @@ def fetch_coloringbook (survey_name):
     except Exception as e:
         abort(404)
 
+
 @site.route('/book/<survey_name>/submit', methods=['POST'])
 def submit(survey_name):
     """ Parse and store data sent by the test subject, all in one go. """
@@ -101,8 +107,9 @@ def submit(survey_name):
         return 'Success'
     except:
         return 'Error'
-    
-def subject_from_json (data):
+
+
+def subject_from_json(data):
     """
         Take personal information from JSON and put into relational object.
         
@@ -169,7 +176,8 @@ def subject_from_json (data):
     
     return subject
 
-def bind_survey_subject (survey, subject, evaluation):
+
+def bind_survey_subject(survey, subject, evaluation):
     """
         Create the association between a Survey and a Subject, with associated evaluation data from a parsed JSON dictionary.
         
@@ -209,8 +217,9 @@ def bind_survey_subject (survey, subject, evaluation):
         binding.topic = evaluation['topic']
     if 'comments' in evaluation:
         binding.comments = evaluation['comments']
-    
-def fills_from_json (survey, page, subject, data):
+
+
+def fills_from_json(survey, page, subject, data):
     """
         Take fill actions from JSON and put into [relational object].
         

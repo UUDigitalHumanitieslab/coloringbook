@@ -31,7 +31,7 @@ class Select2MultipleWidget(widgets.HiddenInput):
         return super(Select2MultipleWidget, self).__call__(field, **kwargs)
     
     @staticmethod
-    def json_choices (field):
+    def json_choices(field):
         objects = ('{{"id": {}, "text": "{}"}}'.format(*c) for c in field.iter_choices())
         return '[' + ','.join(objects) + ']'
 
@@ -91,7 +91,7 @@ class Select2MultipleField(fields.SelectMultipleField):
 
         super(Select2MultipleField, self).pre_validate(form)
     
-    def _value (self):
+    def _value(self):
         return ','.join(map(str, self.data))
 
 

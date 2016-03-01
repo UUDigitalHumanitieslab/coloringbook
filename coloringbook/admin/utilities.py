@@ -34,7 +34,7 @@ def convert_utf8(table):
         yield map(maybe_utf8, row)
 
 
-def csvdownload (view):
+def csvdownload(view):
     r"""
         View decorator adding suitable response headers for CSV downloads.
         
@@ -63,7 +63,7 @@ def csvdownload (view):
         u'attachment; filename="..._doctest_.csv"'
     """
 
-    def wrap (self = None):
+    def wrap(self = None):
         query, headers, filename_core = view(self)
         if self:
             filters = filters_from_request(self)
@@ -84,7 +84,8 @@ def csvdownload (view):
         return response
     return wrap
 
-def filters_from_request (self):
+
+def filters_from_request(self):
     """
         Parse the request arguments and return flask-admin Filter objects.
         

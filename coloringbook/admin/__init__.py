@@ -19,7 +19,7 @@ from flask.ext.admin.contrib.fileadmin import FileAdmin
 from ..models import db, Page, Color, Language
 
 
-def create_admin (app):
+def create_admin(app):
     """
         Create an Admin object on Flask instance `app` and return it.
         
