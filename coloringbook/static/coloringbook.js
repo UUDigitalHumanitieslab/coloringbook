@@ -1,5 +1,5 @@
 /*
-	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	(c) 2014-2016 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 	
 	It is helpful to think of this script as an event-driven state machine.
