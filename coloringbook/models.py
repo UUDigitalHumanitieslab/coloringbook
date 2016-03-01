@@ -142,10 +142,6 @@ class Language(db.Model):
 class File(object):
     """ Common members for Drawing and Sound. """
     
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(50), nullable = False, unique = True)
                                      # filename *without* extension
@@ -157,7 +153,7 @@ class File(object):
 
 class Drawing(File, db.Model):
     """ Proxy to a colorable SVG. """
-    pass
+    __tablename__ = 'drawing'
 
 
 class Area(db.Model):
@@ -187,7 +183,7 @@ class Area(db.Model):
 
 class Sound(File, db.Model):
     """ Proxy to a MP3 file. """
-    pass
+    __tablename__ = 'sound'
 
 
 class Page(db.Model):
