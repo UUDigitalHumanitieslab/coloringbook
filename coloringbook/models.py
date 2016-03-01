@@ -87,10 +87,10 @@ db = InnoDBSQLAlchemy()  # actual database connection is done in __init__.py
 class Subject(db.Model):
     """ Personal information of a test person. """
     
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(50), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
     numeral = db.Column(db.Integer)  # such as student ID
-    birth = db.Column(db.DateTime, nullable = False)
+    birth = db.Column(db.DateTime, nullable=False)
     eyesight = db.Column(db.String(100))  # medical conditions
     
     languages = association_proxy('subject_languages', 'language')  # many-many
@@ -106,32 +106,32 @@ class SubjectLanguage(db.Model):
     language_id = db.Column(
         db.Integer,
         db.ForeignKey('language.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     subject_id = db.Column(
         db.Integer,
         db.ForeignKey('subject.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     level = db.Column(db.Integer)  # language skill 1--10 where 10 is native
     
     subject = db.relationship(  # many-one (facilitates many-many)
         'Subject',
-        backref = db.backref(
+        backref=db.backref(
             'subject_languages',
-            cascade = 'all, delete-orphan'))
+            cascade='all, delete-orphan'))
     language = db.relationship(  # many-one (facilitates many-many)
         'Language',
-        backref = db.backref(
+        backref=db.backref(
             'language_subjects',
-            cascade = 'all, delete-orphan'))
+            cascade='all, delete-orphan'))
 
 
 class Language(db.Model):
     """ Language that may be associated with a Subject, Survey or Page. """
 
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30), nullable = False, unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False, unique=True)
     
     subjects = association_proxy('language_subjects', 'subject')  # many-many
     
@@ -142,8 +142,8 @@ class Language(db.Model):
 class File(object):
     """ Common members for Drawing and Sound. """
     
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(50), nullable = False, unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False, unique=True)
                                      # filename *without* extension
                                      # database is path-agnostic
     
@@ -164,17 +164,17 @@ class Area(db.Model):
         db.UniqueConstraint('name', 'drawing_id'),
     )
 
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(40), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False)
                                         # id of the <path> element in the SVG
     drawing_id = db.Column(
         db.Integer,
         db.ForeignKey('drawing.id'),
-        nullable = False )
+        nullable=False )
     
     drawing = db.relationship(
         'Drawing',
-        backref= db.backref('areas', cascade = 'all, delete-orphan') )
+        backref=db.backref('areas', cascade='all, delete-orphan') )
         # many-one
     
     def __str__(self):
@@ -189,31 +189,31 @@ class Sound(File, db.Model):
 class Page(db.Model):
     """ Combination of a sentence and a Drawing. """
 
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(30), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
     sound_id = db.Column(db.Integer, db.ForeignKey('sound.id'))
     drawing_id = db.Column(db.Integer,
         db.ForeignKey('drawing.id'),
-        nullable = False )
+        nullable=False )
     
     language = db.relationship(  # many-one
         'Language',
-        backref = db.backref(
+        backref=db.backref(
             'pages',
-            lazy = 'dynamic'))
+            lazy='dynamic'))
     sound = db.relationship(  # many-one
         'Sound',
-        backref = db.backref(
+        backref=db.backref(
             'pages',
-            lazy = 'dynamic'))
+            lazy='dynamic'))
     drawing = db.relationship(  # many-one
         'Drawing',
-        backref = db.backref(
+        backref=db.backref(
             'pages',
-            lazy = 'dynamic'))
-    expectations = db.relationship('Expectation', backref = 'page')  # one-many
+            lazy='dynamic'))
+    expectations = db.relationship('Expectation', backref='page')  # one-many
     surveys = association_proxy('page_surveys', 'survey')  # many-many
     
     def __str__(self):
@@ -223,10 +223,10 @@ class Page(db.Model):
 class Color(db.Model):
     """ Color that may be associated with a Fill or Expectation. """
 
-    id = db.Column(db.Integer, primary_key = True)
-    code = db.Column(db.String(25), nullable = False)
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(25), nullable=False)
                                         # RGB code as used at the client side
-    name = db.Column(db.String(20), nullable = False)  # mnemonic
+    name = db.Column(db.String(20), nullable=False)  # mnemonic
     
     def __str__(self):
         return self.name
@@ -238,22 +238,22 @@ class Expectation(db.Model):
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     area_id = db.Column(
         db.Integer,
         db.ForeignKey('area.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     color_id = db.Column(
         db.Integer,
         db.ForeignKey('color.id'),
-        nullable = False )
-    here = db.Column(db.Boolean, nullable = False)
+        nullable=False )
+    here = db.Column(db.Boolean, nullable=False)
                                 # if False, color is expected in another area
     motivation = db.Column(db.String(200))
     
-    area = db.relationship('Area', backref = 'expectations')  # many-one
+    area = db.relationship('Area', backref='expectations')  # many-one
     color = db.relationship('Color')  # many-one, no backref
     
     def __repr__(self):
@@ -267,16 +267,16 @@ class Expectation(db.Model):
 class Survey(db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(40), nullable = False, unique = True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40), nullable=False, unique=True)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     begin = db.Column(db.DateTime)
     end = db.Column(db.DateTime)
-    duration = db.Column(db.Integer, nullable = False, default = 6000)
-    simultaneous = db.Column(db.Boolean, nullable = False)
+    duration = db.Column(db.Integer, nullable=False, default=6000)
+    simultaneous = db.Column(db.Boolean, nullable=False)
     information = db.Column(db.String(500))
     
-    language = db.relationship('Language', backref = 'surveys')  # many-one
+    language = db.relationship('Language', backref='surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
     subjects = association_proxy('survey_subjects', 'subject')  # many-many
     
@@ -288,20 +288,20 @@ class SurveySubject(db.Model):
     """ Participation of a Subject in a Survey, with evaluation data. """
     
     # association
-    survey_id = db.Column(db.ForeignKey('survey.id'), primary_key = True)
-    subject_id = db.Column(db.ForeignKey('subject.id'), primary_key = True)
+    survey_id = db.Column(db.ForeignKey('survey.id'), primary_key=True)
+    subject_id = db.Column(db.ForeignKey('subject.id'), primary_key=True)
     # evaluation
     difficulty = db.Column(db.Integer)
     topic = db.Column(db.String(60))
     comments = db.Column(db.Text)
     
     # two many-one relationships, both of which facilitate many-many
-    survey = db.relationship('Survey', backref = db.backref(
+    survey = db.relationship('Survey', backref=db.backref(
         'survey_subjects',
-        cascade = 'all, delete-orphan' ))
-    subject = db.relationship('Subject', backref = db.backref(
+        cascade='all, delete-orphan' ))
+    subject = db.relationship('Subject', backref=db.backref(
         'subject_surveys',
-        cascade = 'all, delete-orphan' ))
+        cascade='all, delete-orphan' ))
 
 
 class SurveyPage(db.Model):
@@ -310,25 +310,25 @@ class SurveyPage(db.Model):
     survey_id = db.Column(
         db.Integer,
         db.ForeignKey('survey.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
-        primary_key = True,
-        nullable = False )
-    ordering = db.Column(db.Integer, nullable = False)  # Nth page of a survey
+        primary_key=True,
+        nullable=False )
+    ordering = db.Column(db.Integer, nullable=False)  # Nth page of a survey
     
     survey = db.relationship(  # many-one (facilitates many-many)
         'Survey',
-        backref = db.backref(
+        backref=db.backref(
             'survey_pages',
-            cascade = 'all, delete-orphan'))
+            cascade='all, delete-orphan'))
     page = db.relationship(  # many-one (facilitates many-many)
         'Page',
-        backref = db.backref(
+        backref=db.backref(
             'page_surveys',
-            cascade = 'all, delete-orphan'))
+            cascade='all, delete-orphan'))
 
 
 class Fill(db.Model):
@@ -337,45 +337,45 @@ class Fill(db.Model):
     survey_id = db.Column(
         db.Integer,
         db.ForeignKey('survey.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     page_id = db.Column(
         db.Integer,
         db.ForeignKey('page.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     area_id = db.Column(
         db.Integer,
         db.ForeignKey('area.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     subject_id = db.Column(
         db.Integer,
         db.ForeignKey('subject.id'),
-        primary_key = True,
-        nullable = False )
+        primary_key=True,
+        nullable=False )
     time = db.Column(  # msecs from page start
         db.Integer,
-        primary_key = True,
-        autoincrement = False,
-        nullable = False )
+        primary_key=True,
+        autoincrement=False,
+        nullable=False )
     color_id = db.Column(
         db.Integer,
         db.ForeignKey('color.id'),
-        nullable = False )
+        nullable=False )
     
     survey = db.relationship(  # many-one
         'Survey',
-        backref = db.backref('fills', lazy = 'dynamic') )
+        backref=db.backref('fills', lazy='dynamic') )
     page = db.relationship(  # many-one
         'Page',
-        backref = db.backref('fills', lazy = 'dynamic') )
+        backref=db.backref('fills', lazy='dynamic') )
     area = db.relationship(  # many-one
         'Area',
-        backref = db.backref('fills', lazy = 'dynamic') )
+        backref=db.backref('fills', lazy='dynamic') )
     subject = db.relationship(  # many-one
         'Subject',
-        backref = db.backref('fills', lazy = 'dynamic') )
+        backref=db.backref('fills', lazy='dynamic') )
     color = db.relationship('Color')  # many-one, no backref
     
     def __repr__(self):

@@ -113,7 +113,7 @@ class FillView(ModelView):
                             Color.id == Expectation.color_id,
                             db.case(
                                 [(Expectation.here, 'expected')],
-                                else_ = 'misplaced' ),
+                                else_='misplaced' ),
                         ),
                         (Expectation.here == True, 'miscolored'),
                         (Expectation.here == False, 'compatible')
@@ -160,17 +160,17 @@ class FillView(ModelView):
                             Color.id == Expectation.color_id,
                             db.case(
                                 [(Expectation.here, 'expected')],
-                                else_ = 'misplaced' ),
+                                else_='misplaced' ),
                         ),
                         (
                             Color.id == None,
                             db.case(
                                 [(Expectation.here, 'not_expected')],
-                                else_ = 'empty' ),
+                                else_='empty' ),
                         ),
                         (Expectation.here, 'miscolored'),
                     ],
-                    else_ = 'compatible' ) )
+                    else_='compatible' ) )
             .select_from(Expectation)
             .join(color_bis, color_bis.id == Expectation.color_id)
             .join(Expectation.page, Expectation.area)
@@ -307,7 +307,7 @@ class SurveyView (ModelView):
     column_display_all_relations = True
     form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list')
     form_extra_fields = {
-        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+        'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
     }
     form_args = {
         'duration': {
@@ -315,11 +315,11 @@ class SurveyView (ModelView):
         },
     }
         
-    def on_model_change(self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if not is_created:
             self.session.query(SurveyPage).filter_by(survey=model).delete()
         for index, id in enumerate(form.page_list.data):
-            SurveyPage(survey = model, page_id = id, ordering = index)
+            SurveyPage(survey=model, page_id=id, ordering=index)
     
     def on_form_prefill(self, form, id):
         form.page_list.process_data(
@@ -370,21 +370,21 @@ class PageView(ModelView):
         rules.Macro('drawing.edit_expectations'),
     )
     
-    def on_model_change(self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if not is_created:
-            Expectation.query.filter_by(page = model).delete()
+            Expectation.query.filter_by(page=model).delete()
             new_expectations = json.loads(form.expect_list.data)
             for area_name, settings in new_expectations.iteritems():
-                color = Color.query.filter_by(code = settings['color']).one()
+                color = Color.query.filter_by(code=settings['color']).one()
                 area = (
                     Area.query
-                    .filter_by(name = area_name, drawing = model.drawing)
+                    .filter_by(name=area_name, drawing=model.drawing)
                     .one()
                 )
                 model.expectations.append(Expectation(
-                    area = area,
-                    color = color,
-                    here = settings['here'] ))
+                    area=area,
+                    color=color,
+                    here=settings['here'] ))
     
     def on_form_prefill(self, form, id):
         form.fname.process_data(
@@ -417,12 +417,12 @@ class DrawingView(ModelView):
     form_extra_fields = {
         'file': form.FileUploadField(
             'Drawing',
-            validators = (FileNameLength(
+            validators=(FileNameLength(
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = current_app.instance_path,
-            allowed_extensions = ('svg',) ),
+            base_path=current_app.instance_path,
+            allowed_extensions=('svg',) ),
         'area_list': fields.HiddenField(),
         'svg_source': fields.HiddenField(),
     }
@@ -433,7 +433,7 @@ class DrawingView(ModelView):
         rules.Macro('drawing.edit_areas'),
     )
         
-    def on_model_change(self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if is_created:
             model.name = op.splitext(form.file.data.filename)[0]
         else:
@@ -445,23 +445,23 @@ class DrawingView(ModelView):
             )
             removed_areas = old_area_set - new_area_set
             for area in removed_areas:
-                Area.query.filter_by(drawing = model, name = area).delete()
+                Area.query.filter_by(drawing=model, name=area).delete()
             added_areas = new_area_set - old_area_set
             for area in added_areas:
-                model.areas.append(Area(name = area))
+                model.areas.append(Area(name=area))
             current_app.open_instance_resource(model.name + '.svg', 'w').write(
                 form.svg_source.data )
     
     def on_form_prefill(self, form, id):
         form.svg_source.process_data(
             current_app.open_instance_resource(
-                self.session.query(Drawing.name).filter_by(id = id).scalar()
+                self.session.query(Drawing.name).filter_by(id=id).scalar()
                 + '.svg'
             ).read()
         )
         form.area_list.process_data(','.join(x[0] for x in
             self.session.query(Area.name)
-            .filter_by(drawing_id = id)
+            .filter_by(drawing_id=id)
             .all()
         ))
     
@@ -487,15 +487,15 @@ class SoundView(ModelView):
     form_extra_fields = {
         'file': form.FileUploadField(
             'Sound',
-            validators = (FileNameLength(
+            validators=(FileNameLength(
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = current_app.instance_path,
-            allowed_extensions = ('mp3',) ),
+            base_path=current_app.instance_path,
+            allowed_extensions=('mp3',) ),
     }
     
-    def on_model_change(self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if is_created:
             model.name = op.splitext(form.file.data.filename)[0]
         
