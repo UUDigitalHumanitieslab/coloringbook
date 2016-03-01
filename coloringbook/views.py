@@ -187,7 +187,12 @@ def bind_survey_subject(survey, subject, evaluation):
         >>> from flask import jsonify
         >>> from datetime import datetime
         >>> app = t.get_fixture_app()
-        >>> testsurvey = m.Survey(name='test')
+        >>> testwelcome = m.SurveyWelcomeText(name='a', content='a')
+        >>> testprivacy = m.SurveyPrivacyText(name='a', content='a')
+        >>> testsuccess = m.SurveySuccessText(name='a', content='a')
+        >>> testfailure = m.SurveyFailureText(name='a', content='a')
+        >>> testinstruction = m.SurveyInstructionText(name='a', content='a')
+        >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
         >>> testsubject = m.Subject(name='Koos', birth=datetime.now())
         >>> testevaluation = {
         ...     'difficulty': 5,
@@ -232,13 +237,19 @@ def fills_from_json(survey, page, subject, data):
         Example:
         
         >>> import coloringbook as cb, flask, datetime, coloringbook.testing
+        >>> import coloringbook.models as m
         >>> app = coloringbook.testing.get_fixture_app()
         >>> # some trivial contents for the database
         >>> testdrawing = cb.models.Drawing(name='picture')
         >>> testdrawing.areas.append(cb.models.Area(name='left door'))
         >>> testdrawing.areas.append(cb.models.Area(name='right door'))
         >>> testpage = cb.models.Page(name='page1', drawing=testdrawing, text='test 123')
-        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False)
+        >>> testwelcome = m.SurveyWelcomeText(name='a', content='a')
+        >>> testprivacy = m.SurveyPrivacyText(name='a', content='a')
+        >>> testsuccess = m.SurveySuccessText(name='a', content='a')
+        >>> testfailure = m.SurveyFailureText(name='a', content='a')
+        >>> testinstruction = m.SurveyInstructionText(name='a', content='a')
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[
