@@ -1,6 +1,11 @@
 # Coloringbook -- version history #
 
-## 1.3 (current) ##
+## 1.3.1 (current) ##
+
+Hotfix release to make area expectations editable again.
+
+
+## 1.3 ##
 
 Enhancement release.
 
