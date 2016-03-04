@@ -241,7 +241,7 @@
             });
         } else if (hidden_table.length) {
             var expectations = JSON.parse(hidden_table.val());
-            var url = base + '/static/' + hidden_fname.val() + '.svg';
+            var url = base + '/media/' + hidden_fname.val() + '.svg';
             $.get(url, null, function (svg) {
                 place_svg(svg);
                 $('path[class~="colorable"]').click(
