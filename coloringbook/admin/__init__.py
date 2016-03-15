@@ -50,6 +50,6 @@ def create_admin(app):
     admin.add_view(TextView(SurveyInstructionText, sess, name='Instruction Text', endpoint='instruction_text'))
     admin.add_view(TextView(SurveySuccessText, sess, name='Success Text', endpoint='success_text'))
     admin.add_view(TextView(SurveyFailureText, sess, name='Failure Text', endpoint='failure_text'))
-    admin.add_view(ColorView(sess))
-    admin.add_view(LanguageView(sess))
+    admin.add_view(ColorView(sess, category='Utilities'))
+    admin.add_view(LanguageView(sess, category='Utilities'))
     return admin
