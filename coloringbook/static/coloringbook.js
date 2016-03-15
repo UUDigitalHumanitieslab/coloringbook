@@ -295,7 +295,7 @@ send_data = function ( ) {
 				$('#success_message').show();
 			} else {
 				$('#failure_message').show();
-				$('#errorbox').val(data);
+				$('#errorbox').val(data).focus().select();
 			}
 		}
 	});
