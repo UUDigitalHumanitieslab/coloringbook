@@ -293,7 +293,7 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list')
+    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list', 'welcome_text', 'privacy_text', 'instruction_text', 'success_text', 'failure_text')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
     }
@@ -499,6 +499,24 @@ def delete_sound(mapper, connection, target):
     except OSError:
         # Don't care if it was not deleted because it does not exist
         pass
+
+
+class TextView(ModelView):
+    """ Management view for customizable text models. """
+    
+    column_descriptions = {
+        'content': 'Parsed as HTML. Use &lt;br> for line breaks.',
+    }
+    form_widget_args = {
+        'content': {
+            'rows': 15,
+            'cols': 70,
+            'style': 'width: 70ex;',
+        },
+    }
+    
+    def __init__(self, model, session, **kwargs):
+        super(TextView, self).__init__(model, session, category='Texts', **kwargs)
 
 
 class ColorView(ModelView):
