@@ -78,8 +78,8 @@ input.error {
 <form id="starting_form">
 	<h2>Kleurgeheugenexperiment</h2>
 	<br>
-	Welkom bij coloringbook.
-	Zou je alstublieft het volgende formulier willen invullen?<br><br>
+	{{ survey.welcome_text.content|safe }}
+	<br><br>
 	<label for="name">Naam</label><input type="text" name="name" id="name" required="required" size="30"/><br />
 	<label for="numeral">Studentnummer</label><input type="number" name="numeral" id="numeral" inputmode="number"/><br />
 	<label for="birth">Geboortedatum</label><input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
@@ -91,22 +91,12 @@ input.error {
 	(1: redelijk &ndash; 10: moedertaalniveau).<br />
 	<input type="button" name="more" value="+"/><br/>
 	<input type="submit"/><br /><br />
-	PRIVACY<br />
-    De gegevens die wij met deze app verzamelen zullen vertrouwelijk worden behandeld. Persoonlijke gegevens zullen niet worden vermeld, noch tijdens de studie, noch bij een eventuele publicatie van de resultaten van dit onderzoek.
+	{{ survey.privacy_text.content|safe }}
 </form>
 
 <p id="instructions">
-	Je krijgt straks steeds een zin te zien of te horen waarin een aantal kleuren voorkomen.
-	Bijvoorbeeld: &ldquo;een vrouw met een kort rokje en rode schoenen staat naast een vrouw met een blauwe handtas&rdquo;.
-	Lees of luister de zin zorgvuldig en probeer hem te onthouden.
-	Na 6 seconden verdwijnt de zin en verschijnt een kleurplaat die bij de zin past.
-	Gebruik de knoppen onderaan het scherm om een kleur te kiezen en vul de juiste vakjes van de tekening in met de laatstgekozen kleur door erin te klikken.
-	In de voorbeeldzin zou je de schoenen van de vrouw met het korte rokje rood inkleuren en zou je de tas van de vrouw ernaast blauw inkleuren.<br><br>
-	Vervolgens druk je op &ldquo;klaar&rdquo;, je krijgt dan de volgende zin te zien.
-	Aan het einde stellen we nog een paar vragen ter evaluatie.
-	Je kunt niet terugkijken of later van gedachten veranderen.
-	Let op: dezelfde kleurplaat kan meerdere keren voorkomen met verschillende zinnen.<br><br>
-	Succes!<br />
+	{{ survey.instruction_text.content|safe }}
+	<br>
 	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
 </p>
 
@@ -131,6 +121,16 @@ input.error {
     <textarea id="comments" name="comments" rows="3" cols="30"></textarea><br>
     <input type="submit">
 </form>
+
+<p id="success_message">
+	{{ survey.success_text.content|safe }}
+</p>
+
+<p id="failure_message">
+	{{ survey.failure_text.content|safe }}
+	<br>
+	<textarea id="errorbox" style="width: 300px; height: 200px;"></textarea>
+</p>
 
 <img src="//upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/36px-Speaker_Icon.svg.png" style="display: none; margin-right: 24pt; vertical-align: -8px;" id="speaker-icon">
 

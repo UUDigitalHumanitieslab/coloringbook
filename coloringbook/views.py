@@ -82,7 +82,7 @@ def fetch_coloringbook(survey_name):
                 sounds=[s for s in audio_set],
                 pages=page_list )
         else:
-            return render_template('coloringbook.html')
+            return render_template('coloringbook.html', survey=survey)
     except Exception as e:
         abort(404)
 
