@@ -187,11 +187,11 @@ def bind_survey_subject(survey, subject, evaluation):
         >>> from flask import jsonify
         >>> from datetime import datetime
         >>> app = t.get_fixture_app()
-        >>> testwelcome = m.SurveyWelcomeText(name='a', content='a')
-        >>> testprivacy = m.SurveyPrivacyText(name='a', content='a')
-        >>> testsuccess = m.SurveySuccessText(name='a', content='a')
-        >>> testfailure = m.SurveyFailureText(name='a', content='a')
-        >>> testinstruction = m.SurveyInstructionText(name='a', content='a')
+        >>> testwelcome = m.WelcomeText(name='a', content='a')
+        >>> testprivacy = m.PrivacyText(name='a', content='a')
+        >>> testsuccess = m.SuccessText(name='a', content='a')
+        >>> testfailure = m.FailureText(name='a', content='a')
+        >>> testinstruction = m.InstructionText(name='a', content='a')
         >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
         >>> testsubject = m.Subject(name='Koos', birth=datetime.now())
         >>> testevaluation = {
@@ -244,11 +244,11 @@ def fills_from_json(survey, page, subject, data):
         >>> testdrawing.areas.append(cb.models.Area(name='left door'))
         >>> testdrawing.areas.append(cb.models.Area(name='right door'))
         >>> testpage = cb.models.Page(name='page1', drawing=testdrawing, text='test 123')
-        >>> testwelcome = m.SurveyWelcomeText(name='a', content='a')
-        >>> testprivacy = m.SurveyPrivacyText(name='a', content='a')
-        >>> testsuccess = m.SurveySuccessText(name='a', content='a')
-        >>> testfailure = m.SurveyFailureText(name='a', content='a')
-        >>> testinstruction = m.SurveyInstructionText(name='a', content='a')
+        >>> testwelcome = m.WelcomeText(name='a', content='a')
+        >>> testprivacy = m.PrivacyText(name='a', content='a')
+        >>> testsuccess = m.SuccessText(name='a', content='a')
+        >>> testfailure = m.FailureText(name='a', content='a')
+        >>> testinstruction = m.InstructionText(name='a', content='a')
         >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database

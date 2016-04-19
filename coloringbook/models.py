@@ -248,8 +248,8 @@ class Expectation(db.Model):
             '' if self.here else 'not ' )
 
 
-class SurveyText(object):
-    """ Common fields for SurveyWelcomeText, SurveyPrivacyText, etcetera. """
+class Text(object):
+    """ Common fields for WelcomeText, PrivacyText, etcetera. """
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(30), nullable=False, unique=True)
@@ -259,29 +259,29 @@ class SurveyText(object):
         return self.name
 
 
-class SurveyWelcomeText(SurveyText, db.Model):
+class WelcomeText(Text, db.Model):
     """ The welcome message above the subscription form. """
-    __tablename__ = 'survey_welcome_text'
+    __tablename__ = 'welcome_text'
 
 
-class SurveyPrivacyText(SurveyText, db.Model):
+class PrivacyText(Text, db.Model):
     """ The privacy statement below the subscription form. """
-    __tablename__ = 'survey_privacy_text'
+    __tablename__ = 'privacy_text'
 
 
-class SurveyInstructionText(SurveyText, db.Model):
+class InstructionText(Text, db.Model):
     """ The instruction text that is shown after subscription. """
-    __tablename__ = 'survey_instruction_text'
+    __tablename__ = 'instruction_text'
 
 
-class SurveySuccessText(SurveyText, db.Model):
+class SuccessText(Text, db.Model):
     """ The message shown after successful data submission. """
-    __tablename__ = 'survey_success_text'
+    __tablename__ = 'success_text'
 
 
-class SurveyFailureText(SurveyText, db.Model):
+class FailureText(Text, db.Model):
     """ The message shown after failed data submission. """
-    __tablename__ = 'survey_failure_text'
+    __tablename__ = 'failure_text'
 
 
 class Survey(db.Model):
@@ -304,30 +304,30 @@ class Survey(db.Model):
     title = db.Column(db.String(100), nullable=False, default='Coloring Book')
     welcome_text_id = db.Column(
         db.Integer,
-        db.ForeignKey('survey_welcome_text.id'),
+        db.ForeignKey('welcome_text.id'),
         nullable=False )
     privacy_text_id = db.Column(
         db.Integer,
-        db.ForeignKey('survey_privacy_text.id'),
+        db.ForeignKey('privacy_text.id'),
         nullable=False )
     instruction_text_id = db.Column(
         db.Integer,
-        db.ForeignKey('survey_instruction_text.id'),
+        db.ForeignKey('instruction_text.id'),
         nullable=False )
     success_text_id = db.Column(
         db.Integer,
-        db.ForeignKey('survey_success_text.id'),
+        db.ForeignKey('success_text.id'),
         nullable=False )
     failure_text_id = db.Column(
         db.Integer,
-        db.ForeignKey('survey_failure_text.id'),
+        db.ForeignKey('failure_text.id'),
         nullable=False )
     
-    welcome_text = db.relationship('SurveyWelcomeText')
-    privacy_text = db.relationship('SurveyPrivacyText')
-    instruction_text = db.relationship('SurveyInstructionText')
-    success_text = db.relationship('SurveySuccessText')
-    failure_text = db.relationship('SurveyFailureText')
+    welcome_text = db.relationship('WelcomeText')
+    privacy_text = db.relationship('PrivacyText')
+    instruction_text = db.relationship('InstructionText')
+    success_text = db.relationship('SuccessText')
+    failure_text = db.relationship('FailureText')
     
     def __str__(self):
         return self.name
