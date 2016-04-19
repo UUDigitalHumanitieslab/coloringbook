@@ -284,6 +284,23 @@ class FailureText(Text, db.Model):
     __tablename__ = 'failure_text'
 
 
+class StartingForm(db.Model):
+    """ Customization parameters for display of the initial form. """
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False, unique=True)
+    name_label = db.Column(db.String(30), nullable=False)
+    numeral_label = db.Column(db.String(30))
+    birth_label = db.Column(db.String(30), nullable=False)
+    eyesight_label = db.Column(db.String(30), nullable=False)
+    eyesight_label_2 = db.Column(db.Text)
+    language_label = db.Column(db.String(30), nullable=False)
+    language_label_2 = db.Column(db.Text)
+    
+    def __str__(self):
+        return self.name
+
+
 class Survey(db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
@@ -300,7 +317,7 @@ class Survey(db.Model):
     pages = association_proxy('survey_pages', 'page')  # many-many
     subjects = association_proxy('survey_subjects', 'subject')  # many-many
     
-    # Customizable text
+    # Customizable text and forms
     title = db.Column(db.String(100), nullable=False, default='Coloring Book')
     welcome_text_id = db.Column(
         db.Integer,
@@ -322,12 +339,17 @@ class Survey(db.Model):
         db.Integer,
         db.ForeignKey('failure_text.id'),
         nullable=False )
+    starting_form_id = db.Column(
+        db.Integer,
+        db.ForeignKey('starting_form.id'),
+        nullable=False )
     
     welcome_text = db.relationship('WelcomeText')
     privacy_text = db.relationship('PrivacyText')
     instruction_text = db.relationship('InstructionText')
     success_text = db.relationship('SuccessText')
     failure_text = db.relationship('FailureText')
+    starting_form = db.relationship('StartingForm')
     
     def __str__(self):
         return self.name

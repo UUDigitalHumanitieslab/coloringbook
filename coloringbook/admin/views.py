@@ -293,7 +293,7 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list', 'welcome_text', 'privacy_text', 'instruction_text', 'success_text', 'failure_text')
+    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list', 'welcome_text', 'privacy_text', 'instruction_text', 'success_text', 'failure_text', 'starting_form')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
     }
@@ -517,6 +517,28 @@ class TextView(ModelView):
     
     def __init__(self, model, session, **kwargs):
         super(TextView, self).__init__(model, session, category='Texts', **kwargs)
+
+
+class StartingFormView(ModelView):
+    """ Management view for customization of the starting form. """
+    
+    column_list = ('name', 'name_label', 'numeral_label', 'birth_label', 'eyesight_label', 'language_label')
+    column_descriptions = {
+        'name': 'For your reference (not shown to subjects).',
+        'name_label': 'Label for the form field shown to subjects.',
+        'numeral_label': 'You can omit the form field entirely by leaving this empty.',
+        'eyesight_label_2': 'Optional. You may use HTML, e.g. &lt;br> for line breaks.',
+        'language_label_2': 'Optional. If omitted, subjects will not get the option to specify more languages. You may use HTML.',
+    }
+    
+    def __init__(self, session, **kwargs):
+        super(StartingFormView, self).__init__(
+            StartingForm,
+            session,
+            name='Starting Form',
+            category='Texts',
+            **kwargs
+        )
 
 
 class ColorView(ModelView):

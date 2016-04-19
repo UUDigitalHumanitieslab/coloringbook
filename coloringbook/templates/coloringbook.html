@@ -80,16 +80,25 @@ input.error {
 	<br>
 	{{ survey.welcome_text.content|safe }}
 	<br><br>
-	<label for="name">Naam</label><input type="text" name="name" id="name" required="required" size="30"/><br />
-	<label for="numeral">Studentnummer</label><input type="number" name="numeral" id="numeral" inputmode="number"/><br />
-	<label for="birth">Geboortedatum</label><input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
-	<label for="eyesight">Bijzonderheden</label><input type="text" name="eyesight" id="eyesight"/><br />
-	<label for="eyesight" style="width: auto;">(kleurenblind, slechtziend, enzovoorts)</label><br>
-	<label for="nativelang">Moedertaal</label><input type="text" name="nativelang" id="nativelang" required="required"/><br />
-	Spreek je nog andere talen?<br />
-	Voeg iedere taal toe met het plusje en geef aan wat je niveau is
-	(1: redelijk &ndash; 10: moedertaalniveau).<br />
+	<label for="name">{{ survey.starting_form.name_label }}</label>
+	<input type="text" name="name" id="name" required="required" size="30"/><br />
+	{%- if survey.starting_form.numeral_label %}
+	<label for="numeral">{{ survey.starting_form.numeral_label }}</label>
+	<input type="number" name="numeral" id="numeral" inputmode="number"/><br />
+	{%- endif %}
+	<label for="birth">{{ survey.starting_form.birth_label }}</label>
+	<input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
+	<label for="eyesight">{{ survey.starting_form.eyesight_label }}</label>
+	<input type="text" name="eyesight" id="eyesight"/><br />
+	{%- if survey.starting_form.eyesight_label_2 %}
+	<label for="eyesight" style="width: auto;">{{ survey.starting_form. eyesight_label_2|safe }}</label><br>
+	{%- endif %}
+	<label for="nativelang">{{ survey.starting_form.language_label }}</label>
+	<input type="text" name="nativelang" id="nativelang" required="required"/><br />
+	{%- if survey.starting_form.language_label_2 %}
+	{{ survey.starting_form.language_label_2|safe }}<br />
 	<input type="button" name="more" value="+"/><br/>
+	{%- endif %}
 	<input type="submit"/><br /><br />
 	{{ survey.privacy_text.content|safe }}
 </form>
