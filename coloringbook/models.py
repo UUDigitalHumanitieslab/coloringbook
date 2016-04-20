@@ -303,6 +303,20 @@ class StartingForm(db.Model):
         return self.name
 
 
+class EndingForm(db.Model):
+    """ Customization parameters for display of the final form. """
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False, unique=True)
+    introduction = db.Column(db.Text, nullable=False)
+    difficulty_label = db.Column(db.Text, nullable=False)
+    topic_label = db.Column(db.Text, nullable=False)
+    comments_label = db.Column(db.Text, nullable=False)
+    
+    def __str__(self):
+        return self.name
+
+
 class Survey(db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
@@ -345,6 +359,10 @@ class Survey(db.Model):
         db.Integer,
         db.ForeignKey('starting_form.id'),
         nullable=False )
+    ending_form_id = db.Column(
+        db.Integer,
+        db.ForeignKey('ending_form.id'),
+        nullable=False )
     
     welcome_text = db.relationship('WelcomeText')
     privacy_text = db.relationship('PrivacyText')
@@ -352,6 +370,7 @@ class Survey(db.Model):
     success_text = db.relationship('SuccessText')
     failure_text = db.relationship('FailureText')
     starting_form = db.relationship('StartingForm')
+    ending_form = db.relationship('EndingForm')
     
     def __str__(self):
         return self.name
