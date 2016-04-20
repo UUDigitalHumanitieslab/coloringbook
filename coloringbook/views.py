@@ -162,7 +162,7 @@ def subject_from_json(data):
     
     subject = Subject(
         name=data['name'],
-        numeral=int(data['numeral']) if data['numeral'] else None,
+        numeral=int(data['numeral']) if 'numeral' in data else None,
         birth=birth_date,
         eyesight=data['eyesight'] )
     
@@ -249,7 +249,8 @@ def fills_from_json(survey, page, subject, data):
         >>> testsuccess = m.SuccessText(name='a', content='a')
         >>> testfailure = m.FailureText(name='a', content='a')
         >>> testinstruction = m.InstructionText(name='a', content='a')
-        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
+        >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction, starting_form=teststartform)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[

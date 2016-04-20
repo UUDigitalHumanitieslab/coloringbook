@@ -29,9 +29,11 @@ var sentence_image_delay = 6000;  // milliseconds
 lang_field = function (count) {
 	var lang = '="language' + count + '"';
 	var level = '="level' + count + '"';
-	return '<label for' + lang + '>Taal ' + count + '</label>' +
-		'<input type="text" name' + lang + 'id' + lang + ' required="required"/> ' +
-		'<label for' + level + '>Niveau</label>' +
+	return '<label for' + lang + '>' + extra_language_label + ' ' + count +
+		'</label>' +
+		'<input type="text" name' + lang + 'id' + lang +
+		' required="required"/> ' +
+		'<label for' + level + '>' + extra_language_level_label + '</label>' +
 		'<input type="number" name' + level + 'id' + level + ' min="1" max="10" step="1"/><br/>';
 }
 

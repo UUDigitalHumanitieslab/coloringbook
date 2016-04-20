@@ -97,6 +97,10 @@ input.error {
 	<input type="text" name="nativelang" id="nativelang" required="required"/><br />
 	{%- if survey.starting_form.language_label_2 %}
 	{{ survey.starting_form.language_label_2|safe }}<br />
+	<script>
+		extra_language_label = '{{ survey.starting_form.extra_language_label }}';
+		extra_language_level_label = '{{ survey.starting_form.extra_language_level_label }}';
+	</script>
 	<input type="button" name="more" value="+"/><br/>
 	{%- endif %}
 	<input type="submit"/><br /><br />

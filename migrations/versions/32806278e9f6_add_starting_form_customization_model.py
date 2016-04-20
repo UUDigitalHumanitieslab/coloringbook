@@ -25,6 +25,8 @@ def upgrade():
         sa.Column('eyesight_label_2', sa.Text(), nullable=True),
         sa.Column('language_label', sa.String(length=30), nullable=False),
         sa.Column('language_label_2', sa.Text(), nullable=True),
+        sa.Column('extra_language_label', sa.String(length=20), nullable=True),
+        sa.Column('extra_language_level_label', sa.String(length=20), nullable=True),
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('name'),
         mysql_engine='InnoDB'
@@ -38,9 +40,11 @@ def upgrade():
             'eyesight_label': 'Bijzonderheden',
             'eyesight_label_2': '(kleurenblind, slechtziend, enzovoorts)',
             'language_label': 'Moedertaal',
-            'language_label_2': '''Spreek je nog andere talen?<br>,
-Voeg iedere taal toe met het plusje en geef aan wat je niveau is,
+            'language_label_2': '''Spreek je nog andere talen?<br>
+Voeg iedere taal toe met het plusje en geef aan wat je niveau is
 (1: redelijk &ndash; 10: moedertaalniveau).''',
+            'extra_language_label': 'Taal',
+            'extra_language_level_label': 'Niveau',
         },
     ])
     op.add_column(u'survey', sa.Column(

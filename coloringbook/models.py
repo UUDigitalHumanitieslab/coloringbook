@@ -296,6 +296,8 @@ class StartingForm(db.Model):
     eyesight_label_2 = db.Column(db.Text)
     language_label = db.Column(db.String(30), nullable=False)
     language_label_2 = db.Column(db.Text)
+    extra_language_label = db.Column(db.String(20))
+    extra_language_level_label = db.Column(db.String(20))
     
     def __str__(self):
         return self.name

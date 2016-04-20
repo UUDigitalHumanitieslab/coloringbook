@@ -523,13 +523,26 @@ class StartingFormView(ModelView):
     """ Management view for customization of the starting form. """
     
     column_list = ('name', 'name_label', 'numeral_label', 'birth_label', 'eyesight_label', 'language_label')
+    column_labels = {
+        'language_label': 'First Language Label',
+        'language_label_2': 'Add Languages Label',
+    }
     column_descriptions = {
         'name': 'For your reference (not shown to subjects).',
         'name_label': 'Label for the form field shown to subjects.',
         'numeral_label': 'You can omit the form field entirely by leaving this empty.',
-        'eyesight_label_2': 'Optional. You may use HTML, e.g. &lt;br> for line breaks.',
-        'language_label_2': 'Optional. If omitted, subjects will not get the option to specify more languages. You may use HTML.',
+        'eyesight_label_2': 'Optional longer clarification for the eyesight field that will be put below the input. You may use HTML, e.g. &lt;br> for line breaks.',
+        'language_label_2': 'Optional text to ask for second languages. If omitted, subjects will not get the option to specify more languages. If specified, you must also specify the Extra Language Label and the Extra Language Level Label. You may use HTML.',
+        'extra_language_level_label': 'Label for the form field where subjects can enter their level of skill for a second language. The form field requires that they enter a value between 1 and 10, inclusive.'
     }
+    
+    def validate_form(self, form):
+        """ Add a check that all extra language fields have the same status. """
+        if form.language_label_2.data:
+            if not form.extra_language_label.data or not form.extra_language_level_label:
+                flash('If you set the Add Languages Label, you must also set the Extra Language Label and the Extra Language Level Label.', 'error')
+                return False
+        return super(StartingFormView, self).validate_form(form)
     
     def __init__(self, session, **kwargs):
         super(StartingFormView, self).__init__(
