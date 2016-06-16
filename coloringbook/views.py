@@ -11,6 +11,7 @@
 """
 
 from datetime import date, datetime
+import traceback
 
 from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app
 
@@ -99,7 +100,13 @@ def submit(survey_name):
             s.add_all(fills_from_json(survey, page, subject, result))
         s.commit()
         return 'Success'
-    except:
+    except Exception as e:
+        current_app.logger.error(
+            'Submit failed for survey "{}". Traceback:\n{}'.format(
+                survey_name,
+                traceback.format_exc()
+            )
+        )
         return 'Error'
     
 def subject_from_json (data):
