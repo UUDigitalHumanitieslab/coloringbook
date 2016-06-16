@@ -1,6 +1,11 @@
 # Coloringbook -- version history #
 
-## 1.3.1 (current) ##
+## 1.3.2 (current) ##
+
+Hotfix release to enable logging for failed submission.
+
+
+## 1.3.1 ##
 
 Hotfix release to make area expectations editable again.
 
