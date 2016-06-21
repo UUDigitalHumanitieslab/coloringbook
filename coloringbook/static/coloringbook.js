@@ -48,6 +48,7 @@ button = function (color) {
 init_application = function ( ) {
 	$('#instructions').hide();
 	$('#sentence').hide();
+	$('#speaker-icon').hide();
 	$('#controls').hide();
 	var now = new Date(),
 	    century_ago = new Date();
@@ -230,12 +231,17 @@ start_page = function ( ) {
 	window.setTimeout(start_image, sentence_image_delay);
 	if (page.audio) {
 		ion.sound.play(page.audio);
+		$('#speaker-icon').show();
 		if (simultaneous) {
-			$('#speaker-icon').clone().attr({id: null}).click(function() {
-				ion.sound.play(page.audio);
-			}).show().prependTo('#sentence');
+			$('#speaker-icon').clone().attr({id: null}).prependTo('#sentence');
 		}
 	}
+}
+
+// Play the sound for the current page, if available.
+// Click event handler for $('#speaker-icon') and its clones.
+play_sound = function ( ) {
+	ion.sound.play(pages[pagenum].audio);
 }
 
 // Display the colorable image and prepare it for coloring.
@@ -255,6 +261,7 @@ start_image = function ( ) {
 // coloring the page. Prepare for the next stage, i.e. either another
 // coloring page or the evaluation form.
 end_page = function ( ) {
+	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
 	page_data.push(serialize_commands(first_command));

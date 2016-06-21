@@ -1,6 +1,11 @@
 # Coloringbook -- version history #
 
-## 1.3.2 (current) ##
+## 1.3.3 (current) ##
+
+Hotfix release to enable the sound repeat button on pages that have the sound playing before the image is displayed.
+
+
+## 1.3.2 ##
 
 Hotfix release to enable logging for failed submission.
 
