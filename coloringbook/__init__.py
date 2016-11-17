@@ -1,4 +1,4 @@
-# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# (c) 2014, 2016 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -42,9 +42,11 @@ from .models import db
 from .views import site
 from .admin import create_admin
 
+
 migrate = Migrate()
 
-def create_app (config, disable_admin=False, create_db=False, instance=None):
+
+def create_app(config, disable_admin=False, create_db=False, instance=None):
     app = Flask(__name__, instance_path=instance)
     
     # The following line may be uncommented, and the corresponding 

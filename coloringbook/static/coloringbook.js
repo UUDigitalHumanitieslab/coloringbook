@@ -1,5 +1,5 @@
 /*
-	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	(c) 2014-2016 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 	
 	It is helpful to think of this script as an event-driven state machine.
@@ -29,9 +29,11 @@ var sentence_image_delay = 6000;  // milliseconds
 lang_field = function (count) {
 	var lang = '="language' + count + '"';
 	var level = '="level' + count + '"';
-	return '<label for' + lang + '>Taal ' + count + '</label>' +
-		'<input type="text" name' + lang + 'id' + lang + ' required="required"/> ' +
-		'<label for' + level + '>Niveau</label>' +
+	return '<label for' + lang + '>' + extra_language_label + ' ' + count +
+		'</label>' +
+		'<input type="text" name' + lang + 'id' + lang +
+		' required="required"/> ' +
+		'<label for' + level + '>' + extra_language_level_label + '</label>' +
 		'<input type="number" name' + level + 'id' + level + ' min="1" max="10" step="1"/><br/>';
 }
 
@@ -50,6 +52,8 @@ init_application = function ( ) {
 	$('#sentence').hide();
 	$('#speaker-icon').hide();
 	$('#controls').hide();
+	$('#success_message').hide();
+	$('#failure_message').hide();
 	var now = new Date(),
 	    century_ago = new Date();
 	century_ago.setFullYear(now.getFullYear() - 100);
@@ -284,38 +288,24 @@ handle_evaluation = function (form) {
 
 // Upload all data and handle possible failure.
 send_data = function ( ) {
-	var data = {
+	var data = JSON.stringify({
 		subject: form_data,
 		results: page_data,
 		evaluation: evaluation_data
-	};
+	});
 	$.ajax({
 		type: 'POST',
 		url: window.location.pathname + '/submit',
-		'data': JSON.stringify(data),
+		'data': data,
 		contentType: 'application/json',
 		success: function (result) {
-			var inst = $('#instructions');
 			$('#ending_form').hide();
 			if (result == 'Success') {
-				inst.html(
-					'Dank voor je deelname aan dit experiment.<br/>' +
-					'Je invoer is opgeslagen. ' +
-					'Je kunt het venster nu sluiten.'
-				);
+				$('#success_message').show();
 			} else {
-				inst.html(
-					'Dank voor je deelname aan dit experiment.<br/>' +
-					'Door een technisch probleem is het opslaan van ' +
-					'je invoer helaas niet gelukt. Zou je de inhoud ' +
-					'van onderstaand kader willen kopiëren en opslaan, ' +
-					'en dit als bijlage willen opsturen naar ' +
-					'j.gonggrijp@uu.nl?<br/> Bij voorbaat dank!<br/>' +
-					'<textarea id="errorbox"></textarea>'
-				);
-				$('#errorbox').width(300).height(200).val(JSON.stringify(data));
+				$('#failure_message').show();
+				$('#errorbox').val(data).focus().select();
 			}
-			inst.show();
 		}
 	});
 }

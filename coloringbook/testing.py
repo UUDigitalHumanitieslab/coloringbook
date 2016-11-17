@@ -1,4 +1,4 @@
-# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# (c) 2014, 2016 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -14,7 +14,8 @@
 
 import coloringbook
 
-def get_fixture_app ( ):
+
+def get_fixture_app():
     class config:
         SQLALCHEMY_DATABASE_URI = 'sqlite://'
         SECRET_KEY = '1234567890'
