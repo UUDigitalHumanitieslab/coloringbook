@@ -52,6 +52,7 @@ def create_admin(app):
     admin.add_view(EndingFormView(sess))
     admin.add_view(TextView(SuccessText, sess, name='Success Text', endpoint='success_text'))
     admin.add_view(TextView(FailureText, sess, name='Failure Text', endpoint='failure_text'))
+    admin.add_view(ButtonSetView(sess))
     admin.add_view(ColorView(sess, category='Utilities'))
     admin.add_view(LanguageView(sess, category='Utilities'))
     return admin

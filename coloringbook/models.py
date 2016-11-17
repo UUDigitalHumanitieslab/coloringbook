@@ -318,6 +318,18 @@ class EndingForm(db.Model):
         return self.name
 
 
+class ButtonSet(db.Model):
+    """ Customization parameters for the text in some of the buttons. """
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(30), nullable=False, unique=True)
+    post_instruction_button = db.Column(db.String(30), nullable=False)
+    post_page_button = db.Column(db.String(30), nullable=False)
+    
+    def __str__(self):
+        return self.name
+
+
 class Survey(db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
     
@@ -364,6 +376,10 @@ class Survey(db.Model):
         db.Integer,
         db.ForeignKey('failure_text.id'),
         nullable=False )
+    button_set_id = db.Column(
+        db.Integer,
+        db.ForeignKey('button_set.id'),
+        nullable=False )
     
     welcome_text = db.relationship('WelcomeText')
     starting_form = db.relationship('StartingForm')
@@ -372,6 +388,7 @@ class Survey(db.Model):
     ending_form = db.relationship('EndingForm')
     success_text = db.relationship('SuccessText')
     failure_text = db.relationship('FailureText')
+    button_set = db.relationship('ButtonSet')
     
     def __str__(self):
         return self.name

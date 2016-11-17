@@ -110,7 +110,7 @@ input.error {
 <p id="instructions">
 	{{ survey.instruction_text.content|safe }}
 	<br>
-	<input type="button" value="Start!" style="margin: 0 auto;" onclick="finish_instructions();"/>
+	<input type="button" value="{{ survey.button_set.post_instruction_button }}" style="margin: 0 auto;" onclick="finish_instructions();"/>
 </p>
 
 <p id="sentence" style="text-align: center; margin: auto;"></p>
@@ -119,7 +119,7 @@ input.error {
 	<div id="coloring_book_image"></div>
 	<p id="swatches" style="float: left; clear: left;"></p>  
 	<p style="float: right; clear: right;">
-		<input type="button" value="klaar" onclick="end_page();"/>
+		<input type="button" value="{{ survey.button_set.post_page_button }}" onclick="end_page();"/>
 	</p>
 </div>
 
