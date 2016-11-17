@@ -6,7 +6,7 @@
 	(c) 2014-2016 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 -->
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta charset="utf-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>Coloringbook &mdash; {{ survey.title }}</title>
@@ -81,36 +81,36 @@ input.error {
 	{{ survey.welcome_text.content|safe }}
 	<br><br>
 	<label for="name">{{ survey.starting_form.name_label }}</label>
-	<input type="text" name="name" id="name" required="required" size="30"/><br />
+	<input type="text" name="name" id="name" required="required" size="30"><br>
 	{%- if survey.starting_form.numeral_label %}
 	<label for="numeral">{{ survey.starting_form.numeral_label }}</label>
-	<input type="number" name="numeral" id="numeral" inputmode="number"/><br />
+	<input type="number" name="numeral" id="numeral" inputmode="number"><br>
 	{%- endif %}
 	<label for="birth">{{ survey.starting_form.birth_label }}</label>
-	<input type="date" name="birth" id="birth" required="required" placeholder="{{ survey.starting_form.birth_placeholder }}"/><br />
+	<input type="date" name="birth" id="birth" required="required" placeholder="{{ survey.starting_form.birth_placeholder }}"><br>
 	<label for="eyesight">{{ survey.starting_form.eyesight_label }}</label>
-	<input type="text" name="eyesight" id="eyesight"/><br />
+	<input type="text" name="eyesight" id="eyesight"><br>
 	{%- if survey.starting_form.eyesight_label_2 %}
 	<label for="eyesight" style="width: auto;">{{ survey.starting_form. eyesight_label_2|safe }}</label><br>
 	{%- endif %}
 	<label for="nativelang">{{ survey.starting_form.language_label }}</label>
-	<input type="text" name="nativelang" id="nativelang" required="required"/><br />
+	<input type="text" name="nativelang" id="nativelang" required="required"><br>
 	{%- if survey.starting_form.language_label_2 %}
-	{{ survey.starting_form.language_label_2|safe }}<br />
+	{{ survey.starting_form.language_label_2|safe }}<br>
 	<script>
 		extra_language_label = '{{ survey.starting_form.extra_language_label }}';
 		extra_language_level_label = '{{ survey.starting_form.extra_language_level_label }}';
 	</script>
-	<input type="button" name="more" value="+"/><br/>
+	<input type="button" name="more" value="+"><br>
 	{%- endif %}
-	<input type="submit"/><br /><br />
+	<input type="submit"><br><br>
 	{{ survey.privacy_text.content|safe }}
 </form>
 
 <p id="instructions">
 	{{ survey.instruction_text.content|safe }}
 	<br>
-	<input type="button" value="{{ survey.button_set.post_instruction_button }}" style="margin: 0 auto;" onclick="finish_instructions();"/>
+	<input type="button" value="{{ survey.button_set.post_instruction_button }}" style="margin: 0 auto;" onclick="finish_instructions();">
 </p>
 
 <p id="sentence" style="text-align: center; margin: auto;"></p>
@@ -120,7 +120,7 @@ input.error {
 	<p id="swatches" style="float: left; clear: left;"></p>  
 	<p style="float: right; clear: right;">
 		<img src="//upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/36px-Speaker_Icon.svg.png" style="display: none; margin-right: 24pt; vertical-align: -8px;" id="speaker-icon" onclick="play_sound();">
-		<input type="button" value="{{ survey.button_set.post_page_button }}" onclick="end_page();"/>
+		<input type="button" value="{{ survey.button_set.post_page_button }}" onclick="end_page();">
 	</p>
 </div>
 
