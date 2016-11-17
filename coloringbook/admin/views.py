@@ -293,7 +293,7 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list', 'welcome_text', 'privacy_text', 'instruction_text', 'success_text', 'failure_text', 'starting_form')
+    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list', 'welcome_text', 'privacy_text', 'instruction_text', 'success_text', 'failure_text', 'starting_form', 'ending_form')
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
     }
@@ -549,6 +549,35 @@ class StartingFormView(ModelView):
             StartingForm,
             session,
             name='Starting Form',
+            category='Texts',
+            **kwargs
+        )
+
+
+class EndingFormView(ModelView):
+    """ Management view for customization of the ending form. """
+    
+    column_list = 'name difficulty_label topic_label comments_label'.split()
+    form_columns = (
+        'name',
+        'introduction',
+        'difficulty_label',
+        'topic_label',
+        'comments_label',
+    )
+    column_descriptions = {
+        'name': 'For your reference (not shown to subjects).',
+        'introduction': 'Shown at the top of the evaluation form.',
+        'difficulty_label': 'Perceived difficulty of the task on a scale from 1 to 10, where 10 is most difficult.',
+        'topic_label': 'What the subject thought the task was about.',
+        'comments_label': 'Any comments or suggestions.',
+    }
+    
+    def __init__(self, session, **kwargs):
+        super(EndingFormView, self).__init__(
+            EndingForm,
+            session,
+            name='Ending Form',
             category='Texts',
             **kwargs
         )
