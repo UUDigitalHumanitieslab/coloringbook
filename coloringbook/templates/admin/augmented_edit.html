@@ -1,6 +1,6 @@
 {#
-    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
-    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 #}
 
 {% extends 'admin/model/edit.html' %}
@@ -8,25 +8,25 @@
 {% import 'admin/forms.html' as forms %}
 
 {% block head_css %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{
-        url_for('static', filename='admin/drawing.css')
-    }}" type="text/css"></link>
+	{{ super() }}
+	<link rel="stylesheet" href="{{
+		url_for('static', filename='admin/drawing.css')
+	}}" type="text/css"></link>
 {% endblock %}
 
 {% block tail %}
-    {{ super() }}
-    
-    <script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
-    <script src="{{
-        url_for('static', filename='jquery.validate.min.js')
-    }}"></script>
-    <script src="{{
-        url_for('static', filename='coloringbook.js')
-    }}"></script>
-    <script src="{{
-        url_for('static', filename='admin/drawing.js')
-    }}"></script>
-    
-    {{ forms.enable_select2multiple() }}
+	{{ super() }}
+	
+	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+	<script src="{{
+		url_for('static', filename='jquery.validate.min.js')
+	}}"></script>
+	<script src="{{
+		url_for('static', filename='coloringbook.js')
+	}}"></script>
+	<script src="{{
+		url_for('static', filename='admin/drawing.js')
+	}}"></script>
+	
+	{{ forms.enable_select2multiple() }}
 {% endblock %}

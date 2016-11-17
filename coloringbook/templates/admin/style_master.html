@@ -1,17 +1,17 @@
 {#
-    (c) 2016 Digital Humanities Lab, Utrecht University
-    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+	(c) 2016 Digital Humanities Lab, Utrecht University
+	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 #}
 
 {% extends 'admin/base.html' %}
 
 {% block head %}
-    {{ super() }}
-    
-    <link rel="icon" type="image/png" href="{{
-        url_for('static', filename='favicon32.png')
-    }}" />
-    <link rel="apple-touch-icon-precomposed" href="{{
-        url_for('static', filename='favicon152.png')
-    }}" />
+	{{ super() }}
+	
+	<link rel="icon" type="image/png" href="{{
+		url_for('static', filename='favicon32.png')
+	}}" />
+	<link rel="apple-touch-icon-precomposed" href="{{
+		url_for('static', filename='favicon152.png')
+	}}" />
 {% endblock head %}
