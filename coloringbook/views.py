@@ -258,7 +258,8 @@ def fills_from_json(survey, page, subject, data):
         >>> testinstruction = m.InstructionText(name='a', content='a')
         >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
         >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
-        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform)
+        >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a')
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[
