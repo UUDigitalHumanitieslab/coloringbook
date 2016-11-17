@@ -87,7 +87,7 @@ input.error {
 	<input type="number" name="numeral" id="numeral" inputmode="number"/><br />
 	{%- endif %}
 	<label for="birth">{{ survey.starting_form.birth_label }}</label>
-	<input type="date" name="birth" id="birth" required="required" placeholder="jjjj-mm-dd"/><br />
+	<input type="date" name="birth" id="birth" required="required" placeholder="{{ survey.starting_form.birth_placeholder }}"/><br />
 	<label for="eyesight">{{ survey.starting_form.eyesight_label }}</label>
 	<input type="text" name="eyesight" id="eyesight"/><br />
 	{%- if survey.starting_form.eyesight_label_2 %}

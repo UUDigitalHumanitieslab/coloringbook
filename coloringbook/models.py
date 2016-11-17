@@ -292,6 +292,7 @@ class StartingForm(db.Model):
     name_label = db.Column(db.String(30), nullable=False)
     numeral_label = db.Column(db.String(30))
     birth_label = db.Column(db.String(30), nullable=False)
+    birth_placeholder = db.Column(db.String(10), nullable=False, default='yyyy-mm-dd')
     eyesight_label = db.Column(db.String(30), nullable=False)
     eyesight_label_2 = db.Column(db.Text)
     language_label = db.Column(db.String(30), nullable=False)
