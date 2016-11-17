@@ -48,6 +48,20 @@
         {{ url_for('site.fetch_coloringbook', survey_name='example', _external=True) }}
     </a></blockquote>
     
+    <p>Apart from the survey <em>name</em>, which is for your reference and which appears in the URL, your survey also has a <em>title</em>. The title appears when subjects visit the survey, both in the window title and on the first screen with the welcome text. It can be a bit longer than the name and may contain spaces.</p>
+    
+    <script type="text/javascript">
+        function flickerTextsTab() {
+            var tabToggle = $('a.dropdown-toggle:contains("Texts")');
+            var toggle = tabToggle.click.bind(tabToggle);
+            toggle();
+            setTimeout(toggle, 300);
+            setTimeout(toggle, 600);
+        }
+    </script>
+    
+    <p>The survey form ends with several fields that enable you to customize any text that appears during the survey. This includes the welcome text, the registration form, the instruction text and even the text that appears in some of the buttons. The composition of the registration form can also be customized to some extent. The database includes a Dutch language default for each of the fields. You can add new texts under the <a href="#top" onmouseup="setTimeout(flickerTextsTab, 200)">Texts</a> tab, for example if you need translated form labels or if you need to work with slightly different instructions. If you have pre-existing surveys, it is recommended not to change the defaults, as this may change the appearance of surveys that are currently being conducted.</p>
+    
     <p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
     
     <p>It is possible to &ldquo;install&rdquo; a survey as a fullscreen &ldquo;app&rdquo; on the home screen of an Apple iPad. This has the advantage that the address bar is hidden. In order to do it, visit the survey URL (as illustrated above) with Safari on the iPad, click on the share button (square box with upwards escaping arrow) in the address bar, and choose &ldquo;Add to home screen&rdquo;. This will add an icon to the home screen which will run the survey in full screen when pressed. Likewise, browsers on a regular PC can often be configured to hide their address bar or to run fullscreen.</p>
