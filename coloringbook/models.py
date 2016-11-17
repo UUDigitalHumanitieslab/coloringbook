@@ -339,6 +339,10 @@ class Survey(db.Model):
         db.Integer,
         db.ForeignKey('welcome_text.id'),
         nullable=False )
+    starting_form_id = db.Column(
+        db.Integer,
+        db.ForeignKey('starting_form.id'),
+        nullable=False )
     privacy_text_id = db.Column(
         db.Integer,
         db.ForeignKey('privacy_text.id'),
@@ -346,6 +350,10 @@ class Survey(db.Model):
     instruction_text_id = db.Column(
         db.Integer,
         db.ForeignKey('instruction_text.id'),
+        nullable=False )
+    ending_form_id = db.Column(
+        db.Integer,
+        db.ForeignKey('ending_form.id'),
         nullable=False )
     success_text_id = db.Column(
         db.Integer,
@@ -355,22 +363,14 @@ class Survey(db.Model):
         db.Integer,
         db.ForeignKey('failure_text.id'),
         nullable=False )
-    starting_form_id = db.Column(
-        db.Integer,
-        db.ForeignKey('starting_form.id'),
-        nullable=False )
-    ending_form_id = db.Column(
-        db.Integer,
-        db.ForeignKey('ending_form.id'),
-        nullable=False )
     
     welcome_text = db.relationship('WelcomeText')
+    starting_form = db.relationship('StartingForm')
     privacy_text = db.relationship('PrivacyText')
     instruction_text = db.relationship('InstructionText')
+    ending_form = db.relationship('EndingForm')
     success_text = db.relationship('SuccessText')
     failure_text = db.relationship('FailureText')
-    starting_form = db.relationship('StartingForm')
-    ending_form = db.relationship('EndingForm')
     
     def __str__(self):
         return self.name

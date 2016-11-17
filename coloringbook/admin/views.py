@@ -293,7 +293,12 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list', 'welcome_text', 'privacy_text', 'instruction_text', 'success_text', 'failure_text', 'starting_form', 'ending_form')
+    form_columns = (
+        'name', 'language', 'begin', 'end', 'duration', 'simultaneous',
+        'information', 'page_list',
+        'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
+        'ending_form', 'success_text','failure_text',
+    )
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
     }
