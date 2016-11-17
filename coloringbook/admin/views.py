@@ -294,8 +294,8 @@ class SurveyView (ModelView):
     column_default_sort = ('begin', True)
     column_display_all_relations = True
     form_columns = (
-        'name', 'language', 'begin', 'end', 'duration', 'simultaneous',
-        'information', 'page_list',
+        'name', 'title', 'language', 'begin', 'end', 'duration',
+        'simultaneous', 'information', 'page_list',
         'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
         'ending_form', 'success_text','failure_text',
     )
@@ -306,6 +306,10 @@ class SurveyView (ModelView):
         'duration': {
             'validators': [validators.NumberRange(min=0, max=60000)],
         },
+    }
+    column_descriptions = {
+        'name': 'Used for your reference and for generating the survey URL.',
+        'title': 'Shown on the first page of the survey and in the window title.',
     }
         
     def on_model_change(self, form, model, is_created=False):

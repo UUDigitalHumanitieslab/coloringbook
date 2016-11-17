@@ -9,7 +9,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Kleurplaat</title>
+<title>Coloringbook &mdash; {{ survey.title }}</title>
 <link rel="icon" type="image/png" href="{{
 	url_for('static', filename='favicon32.png')
 }}" />
@@ -76,7 +76,7 @@ input.error {
 <body onload="init_application();">
 
 <form id="starting_form">
-	<h2>Kleurgeheugenexperiment</h2>
+	<h2>{{ survey.title }}</h2>
 	<br>
 	{{ survey.welcome_text.content|safe }}
 	<br><br>
