@@ -11,22 +11,33 @@
 
 {% macro enable_select2multiple() %}
 	<script>
-		$('input[data-choices]').each(function() {
-			var self = $(this);
-			self.select2({
-				data:self.data().choices,
-				multiple:true,
-				sortable:true,
-				width:'220px',
+		(function() {
+			var input, data, binder = this;
+			function enable(self, choices) {
+				self.select2({
+					data: choices,
+					multiple: true,
+					sortable: true,
+					width: '220px',
+				});
+				self.on("change", function() {
+					$("#" + self.id + "_val").html(self.val());
+				});
+				self.select2("container").find("ul.select2-choices").sortable({
+					containment: 'parent',
+					start: function() { self.select2("onSortStart"); },
+					update: function() { self.select2("onSortEnd"); },
+				});
+			}
+			$('input[data-choices]').each(function() {
+				input = $(this);
+				data = input.data();
+				if (data.choices) {
+					enable(input, data.choices);
+				} else if (data.fetch) {
+					$.get(data.fetch).then(enable.bind(binder, input));
+				}
 			});
-			self.on("change", function() {
-				$("#" + self.id + "_val").html(self.val());
-			});
-			self.select2("container").find("ul.select2-choices").sortable({
-				containment: 'parent',
-				start: function() { self.select2("onSortStart"); },
-				update: function() { self.select2("onSortEnd"); },
-			});
-		});
+		}());
 	</script>
 {% endmacro %}
