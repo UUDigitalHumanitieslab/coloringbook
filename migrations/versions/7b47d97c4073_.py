@@ -88,7 +88,7 @@ def upgrade():
         survey_welcome_text,
         [{
             'name': 'default (NL)',
-            'content': 'Welkom bij coloringbook.\nZou je alstublieft het volgende formulier willen invullen?',
+            'content': 'Welkom bij Coloring Book.\nZou je alstublieft het volgende formulier willen invullen?',
         }]
     )
     op.add_column(u'survey', sa.Column(

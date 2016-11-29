@@ -25,7 +25,7 @@ site = Blueprint('site', __name__)
 
 @site.route('/')
 def index():
-    return 'Welkom bij Coloringbook.'
+    return 'Welkom bij Coloring Book.'
 
 
 @site.route('/media/<file_name>')
@@ -48,7 +48,7 @@ def get_survey_pages(survey):
 def fetch_coloringbook(survey_name):
     """
         Depending on whether the current request is XHR, either render
-        the coloringbook HTML backbone (if not XHR) or render the
+        the coloring book HTML backbone (if not XHR) or render the
         pages associated with the current survey in JSON format (if
         XHR).
     """

@@ -36,7 +36,7 @@ def create_admin(app):
         
     """
     sess = db.session
-    admin = Admin(name='Coloringbook', app=app, base_template='admin/style_master.html')
+    admin = Admin(name='Coloring Book', app=app, base_template='admin/style_master.html')
     with app.app_context():
         from .views import *
     admin.add_view(FillView(sess))

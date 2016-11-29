@@ -1,7 +1,7 @@
-Coloringbook
-============
+Coloring Book
+=============
 
-A web-based coloringbook survey application
+A web-based coloring book survey application
 by Digital Humanities Lab, Utrecht University
 
 
@@ -14,9 +14,9 @@ Because it allows researchers to test how subjects parse language, without revea
 What does it do?
 ----------------
 
-Test subjects are presented with a subscription form, instructions, a series of coloringbook pages and finally an evaluation form. After both forms have been completed and all pages have been colored, all data are submitted to the server at once.
+Test subjects are presented with a subscription form, instructions, a series of coloring pages and finally an evaluation form. After both forms have been completed and all pages have been colored, all data are submitted to the server at once.
 
-When a coloringbook page is presented, initially a sentence is displayed, in written text, sound or both. Then, the drawing is shown and the subject is given the means to pick colors and fill areas of the drawing by point-and-click. The researcher may also opt to offer the sentence simultaneously with the drawing. This also works on touch devices. All data for the coloringbook pages are downloaded to the client side at once before the survey starts.
+When a coloring page is presented, initially a sentence is displayed, in written text, sound or both. Then, the drawing is shown and the subject is given the means to pick colors and fill areas of the drawing by point-and-click. The researcher may also opt to offer the sentence simultaneously with the drawing. This also works on touch devices. All data for the coloring pages are downloaded to the client side at once before the survey starts.
 
 On the server side, all coloring data are collected in a table that can be filtered by survey, page, area and subject. Each individual fill action is recorded with the color and the exact elapsed time since the drawing appeared on screen. Researchers can also define expected results for each page and compare the data with their expectations. Tables can be exported to CSV for further processing in any spreadsheet or statistics software.
 
@@ -28,16 +28,16 @@ How to deploy?
 
 On the client side, test subjects just need to run a HTML5 capable browser.
 
-On the server side, Coloringbook is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. Apart from a WSGI-enabled webserver, install the dependencies using `pip install -r requirements.txt` or preferably `pip-sync` from the pip-tools package.
+On the server side, Coloring Book is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. Apart from a WSGI-enabled webserver, install the dependencies using `pip install -r requirements.txt` or preferably `pip-sync` from the pip-tools package.
 
-Assuming you opt to use MySQL (or anything other than SQLite), you need to create an empty database with pre-configured access rights for the Coloringbook application to use. For example by entering the following commands while running `mysql` as root user:
+Assuming you opt to use MySQL (or anything other than SQLite), you need to create an empty database with pre-configured access rights for the Coloring Book application to use. For example by entering the following commands while running `mysql` as root user:
 
     create database coloringbook;
     grant all privileges on coloringbook.* to 'coloringbook'@'localhost' identified by 'myawesomepassword';
 
 **Note** that you should not use the password quoted above. You can choose the name of the database and the name of the user freely as well.
 
-Coloringbook obtains the necessary information to connect to the database from a user-provided configuration file. This is what the file contents should minimally look like:
+Coloring Book obtains the necessary information to connect to the database from a user-provided configuration file. This is what the file contents should minimally look like:
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'

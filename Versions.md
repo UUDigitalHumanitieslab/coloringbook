@@ -1,4 +1,4 @@
-# Coloringbook -- version history #
+# Coloring Book -- version history #
 
 ## 1.3.3 (current) ##
 

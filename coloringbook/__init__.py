@@ -2,12 +2,12 @@
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
-    This is the head of the Coloringbook package.
+    This is the head of the coloringbook package.
     
     Its primary purpose is to deliver a fully configured WSGI
     application object which can be run either in production or in a
     test environment. When run, the application will serve all the
-    various pages of the Coloringbook web application.
+    various pages of the Coloring Book web application.
 
     In order to run the create_app function, you need to pass any
     Python object with member variables that can be used to configure

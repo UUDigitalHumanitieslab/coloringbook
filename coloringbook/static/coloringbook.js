@@ -75,7 +75,7 @@ init_application = function() {
 	init_controls();
 	create_swatches(colors);
 	
-	// The part below retrieves the data about the coloringbook pages.
+	// The part below retrieves the data about the coloring pages.
 	$.ajax({
 		type: 'GET',
 		url: window.location.pathname,
