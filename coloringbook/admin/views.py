@@ -1,4 +1,4 @@
-# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# (c) 2014-2016 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -28,18 +28,8 @@ from ..models import *
 from .utilities import csvdownload
 from .forms import Select2MultipleField, FileNameLength
 
-__all__ = [
-    'FillView',
-    'SubjectView',
-    'SurveyView',
-    'PageView',
-    'DrawingView',
-    'SoundView',
-    'ColorView',
-    'LanguageView',
-]
 
-class FillView (ModelView):
+class FillView(ModelView):
     """ Custom admin table view of Fill objects. """
     
     list_template = 'admin/fill_list.html'
@@ -67,12 +57,12 @@ class FillView (ModelView):
     page_size = 100
     column_display_all_relations = True
     
-    def __init__ (self, session, **kwargs):
+    def __init__(self, session, **kwargs):
         super(FillView, self).__init__(Fill, session, name='Data', **kwargs)
     
     @expose('/csv/raw')
     @csvdownload
-    def export_raw (self):
+    def export_raw(self):
         """ Render a CSV, similar in operation to BaseModelView.index_view. """
         
         query = (
@@ -90,7 +80,7 @@ class FillView (ModelView):
     
     @expose('/csv/final')
     @csvdownload
-    def export_final (self):
+    def export_final(self):
         """ Render a CSV with only the final color of each area. """
         color_bis = db.aliased(Color)
         subquery = self.get_core_query()
@@ -111,7 +101,7 @@ class FillView (ModelView):
                             Color.id == Expectation.color_id,
                             db.case(
                                 [(Expectation.here, 'expected')],
-                                else_ = 'misplaced' ),
+                                else_='misplaced' ),
                         ),
                         (Expectation.here == True, 'miscolored'),
                         (Expectation.here == False, 'compatible')
@@ -137,7 +127,7 @@ class FillView (ModelView):
     
     @expose('/csv/comparison')
     @csvdownload
-    def export_comparison (self):
+    def export_comparison(self):
         """ Render a CSV with expected colors compared to actual final data. """
         color_bis = db.aliased(Color)
         subquery = self.get_core_query()
@@ -158,17 +148,17 @@ class FillView (ModelView):
                             Color.id == Expectation.color_id,
                             db.case(
                                 [(Expectation.here, 'expected')],
-                                else_ = 'misplaced' ),
+                                else_='misplaced' ),
                         ),
                         (
                             Color.id == None,
                             db.case(
                                 [(Expectation.here, 'not_expected')],
-                                else_ = 'empty' ),
+                                else_='empty' ),
                         ),
                         (Expectation.here, 'miscolored'),
                     ],
-                    else_ = 'compatible' ) )
+                    else_='compatible' ) )
             .select_from(Expectation)
             .join(color_bis, color_bis.id == Expectation.color_id)
             .join(Expectation.page, Expectation.area)
@@ -191,7 +181,7 @@ class FillView (ModelView):
                     ]
         return query, headers, 'filldata_comparison'
     
-    def get_core_query (self):
+    def get_core_query(self):
         return (
             self.session.query(
                 Fill.survey_id.label('survey_id'),
@@ -207,7 +197,8 @@ class FillView (ModelView):
                 Fill.subject_id )
             .subquery('sub')
         )
-    
+
+
 class SubjectView (ModelView):
     """ Custom admin table view of Subject data. """
     can_edit = False
@@ -225,12 +216,12 @@ class SubjectView (ModelView):
     )
     page_size = 100
     
-    def __init__ (self, session, **kwargs):
+    def __init__(self, session, **kwargs):
         super(SubjectView, self).__init__(Subject, session, name='Subjects', **kwargs)
     
     @expose('/csv/subjects')
     @csvdownload
-    def export_subjects (self):
+    def export_subjects(self):
         """ Export personals, language summary and survey evaluation. """
         
         language_primary = db.aliased(SubjectLanguage)
@@ -265,7 +256,7 @@ class SubjectView (ModelView):
     
     @expose('/csv/languages')
     @csvdownload
-    def export_languages (self):
+    def export_languages(self):
         """ Export complete language data from the database. """
         query = (
             self.session.query(
@@ -277,7 +268,8 @@ class SubjectView (ModelView):
         )
         headers = 'id language level'.split()
         return query, headers, 'subject-languagedata'
-    
+
+
 class SurveyView (ModelView):
     """ Custom admin table view of Survey objects. """
     
@@ -301,23 +293,32 @@ class SurveyView (ModelView):
     column_searchable_list = ('information',)
     column_default_sort = ('begin', True)
     column_display_all_relations = True
-    form_columns = ('name', 'language', 'begin', 'end', 'duration', 'simultaneous', 'information', 'page_list')
+    form_columns = (
+        'name', 'title', 'language', 'begin', 'end', 'duration',
+        'simultaneous', 'information', 'page_list',
+        'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
+        'ending_form', 'success_text', 'failure_text', 'button_set',
+    )
     form_extra_fields = {
-        'page_list': Select2MultipleField('Pages', choices = db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce = int),
+        'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
     }
     form_args = {
         'duration': {
             'validators': [validators.NumberRange(min=0, max=60000)],
         },
     }
+    column_descriptions = {
+        'name': 'Used for your reference and for generating the survey URL.',
+        'title': 'Shown on the first page of the survey and in the window title.',
+    }
         
-    def on_model_change (self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if not is_created:
             self.session.query(SurveyPage).filter_by(survey=model).delete()
         for index, id in enumerate(form.page_list.data):
-            SurveyPage(survey = model, page_id = id, ordering = index)
+            SurveyPage(survey=model, page_id=id, ordering=index)
     
-    def on_form_prefill (self, form, id):
+    def on_form_prefill(self, form, id):
         form.page_list.process_data(
             self.session.query(SurveyPage.page_id)
             .filter(SurveyPage.survey_id == id)
@@ -325,8 +326,9 @@ class SurveyView (ModelView):
             .all()
         )
     
-    def __init__ (self, session, **kwargs):
+    def __init__(self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
+
 
 class PageView(ModelView):
     """
@@ -365,23 +367,23 @@ class PageView(ModelView):
         rules.Macro('drawing.edit_expectations'),
     )
     
-    def on_model_change (self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if not is_created:
-            Expectation.query.filter_by(page = model).delete()
+            Expectation.query.filter_by(page=model).delete()
             new_expectations = json.loads(form.expect_list.data)
             for area_name, settings in new_expectations.iteritems():
-                color = Color.query.filter_by(code = settings['color']).one()
+                color = Color.query.filter_by(code=settings['color']).one()
                 area = (
                     Area.query
-                    .filter_by(name = area_name, drawing = model.drawing)
+                    .filter_by(name=area_name, drawing=model.drawing)
                     .one()
                 )
                 model.expectations.append(Expectation(
-                    area = area,
-                    color = color,
-                    here = settings['here'] ))
+                    area=area,
+                    color=color,
+                    here=settings['here'] ))
     
-    def on_form_prefill (self, form, id):
+    def on_form_prefill(self, form, id):
         form.fname.process_data(
             self.session.query(Drawing.name)
             .join(Drawing.pages)
@@ -400,8 +402,9 @@ class PageView(ModelView):
                 )
             } ))
     
-    def __init__ (self, session, **kwargs):
+    def __init__(self, session, **kwargs):
         super(PageView, self).__init__(Page, session, name='Pages', **kwargs)
+
 
 class DrawingView(ModelView):
     """ Custom admin table view of Drawing objects with associated Areas. """
@@ -411,12 +414,12 @@ class DrawingView(ModelView):
     form_extra_fields = {
         'file': form.FileUploadField(
             'Drawing',
-            validators = (FileNameLength(
+            validators=(FileNameLength(
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = current_app.instance_path,
-            allowed_extensions = ('svg',) ),
+            base_path=current_app.instance_path,
+            allowed_extensions=('svg',) ),
         'area_list': fields.HiddenField(),
         'svg_source': fields.HiddenField(),
     }
@@ -427,7 +430,7 @@ class DrawingView(ModelView):
         rules.Macro('drawing.edit_areas'),
     )
         
-    def on_model_change (self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if is_created:
             model.name = op.splitext(form.file.data.filename)[0]
         else:
@@ -439,28 +442,29 @@ class DrawingView(ModelView):
             )
             removed_areas = old_area_set - new_area_set
             for area in removed_areas:
-                Area.query.filter_by(drawing = model, name = area).delete()
+                Area.query.filter_by(drawing=model, name=area).delete()
             added_areas = new_area_set - old_area_set
             for area in added_areas:
-                model.areas.append(Area(name = area))
+                model.areas.append(Area(name=area))
             current_app.open_instance_resource(model.name + '.svg', 'w').write(
                 form.svg_source.data )
     
-    def on_form_prefill (self, form, id):
+    def on_form_prefill(self, form, id):
         form.svg_source.process_data(
             current_app.open_instance_resource(
-                self.session.query(Drawing.name).filter_by(id = id).scalar()
+                self.session.query(Drawing.name).filter_by(id=id).scalar()
                 + '.svg'
             ).read()
         )
         form.area_list.process_data(','.join(x[0] for x in
             self.session.query(Area.name)
-            .filter_by(drawing_id = id)
+            .filter_by(drawing_id=id)
             .all()
         ))
     
-    def __init__ (self, session, **kwargs):
+    def __init__(self, session, **kwargs):
         super(DrawingView, self).__init__(Drawing, session, name='Drawings', **kwargs)
+
 
 @listens_for(Drawing, 'after_delete')
 def delete_drawing(mapper, connection, target):
@@ -471,6 +475,7 @@ def delete_drawing(mapper, connection, target):
         # Don't care if it was not deleted because it does not exist
         pass
 
+
 class SoundView(ModelView):
     """ Custom admin table view of Drawing objects with associated Areas. """
     
@@ -479,20 +484,21 @@ class SoundView(ModelView):
     form_extra_fields = {
         'file': form.FileUploadField(
             'Sound',
-            validators = (FileNameLength(
+            validators=(FileNameLength(
                 max=54, 
                 message='File name cannot be longer than %(max)d characters (extension included).'
             ),),
-            base_path = current_app.instance_path,
-            allowed_extensions = ('mp3',) ),
+            base_path=current_app.instance_path,
+            allowed_extensions=('mp3',) ),
     }
     
-    def on_model_change (self, form, model, is_created = False):
+    def on_model_change(self, form, model, is_created=False):
         if is_created:
             model.name = op.splitext(form.file.data.filename)[0]
         
-    def __init__ (self, session, **kwargs):
+    def __init__(self, session, **kwargs):
         super(SoundView, self).__init__(Sound, session, name='Sounds', **kwargs)
+
 
 @listens_for(Sound, 'after_delete')
 def delete_sound(mapper, connection, target):
@@ -503,6 +509,108 @@ def delete_sound(mapper, connection, target):
         # Don't care if it was not deleted because it does not exist
         pass
 
+
+class TextView(ModelView):
+    """ Management view for customizable text models. """
+    
+    column_descriptions = {
+        'content': 'Parsed as HTML. Use &lt;br> for line breaks.',
+    }
+    form_widget_args = {
+        'content': {
+            'rows': 15,
+            'cols': 70,
+            'style': 'width: 70ex;',
+        },
+    }
+    
+    def __init__(self, model, session, **kwargs):
+        super(TextView, self).__init__(model, session, category='Texts', **kwargs)
+
+
+class StartingFormView(ModelView):
+    """ Management view for customization of the starting form. """
+    
+    column_list = ('name', 'name_label', 'numeral_label', 'birth_label', 'eyesight_label', 'language_label')
+    column_labels = {
+        'language_label': 'First Language Label',
+        'language_label_2': 'Add Languages Label',
+    }
+    column_descriptions = {
+        'name': 'For your reference (not shown to subjects).',
+        'name_label': 'Label for the form field shown to subjects.',
+        'numeral_label': 'You can omit the form field entirely by leaving this empty.',
+        'eyesight_label_2': 'Optional longer clarification for the eyesight field that will be put below the input. You may use HTML, e.g. &lt;br> for line breaks.',
+        'language_label_2': 'Optional text to ask for second languages. If omitted, subjects will not get the option to specify more languages. If specified, you must also specify the Extra Language Label and the Extra Language Level Label. You may use HTML.',
+        'extra_language_level_label': 'Label for the form field where subjects can enter their level of skill for a second language. The form field requires that they enter a value between 1 and 10, inclusive.'
+    }
+    
+    def validate_form(self, form):
+        """ Add a check that all extra language fields have the same status. """
+        if form.language_label_2.data:
+            if not form.extra_language_label.data or not form.extra_language_level_label:
+                flash('If you set the Add Languages Label, you must also set the Extra Language Label and the Extra Language Level Label.', 'error')
+                return False
+        return super(StartingFormView, self).validate_form(form)
+    
+    def __init__(self, session, **kwargs):
+        super(StartingFormView, self).__init__(
+            StartingForm,
+            session,
+            name='Starting Form',
+            category='Texts',
+            **kwargs
+        )
+
+
+class EndingFormView(ModelView):
+    """ Management view for customization of the ending form. """
+    
+    column_list = 'name difficulty_label topic_label comments_label'.split()
+    form_columns = (
+        'name',
+        'introduction',
+        'difficulty_label',
+        'topic_label',
+        'comments_label',
+    )
+    column_descriptions = {
+        'name': 'For your reference (not shown to subjects).',
+        'introduction': 'Shown at the top of the evaluation form.',
+        'difficulty_label': 'Perceived difficulty of the task on a scale from 1 to 10, where 10 is most difficult.',
+        'topic_label': 'What the subject thought the task was about.',
+        'comments_label': 'Any comments or suggestions.',
+    }
+    
+    def __init__(self, session, **kwargs):
+        super(EndingFormView, self).__init__(
+            EndingForm,
+            session,
+            name='Ending Form',
+            category='Texts',
+            **kwargs
+        )
+
+
+class ButtonSetView(ModelView):
+    """ Management view for customization of the button values. """
+    
+    column_descriptions = {
+        'name': 'For your reference.',
+        'post_instruction_button': 'This text appears in the button to confirm the instruction.',
+        'post_page_button': 'This text appears in the button to finish a page.',
+    }
+    
+    def __init__(self, session, **kwargs):
+        super(ButtonSetView, self).__init__(
+            ButtonSet,
+            session,
+            name='Button Set',
+            category='Texts',
+            **kwargs
+        )
+
+
 class ColorView(ModelView):
     """ Lookup table of colors with associated codes. """
     can_edit = False
@@ -511,10 +619,10 @@ class ColorView(ModelView):
     column_list = ('name', 'code')
     def __init__ (self, session, **kwargs):
         super(ColorView, self).__init__(Color, session, name='Colors', **kwargs)
-    
+
+
 class LanguageView(ModelView):
     """ Lookup table of languages that allows edits and additions. """
     can_delete = False  # necessary because this may cause information loss
     def __init__ (self, session, **kwargs):
         super(LanguageView, self).__init__(Language, session, name='Languages', **kwargs)
-    

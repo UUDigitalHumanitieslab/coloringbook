@@ -1,5 +1,5 @@
 /*
-	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	(c) 2014-2016 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 	
 	It is helpful to think of this script as an event-driven state machine.
@@ -26,30 +26,36 @@ var sentence_image_delay = 6000;  // milliseconds
 
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
-lang_field = function (count) {
+lang_field = function(count) {
 	var lang = '="language' + count + '"';
 	var level = '="level' + count + '"';
-	return '<label for' + lang + '>Taal ' + count + '</label>' +
-		'<input type="text" name' + lang + 'id' + lang + ' required="required"/> ' +
-		'<label for' + level + '>Niveau</label>' +
+	return '<label for' + lang + '>' + extra_language_label + ' ' + count +
+		'</label>' +
+		'<input type="text" name' + lang + 'id' + lang +
+		' required="required"/> ' +
+		'<label for' + level + '>' + extra_language_level_label + '</label>' +
 		'<input type="number" name' + level + 'id' + level + ' min="1" max="10" step="1"/><br/>';
 }
 
 // Generates the HTML code for a swatch.
-button = function (color) {
-	return $('<span class="color_choice" style="background-color: ' +
-			color +
-			';" id="' +
-			color.substr(1, 3) +
-			'"/>').data('color', color);
+button = function(color) {
+	return $(
+		'<span class="color_choice" style="background-color: ' +
+		color +
+		';" id="' +
+		color.substr(1, 3) +
+		'"/>'
+	).data('color', color);
 }
 
 // All the things that need to be done after the DOM is ready.
-init_application = function ( ) {
+init_application = function() {
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#speaker-icon').hide();
 	$('#controls').hide();
+	$('#success_message').hide();
+	$('#failure_message').hide();
 	var now = new Date(),
 	    century_ago = new Date();
 	century_ago.setFullYear(now.getFullYear() - 100);
@@ -58,23 +64,23 @@ init_application = function ( ) {
 		onkeyup: false,
 		rules: {
 			birth: {
-				daterange: [century_ago.toShortString(), now.toShortString()]
-			}
-		}
+				daterange: [century_ago.toShortString(), now.toShortString()],
+			},
+		},
 	});
 	$('#ending_form').hide().validate({
 		submitHandler: handle_evaluation,
-		onkeyup: false
+		onkeyup: false,
 	});
 	init_controls();
 	create_swatches(colors);
 	
-	// The part below retrieves the data about the coloringbook pages.
+	// The part below retrieves the data about the coloring pages.
 	$.ajax({
 		type: 'GET',
 		url: window.location.pathname,
 		dataType: 'json',
-		success: function (resp, xmlstatus) {
+		success: function(resp, xmlstatus) {
 			for (var l = resp.images.length, i = 0; i < l; ++i) {
 				load_image(resp.images[i]);
 			}
@@ -94,15 +100,15 @@ init_application = function ( ) {
 				$('#sentence').css('font-size', '48pt');
 			}
 		},
-		error: function (xhr, status, error) {
+		error: function(xhr, status, error) {
 			alert(error);
 			console.log(xhr);
-		}
+		},
 	});
 }
 
 // Return strings of the format YYYY-MM-DD.
-Date.prototype.toShortString = function ( ) {
+Date.prototype.toShortString = function() {
 	return this.toISOString().substring(0, 10);
 }
 
@@ -115,14 +121,14 @@ $.validator.addMethod('daterange', function(value, element, arg) {
 		endDate = Date.parse(arg[1]),
 		enteredDate = Date.parse(value);
 
-	if(isNaN(enteredDate)) return false;
+	if (isNaN(enteredDate)) return false;
 
 	return ((startDate <= enteredDate) && (enteredDate <= endDate));
 }, $.validator.format("De datum moet tussen {0} en {1} liggen."))
 
 // Put personalia form data into compact JSON format.
 // Result saved globally.
-handle_form = function (form) {
+handle_form = function(form) {
 	$(form).hide();
 	$('#instructions').show();
 	var raw_form = $(form).serializeArray();
@@ -142,7 +148,7 @@ handle_form = function (form) {
 }
 
 // Event handler for the "klaar" button.
-finish_instructions = function ( ) {
+finish_instructions = function() {
 	$('#instructions').hide();
 	if (image_count > 0 && Object.keys(images).length == image_count) {
 		start_page();
@@ -152,8 +158,8 @@ finish_instructions = function ( ) {
 }
 
 // Add more language fields when requested.
-init_controls = function ( ) {
-	$('#starting_form >[name="more"]').click(function () {
+init_controls = function() {
+	$('#starting_form >[name="more"]').click(function() {
 		var self = $(this);
 		var count = self.data('count');
 		if (count) count++; else count = 1;
@@ -163,7 +169,7 @@ init_controls = function ( ) {
 }
 
 // Ensure that the page fills the screen exactly by scaling the SVG image.
-set_image_dimensions = function ( ) {
+set_image_dimensions = function() {
 	var image = $('svg');
 	var win = $(window);
 	var padding = $('body').css('padding').split('px')[0];
@@ -176,7 +182,7 @@ set_image_dimensions = function ( ) {
 // Insert swatch buttons into the appropriate container element,
 // adding click event handlers as well as a white button.
 // Also sets the initially selected color.
-insert_swatches = function (colors) {
+insert_swatches = function(colors) {
 	var swatches = $('#swatches');
 	swatches.empty();
 	for (index in colors) {
@@ -184,7 +190,7 @@ insert_swatches = function (colors) {
 	}
 	$(button('#fff')).appendTo(swatches);
 	color_chosen = $('.color_choice').first();
-	$('.color_choice').mousedown(function (event) {
+	$('.color_choice').mousedown(function(event) {
 		color_chosen.css('border-color', '#fff');
 		color_chosen = $(this);
 		color_chosen.css('border-color', '#000');
@@ -193,30 +199,30 @@ insert_swatches = function (colors) {
 }
 
 // Insert swatches and disguise the last (white) swatch as an eraser.
-create_swatches = function (colors) {
+create_swatches = function(colors) {
 	insert_swatches(colors);
 		var eraser_path = base + '/static/lmproulx_eraser.png';
 	$('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
 // Retrieve an SVG image by filename.
-load_image = function (name) {
+load_image = function(name) {
 	$.ajax({
 		type: 'GET',
 		url: base + '/media/' + name,
 		dataType: 'html',
-		success: function (svg_resp, xmlstatus) {
+		success: function(svg_resp, xmlstatus) {
 			images[name] = svg_resp;
 		},
-		error: function (xhr, status, error) {
+		error: function(xhr, status, error) {
 			alert(error);
-		}
+		},
 	});
 }
 
 // Add click event handlers to all .colorable areas in the SVG.
-add_coloring_book_events = function ( ) {
-	$('path[class~="colorable"]').mousedown(function (event) {
+add_coloring_book_events = function() {
+	$('path[class~="colorable"]').mousedown(function(event) {
 		event.preventDefault();  // helpful on touchscreen devices
 		launch_fill_command(this, color_chosen.data('color'));
 		$('#undo_redo').attr('value', 'Herstel');
@@ -225,7 +231,7 @@ add_coloring_book_events = function ( ) {
 
 // Start a new coloring page by (dis)playing the sentence and set a
 // timeout for displaying the image (possibly zero).
-start_page = function ( ) {
+start_page = function() {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
@@ -240,13 +246,13 @@ start_page = function ( ) {
 
 // Play the sound for the current page, if available.
 // Click event handler for $('#speaker-icon') and its clones.
-play_sound = function ( ) {
+play_sound = function() {
 	ion.sound.play(pages[pagenum].audio);
 }
 
 // Display the colorable image and prepare it for coloring.
 // Initializes the clock for coloring actions.
-start_image = function ( ) {
+start_image = function() {
 	var image = $('#coloring_book_image');
 	image.empty();
 	image.append(images[page.image]);
@@ -260,7 +266,7 @@ start_image = function ( ) {
 // Serialize data and do some cleanup after the subject is done
 // coloring the page. Prepare for the next stage, i.e. either another
 // coloring page or the evaluation form.
-end_page = function ( ) {
+end_page = function() {
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
@@ -274,7 +280,7 @@ end_page = function ( ) {
 }
 
 // Serialize the evaluation form data and trigger uploading of all data.
-handle_evaluation = function (form) {
+handle_evaluation = function(form) {
 	var raw_data = $(form).serializeArray();
 	for (var l = raw_data.length, i = 0; i < l; ++i) {
 		evaluation_data[raw_data[i].name] = raw_data[i].value;
@@ -283,45 +289,31 @@ handle_evaluation = function (form) {
 }
 
 // Upload all data and handle possible failure.
-send_data = function ( ) {
-	var data = {
+send_data = function() {
+	var data = JSON.stringify({
 		subject: form_data,
 		results: page_data,
-		evaluation: evaluation_data
-	};
+		evaluation: evaluation_data,
+	});
 	$.ajax({
 		type: 'POST',
 		url: window.location.pathname + '/submit',
-		'data': JSON.stringify(data),
+		'data': data,
 		contentType: 'application/json',
-		success: function (result) {
-			var inst = $('#instructions');
+		success: function(result) {
 			$('#ending_form').hide();
 			if (result == 'Success') {
-				inst.html(
-					'Dank voor je deelname aan dit experiment.<br/>' +
-					'Je invoer is opgeslagen. ' +
-					'Je kunt het venster nu sluiten.'
-				);
+				$('#success_message').show();
 			} else {
-				inst.html(
-					'Dank voor je deelname aan dit experiment.<br/>' +
-					'Door een technisch probleem is het opslaan van ' +
-					'je invoer helaas niet gelukt. Zou je de inhoud ' +
-					'van onderstaand kader willen kopiëren en opslaan, ' +
-					'en dit als bijlage willen opsturen naar ' +
-					'j.gonggrijp@uu.nl?<br/> Bij voorbaat dank!<br/>' +
-					'<textarea id="errorbox"></textarea>'
-				);
-				$('#errorbox').width(300).height(200).val(JSON.stringify(data));
+				$('#failure_message').show();
+				$('#errorbox').val(data).focus().select();
 			}
-			inst.show();
 		}
 	});
 }
 
 // Abstraction of an action taken by a test subject.
-command = function (previous) {
+command = function(previous) {
 	if (previous) {
 		this.prev = previous;
 		previous.next = this;
@@ -329,8 +321,8 @@ command = function (previous) {
 		first_command = this;
 	}
 	this.json = { };
-	this.toggle = function ( ) { this.json.time = $.now() - page_onset; };
-	this.do = function ( ) { };
+	this.toggle = function() { this.json.time = $.now() - page_onset; };
+	this.do = function() { };
 }
 
 // Create a command object for filling a particular area in the
@@ -339,12 +331,12 @@ command = function (previous) {
 // Note of historical interest: there used to be other types of
 // commands, but they became irrelevant when the user interface was
 // simplified.
-launch_fill_command = function (target, value) {
+launch_fill_command = function(target, value) {
 	var cmd = new command(last_command);
 	cmd.target = target;
 	cmd.color = value;
 	cmd.prior = $(target).attr('fill');
-	cmd.do = function ( ) {
+	cmd.do = function() {
 		this.toggle();
 		$(cmd.target).attr('fill', this.color);
 	}
@@ -357,7 +349,7 @@ launch_fill_command = function (target, value) {
 
 // Serialize all actions taken by the test subject (since
 // `current_cmd`) into a single array, and return said array.
-serialize_commands = function (current_cmd) {
+serialize_commands = function(current_cmd) {
 	sequence = [];
 	while (current_cmd) {
 		sequence.push(current_cmd.json);

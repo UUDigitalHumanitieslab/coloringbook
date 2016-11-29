@@ -1,6 +1,6 @@
 /*
-    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
-    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 */
 
 label {
@@ -17,15 +17,15 @@ label {
 }
 
 #area_panel {
-    display: block;
-    position: absolute;
-    z-index: 2;
-    padding: 10px;
-    border: 3px double black;
-    border-radius: 10px;
-    background: #ccc;
+	display: block;
+	position: absolute;
+	z-index: 2;
+	padding: 10px;
+	border: 3px double black;
+	border-radius: 10px;
+	background: #ccc;
 }
 
 #area_name {
-    margin: 6px 0;
+	margin: 6px 0;
 }

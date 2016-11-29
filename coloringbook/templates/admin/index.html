@@ -1,95 +1,109 @@
 {#
-    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
-    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 #}
 
 {% extends 'admin/style_master.html' %}
 
 {% block head_css %}
-    {{ super() }}
-    
-    <style type="text/css">
-        p, h1, h2, h3, h4, h5, h6 {
-            max-width: 80ex;
-        }
-        table {
-            margin: 2em;
-        }
-        th {
-            text-align: left;
-            padding-right: 3ex;
-        }
-        caption {
-            font-style: italic;
-        }
-    </style>
+	{{ super() }}
+	
+	<style type="text/css">
+		p, h1, h2, h3, h4, h5, h6 {
+			max-width: 80ex;
+		}
+		table {
+			margin: 2em;
+		}
+		th {
+			text-align: left;
+			padding-right: 3ex;
+		}
+		caption {
+			font-style: italic;
+		}
+	</style>
 {% endblock head_css %}
 
 {% block body %}
-    {{ super() }}
-    
-    <p>Welcome to the Coloringbook administration interface. This is version 1.3.3.</p>
-    
-    <h3>How to create new surveys</h3>
-    
-    <p>You can upload recorded sentences (in MP3 format) and prepared colorable SVG files to the <a href="{{ url_for('sound.index_view') }}">Sounds</a> and <a href="{{ url_for('drawing.index_view') }}">Drawings</a> tabs, respectively. After uploading a drawing, it is necessary to edit it (by clicking on a pencil icon at the left side of the list) in order to identify all colorable areas. You need to do this only once per uploaded drawing.</p>
-    
-    <p>Once the required media have been uploaded, you can create a coloringbook <a href="{{ url_for('page.index_view') }}">Page</a> by combining a drawing with a recorded sentence and/or a written sentence. You can re-use drawings and recordings as many times as you want. By default, the sentence is played and/or displayed for six seconds, after which the drawing is shown and the test subject can start coloring it. You can however opt to play/display the sentences at the same time as the drawing by clicking the &ldquo;Simultaneous&rdquo; checkbox when creating a survey (see below).</p>
-    
-    <p>It is possible to express your expectations about a page by editing it, again with the pencil icon. The actual behaviour of your test subjects is automatically compared with your expectations. You can also change the sentence in the editing form, but it is recommended to not do this after the page is published to test subjects.</p>
-    
-    <p>Finally, pages can be bundled in a <a href="{{ url_for('survey.index_view') }}">Survey</a>. At your option, you may either set a starting date for the survey, before which the survey will be unavailable to test subjects, or an ending date, after which the survey will become unavailable, or both. The &ldquo;Simultaneous&rdquo; checkbox determines whether drawings are shown six seconds after the sentence (unchecked, default) or at the same time as the drawing (checked). The &ldquo;Information&rdquo; field can contain any comments that you may want to add about the survey. The &ldquo;Pages&rdquo; field lets you order the pages that you add by drag and drop; test subjects are presented with the pages in the same order.</p>
-    
-    <p>The name of a survey also determines the URL at which your survey becomes available to test subjects (between the optional begin and end dates). For example, if your survey is called &ldquo;example&rdquo;, then test subjects have to follow this link in order to take it:</p>
-    
-    <blockquote><a href="{{ 
-        url_for('site.fetch_coloringbook', survey_name='example', _external=True)
-    }}">
-        {{ url_for('site.fetch_coloringbook', survey_name='example', _external=True) }}
-    </a></blockquote>
-    
-    <p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
-    
-    <p>It is possible to &ldquo;install&rdquo; a survey as a fullscreen &ldquo;app&rdquo; on the home screen of an Apple iPad. This has the advantage that the address bar is hidden. In order to do it, visit the survey URL (as illustrated above) with Safari on the iPad, click on the share button (square box with upwards escaping arrow) in the address bar, and choose &ldquo;Add to home screen&rdquo;. This will add an icon to the home screen which will run the survey in full screen when pressed. Likewise, browsers on a regular PC can often be configured to hide their address bar or to run fullscreen.</p>
-    
-    <p>Regardless of whether the survey is taken in full screen or not, subjects first see a short welcome text and a personal information form. After filling out the form, the subject receives instruction on how to use the coloringbook controls. The subject is then presented with the pages of the survey one by one. After the last page, an evaluation form is offered. When the subject presses &ldquo;Send&rdquo;, all data including the coloring actions and the initial personal information form are submitted to the server at once. If the upload is successful, the subject gets a success message; otherwise they get the option to copy and send their data by email.</p>
-    
-    <h3>How to obtain the data</h3>
-    
-    <p>All actions that test subjects take, up to the exact time in milliseconds since the drawing appeared, are stored and can be accessed in the <a href="{{ url_for('fill.index_view') }}">Data</a> tab. This tab also allows you to sort and filter the data. You can export the (possibly filtered) data to a CSV format which works well with both Microsoft Excel and IBM SPSS. This functionality can be accessed from the pulldown menu in the top right. There are three flavours of export: <emph>raw</emph>, where the data are simply exported as shown, <emph>final</emph>, where the final results for each area and each subject are exported together with additional information such as the total number of clicks in the area and a comparison with your expectation, and <emph>compared</emph>, which is similar to final but takes your expectations as the starting point. The consequence is that final includes data of coloring actions in areas about which you didn't express any expectations, while compared includes entries for areas in which you expressed expectations, but which weren't colored by test subjects. In other words, the former tells you the complete story of what subjects have done, while the latter tells you the full story of to what extend your expectations have come out.</p>
-    
-    <table>
-        <caption>Meaning of the columns in the Data tab and the CSV files that can be exported from there.</caption>
-        <tr><th>survey</th><td>name of the survey as part of which coloring was done</td></tr>
-        <tr><th>page</th><td>name of the page on which coloring was done</td></tr>
-        <tr><th>area</th><td>name of the area that was colored</td></tr>
-        <tr><th>subject</th><td>ID of the subject who colored</td></tr>
-        <tr><th>time</th><td>number of milliseconds after drawing appearance</td></tr>
-        <tr><th>color</th><td>name of the color that was (last) applied on the area</td></tr>
-        <tr><th>clicks</th><td>total no. of clicks on the area</td></tr>
-        <tr><th>expected</th><td>name of the expected color for the same area and page</td></tr>
-        <tr><th>here</th><td>whether the color was expected in the same area or elsewhere</td></tr>
-        <tr><th>category</th><td>type of way in which the final color compares with the expectation</td></tr>
-    </table>
-    
-    <p>Colors are given by name. Since &ldquo;red&rdquo; can refer to many different colors, the exact RGB code of the color that is being used can at all times be referenced from the <a href="{{ url_for('color.index_view') }}">Colors</a> tab. The colors have been selected both to be visually appealing for a broad audience and to be distinguishable even for the colorblind. Each color differs from each other color in each channel (red/green/blue), so even if a subject can see only one channel, the colors still appear as different shades of &ldquo;grey&rdquo;. The only exception is that orange and white both have maximum saturation in the red channel; since people who can see only in the red channel are extremely rare, this is very unlikely to cause issues. The colors also all have different overall brightness.</p>
-    
-    <p>Information about test subjects is available from the <a href="{{ url_for('subject.index_view') }}">Subjects</a> tab. Subjects can be sorted and filtered, as on the Data tab, and again it is possible to export the information to CSV. The per-subject summary of personalia includes two fields about the language skills of the subject as well as the information that they entered into the evaluation form of the survey they participated in. The full language information lists all languages that subjects have filled into the personal information form, together with their estimated level of skill.</p>
-    
-    <table>
-        <caption>Meaning of the columns in the Subjects tab and the CSV files that can be exported from there.</caption>
-        <tr><th>ID</th><td>uniquely identifiable numeric ID for the test subject</td></tr>
-        <tr><th>name</th><td>full name of the test subject</td></tr>
-        <tr><th>numeral</th><td>student ID or other pre-determined personal number</td></tr>
-        <tr><th>birth</th><td>date of birth</td></tr>
-        <tr><th>eyesight</th><td>any functional limitations with regard to eyesight</td></tr>
-        <tr><th>language</th><td>a single language spoken by the subject</td></tr>
-        <tr><th>level</th><td>language skill level on a 10-point scale</td></tr>
-        <tr><th>#lang</th><td>the total number of languages spoken (including native)</td></tr>
-        <tr><th>nativelang</th><td>languages marked as native or graded level 10</td></tr>
-        <tr><th>survey</th><td>name of the survey in which the subject participated</td></tr>
-        <tr><th>difficulty</th><td>how much difficulty the subject had participating (evaluation)</td></tr>
-        <tr><th>topic</th><td>what the subject thought the survey was about (evaluation)</td></tr>
-        <tr><th>comments</th><td>any other remarks that the subject may have (evaluation)</td></tr>
-    </table>
+	{{ super() }}
+	
+	<p>Welcome to the Coloring Book administration interface. This is version 1.4.</p>
+	
+	<h3>How to create new surveys</h3>
+	
+	<p>You can upload recorded sentences (in MP3 format) and prepared colorable SVG files to the <a href="{{ url_for('sound.index_view') }}">Sounds</a> and <a href="{{ url_for('drawing.index_view') }}">Drawings</a> tabs, respectively. After uploading a drawing, it is necessary to edit it (by clicking on a pencil icon at the left side of the list) in order to identify all colorable areas. You need to do this only once per uploaded drawing.</p>
+	
+	<p>Once the required media have been uploaded, you can create a coloring <a href="{{ url_for('page.index_view') }}">Page</a> by combining a drawing with a recorded sentence and/or a written sentence. You can re-use drawings and recordings as many times as you want. By default, the sentence is played and/or displayed for six seconds, after which the drawing is shown and the test subject can start coloring it. You can however change the display duration, or opt to play/display the sentences at the same time as the drawing by clicking the &ldquo;Simultaneous&rdquo; checkbox when creating a survey (see below).</p>
+	
+	<p>It is possible to express your expectations about a page by editing it, again with the pencil icon. The actual behaviour of your test subjects is automatically compared with your expectations. You can also change the sentence in the editing form, but it is recommended to not do this after the page is published to test subjects.</p>
+	
+	<p>Finally, pages can be bundled in a <a href="{{ url_for('survey.index_view') }}">Survey</a>. At your option, you may either set a starting date for the survey, before which the survey will be unavailable to test subjects, or an ending date, after which the survey will become unavailable, or both. The &ldquo;Duration&rdquo; field lets you customize the delay between the onset of sentence display/playback and the appearance of the corresponding coloring page. The field is set in milliseconds; the default value, 6000, means 6 seconds. You may also check the &ldquo;Simultaneous&rdquo; checkbox to make the sentence play/appear at the same time as the drawing. The &ldquo;Information&rdquo; field can contain any comments that you may want to add about the survey. The &ldquo;Pages&rdquo; field lets you order the pages that you add by drag and drop; test subjects are presented with the pages in the same order.</p>
+	
+	<p>The name of a survey also determines the URL at which your survey becomes available to test subjects (between the optional begin and end dates). For example, if your survey is called &ldquo;example&rdquo;, then test subjects have to follow this link in order to take it:</p>
+	
+	<blockquote><a href="{{ 
+		url_for('site.fetch_coloringbook', survey_name='example', _external=True)
+	}}">{{
+		url_for('site.fetch_coloringbook', survey_name='example', _external=True)
+	}}</a></blockquote>
+	
+	<p>Apart from the survey <em>name</em>, which is for your reference and which appears in the URL, your survey also has a <em>title</em>. The title appears when subjects visit the survey, both in the window title and on the first screen with the welcome text. It can be a bit longer than the name and may contain spaces.</p>
+	
+	<script type="text/javascript">
+		function flickerTextsTab() {
+			var tabToggle = $('a.dropdown-toggle:contains("Texts")');
+			var toggle = tabToggle.click.bind(tabToggle);
+			toggle();
+			setTimeout(toggle, 300);
+			setTimeout(toggle, 600);
+		}
+	</script>
+	
+	<p>The survey form ends with several fields that enable you to customize any text that appears during the survey. This includes the welcome text, the registration form, the instruction text and even the text that appears in some of the buttons. The composition of the registration form can also be customized to some extent. The database includes a Dutch language default for each of the fields. You can add new texts under the <a href="#top" onmouseup="setTimeout(flickerTextsTab, 200)">Texts</a> tab, for example if you need translated form labels or if you need to work with slightly different instructions. If you have pre-existing surveys, it is recommended not to change the defaults, as this may change the appearance of surveys that are currently being conducted.</p>
+	
+	<p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
+	
+	<p>It is possible to &ldquo;install&rdquo; a survey as a fullscreen &ldquo;app&rdquo; on the home screen of an Apple iPad. This has the advantage that the address bar is hidden. In order to do it, visit the survey URL (as illustrated above) with Safari on the iPad, click on the share button (square box with upwards escaping arrow) in the address bar, and choose &ldquo;Add to home screen&rdquo;. This will add an icon to the home screen which will run the survey in full screen when pressed. Likewise, browsers on a regular PC can often be configured to hide their address bar or to run fullscreen.</p>
+	
+	<p>Regardless of whether the survey is taken in full screen or not, subjects first see a short welcome text and a personal information form. After filling out the form, the subject receives instruction on how to use the coloring book controls. The subject is then presented with the pages of the survey one by one. After the last page, an evaluation form is offered. When the subject presses &ldquo;Send&rdquo;, all data including the coloring actions and the initial personal information form are submitted to the server at once. If the upload is successful, the subject gets a success message; otherwise they get the option to copy and send their data by email.</p>
+	
+	<h3>How to obtain the data</h3>
+	
+	<p>All actions that test subjects take, up to the exact time in milliseconds since the drawing appeared, are stored and can be accessed in the <a href="{{ url_for('fill.index_view') }}">Data</a> tab. This tab also allows you to sort and filter the data. You can export the (possibly filtered) data to a CSV format which works well with both Microsoft Excel and IBM SPSS. This functionality can be accessed from the pulldown menu in the top right. There are three flavours of export: <emph>raw</emph>, where the data are simply exported as shown, <emph>final</emph>, where the final results for each area and each subject are exported together with additional information such as the total number of clicks in the area and a comparison with your expectation, and <emph>compared</emph>, which is similar to final but takes your expectations as the starting point. The consequence is that final includes data of coloring actions in areas about which you didn't express any expectations, while compared includes entries for areas in which you expressed expectations, but which weren't colored by test subjects. In other words, the former tells you the complete story of what subjects have done, while the latter tells you the full story of to what extend your expectations have come out.</p>
+	
+	<table>
+		<caption>Meaning of the columns in the Data tab and the CSV files that can be exported from there.</caption>
+		<tr><th>survey</th><td>name of the survey as part of which coloring was done</td></tr>
+		<tr><th>page</th><td>name of the page on which coloring was done</td></tr>
+		<tr><th>area</th><td>name of the area that was colored</td></tr>
+		<tr><th>subject</th><td>ID of the subject who colored</td></tr>
+		<tr><th>time</th><td>number of milliseconds after drawing appearance</td></tr>
+		<tr><th>color</th><td>name of the color that was (last) applied on the area</td></tr>
+		<tr><th>clicks</th><td>total no. of clicks on the area</td></tr>
+		<tr><th>expected</th><td>name of the expected color for the same area and page</td></tr>
+		<tr><th>here</th><td>whether the color was expected in the same area or elsewhere</td></tr>
+		<tr><th>category</th><td>type of way in which the final color compares with the expectation</td></tr>
+	</table>
+	
+	<p>Colors are given by name. Since &ldquo;red&rdquo; can refer to many different colors, the exact RGB code of the color that is being used can at all times be referenced from the <a href="{{ url_for('color.index_view') }}">Colors</a> tab. The colors have been selected both to be visually appealing for a broad audience and to be distinguishable even for the colorblind. Each color differs from each other color in each channel (red/green/blue), so even if a subject can see only one channel, the colors still appear as different shades of &ldquo;grey&rdquo;. The only exception is that orange and white both have maximum saturation in the red channel; since people who can see only in the red channel are extremely rare, this is very unlikely to cause issues. The colors also all have different overall brightness.</p>
+	
+	<p>Information about test subjects is available from the <a href="{{ url_for('subject.index_view') }}">Subjects</a> tab. Subjects can be sorted and filtered, as on the Data tab, and again it is possible to export the information to CSV. The per-subject summary of personalia includes two fields about the language skills of the subject as well as the information that they entered into the evaluation form of the survey they participated in. The full language information lists all languages that subjects have filled into the personal information form, together with their estimated level of skill.</p>
+	
+	<table>
+		<caption>Meaning of the columns in the Subjects tab and the CSV files that can be exported from there.</caption>
+		<tr><th>ID</th><td>uniquely identifiable numeric ID for the test subject</td></tr>
+		<tr><th>name</th><td>full name of the test subject</td></tr>
+		<tr><th>numeral</th><td>student ID or other pre-determined personal number</td></tr>
+		<tr><th>birth</th><td>date of birth</td></tr>
+		<tr><th>eyesight</th><td>any functional limitations with regard to eyesight</td></tr>
+		<tr><th>language</th><td>a single language spoken by the subject</td></tr>
+		<tr><th>level</th><td>language skill level on a 10-point scale</td></tr>
+		<tr><th>#lang</th><td>the total number of languages spoken (including native)</td></tr>
+		<tr><th>nativelang</th><td>languages marked as native or graded level 10</td></tr>
+		<tr><th>survey</th><td>name of the survey in which the subject participated</td></tr>
+		<tr><th>difficulty</th><td>how much difficulty the subject had participating (evaluation)</td></tr>
+		<tr><th>topic</th><td>what the subject thought the survey was about (evaluation)</td></tr>
+		<tr><th>comments</th><td>any other remarks that the subject may have (evaluation)</td></tr>
+	</table>
 {% endblock body %}

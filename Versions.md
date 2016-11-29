@@ -1,6 +1,15 @@
-# Coloringbook -- version history #
+# Coloring Book -- version history #
 
-## 1.3.3 (current) ##
+## 1.4 (current) ##
+
+  * All text that is shown to the subjects is now customizable.
+  * Several small enhancements to the admin pages.
+  * Various coding style improvements, including whitespace and HTML5.
+  * Consistently renamed "Coloringbook" to "Coloring Book" and "coloringbook page" to "coloring page" in human-oriented text, since this is better English.
+  * Updates to the documentation.
+
+
+## 1.3.3 ##
 
 Hotfix release to enable the sound repeat button on pages that have the sound playing before the image is displayed.
 

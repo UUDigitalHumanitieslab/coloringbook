@@ -1,13 +1,13 @@
-# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# (c) 2014, 2016 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
-    This is the head of the Coloringbook package.
+    This is the head of the coloringbook package.
     
     Its primary purpose is to deliver a fully configured WSGI
     application object which can be run either in production or in a
     test environment. When run, the application will serve all the
-    various pages of the Coloringbook web application.
+    various pages of the Coloring Book web application.
 
     In order to run the create_app function, you need to pass any
     Python object with member variables that can be used to configure
@@ -42,9 +42,11 @@ from .models import db
 from .views import site
 from .admin import create_admin
 
+
 migrate = Migrate()
 
-def create_app (config, disable_admin=False, create_db=False, instance=None):
+
+def create_app(config, disable_admin=False, create_db=False, instance=None):
     app = Flask(__name__, instance_path=instance)
     
     # The following line may be uncommented, and the corresponding 

@@ -1,4 +1,4 @@
-# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+# (c) 2014, 2016 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -17,19 +17,23 @@ from flask import Blueprint, render_template, request, json, abort, jsonify, sen
 
 from .models import *
 
+
 MAX_AGE_TOLERANCE = 36524  # approx. number of days in 100 years
 
 site = Blueprint('site', __name__)
 
+
 @site.route('/')
 def index():
-    return 'Welkom bij Coloringbook.'
+    return 'Welkom bij Coloring Book.'
+
 
 @site.route('/media/<file_name>')
-def fetch_media (file_name):
+def fetch_media(file_name):
     return send_from_directory(current_app.instance_path, file_name)
 
-def get_survey_pages (survey):
+
+def get_survey_pages(survey):
     """ Returns all pages that are associated with a survey. """
     return (
         Page.query
@@ -38,17 +42,18 @@ def get_survey_pages (survey):
         .order_by(SurveyPage.ordering)
         .all()
     )
-    
+
+
 @site.route('/book/<survey_name>')
-def fetch_coloringbook (survey_name):
+def fetch_coloringbook(survey_name):
     """
         Depending on whether the current request is XHR, either render
-        the coloringbook HTML backbone (if not XHR) or render the
+        the coloring book HTML backbone (if not XHR) or render the
         pages associated with the current survey in JSON format (if
         XHR).
     """
     try:
-        survey = Survey.query.filter_by(name = survey_name).one()
+        survey = Survey.query.filter_by(name=survey_name).one()
         today = datetime.today()
         if (survey.end and survey.end < today or
                 survey.begin and survey.begin > today):
@@ -72,15 +77,16 @@ def fetch_coloringbook (survey_name):
                     page['text'] = ''
                 page_list.append(page)
             return jsonify(
-                simultaneous = survey.simultaneous,
-                duration = survey.duration,
-                images = [i for i in image_set],
-                sounds = [s for s in audio_set],
-                pages = page_list )
+                simultaneous=survey.simultaneous,
+                duration=survey.duration,
+                images=[i for i in image_set],
+                sounds=[s for s in audio_set],
+                pages=page_list )
         else:
-            return render_template('coloringbook.html')
+            return render_template('coloringbook.html', survey=survey)
     except Exception as e:
         abort(404)
+
 
 @site.route('/book/<survey_name>/submit', methods=['POST'])
 def submit(survey_name):
@@ -108,8 +114,9 @@ def submit(survey_name):
             )
         )
         return 'Error'
-    
-def subject_from_json (data):
+
+
+def subject_from_json(data):
     """
         Take personal information from JSON and put into relational object.
         
@@ -161,22 +168,23 @@ def subject_from_json (data):
         raise ValueError('Negative age')
     
     subject = Subject(
-        name = data['name'],
-        numeral = int(data['numeral']) if data['numeral'] else None,
-        birth = birth_date,
-        eyesight = data['eyesight'] )
+        name=data['name'],
+        numeral=int(data['numeral']) if 'numeral' in data and data['numeral'] else None,
+        birth=birth_date,
+        eyesight=data['eyesight'] )
     
     for name, level in data['languages']:
         if not name:
             raise ValueError('Incomplete language data')
-        language = Language.query.filter_by(name = name).first()
+        language = Language.query.filter_by(name=name).first()
         if language == None:
-            language = Language(name = name)
-        SubjectLanguage(subject = subject, language = language, level = level)
+            language = Language(name=name)
+        SubjectLanguage(subject=subject, language=language, level=level)
     
     return subject
 
-def bind_survey_subject (survey, subject, evaluation):
+
+def bind_survey_subject(survey, subject, evaluation):
     """
         Create the association between a Survey and a Subject, with associated evaluation data from a parsed JSON dictionary.
         
@@ -186,8 +194,13 @@ def bind_survey_subject (survey, subject, evaluation):
         >>> from flask import jsonify
         >>> from datetime import datetime
         >>> app = t.get_fixture_app()
-        >>> testsurvey = m.Survey(name = 'test')
-        >>> testsubject = m.Subject(name = 'Koos', birth = datetime.now())
+        >>> testwelcome = m.WelcomeText(name='a', content='a')
+        >>> testprivacy = m.PrivacyText(name='a', content='a')
+        >>> testsuccess = m.SuccessText(name='a', content='a')
+        >>> testfailure = m.FailureText(name='a', content='a')
+        >>> testinstruction = m.InstructionText(name='a', content='a')
+        >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
+        >>> testsubject = m.Subject(name='Koos', birth=datetime.now())
         >>> testevaluation = {
         ...     'difficulty': 5,
         ...     'topic': 'was this about anything?',
@@ -209,15 +222,16 @@ def bind_survey_subject (survey, subject, evaluation):
         >>> testsubject.subject_surveys[0].difficulty
         5
     """
-    binding = SurveySubject(survey = survey, subject = subject)
+    binding = SurveySubject(survey=survey, subject=subject)
     if 'difficulty' in evaluation:
         binding.difficulty = evaluation['difficulty']
     if 'topic' in evaluation:
         binding.topic = evaluation['topic']
     if 'comments' in evaluation:
         binding.comments = evaluation['comments']
-    
-def fills_from_json (survey, page, subject, data):
+
+
+def fills_from_json(survey, page, subject, data):
     """
         Take fill actions from JSON and put into [relational object].
         
@@ -230,13 +244,22 @@ def fills_from_json (survey, page, subject, data):
         Example:
         
         >>> import coloringbook as cb, flask, datetime, coloringbook.testing
+        >>> import coloringbook.models as m
         >>> app = coloringbook.testing.get_fixture_app()
         >>> # some trivial contents for the database
         >>> testdrawing = cb.models.Drawing(name='picture')
         >>> testdrawing.areas.append(cb.models.Area(name='left door'))
         >>> testdrawing.areas.append(cb.models.Area(name='right door'))
         >>> testpage = cb.models.Page(name='page1', drawing=testdrawing, text='test 123')
-        >>> testsurvey = cb.models.Survey(name='test', simultaneous = False)
+        >>> testwelcome = m.WelcomeText(name='a', content='a')
+        >>> testprivacy = m.PrivacyText(name='a', content='a')
+        >>> testsuccess = m.SuccessText(name='a', content='a')
+        >>> testfailure = m.FailureText(name='a', content='a')
+        >>> testinstruction = m.InstructionText(name='a', content='a')
+        >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
+        >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
+        >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a')
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[
@@ -286,14 +309,14 @@ def fills_from_json (survey, page, subject, data):
     """
     
     colors = Color.query
-    areas = Area.query.filter_by(drawing = page.drawing)
+    areas = Area.query.filter_by(drawing=page.drawing)
     fills = []
     for datum in data:
         fills.append(Fill(
-            survey = survey,
-            page = page,
-            area = areas.filter_by(name = datum['target']).one(),
-            subject = subject,
-            time = int(datum['time']),
-            color = colors.filter_by(code = datum['color']).one() ))
+            survey=survey,
+            page=page,
+            area=areas.filter_by(name=datum['target']).one(),
+            subject=subject,
+            time=int(datum['time']),
+            color=colors.filter_by(code=datum['color']).one() ))
     return fills

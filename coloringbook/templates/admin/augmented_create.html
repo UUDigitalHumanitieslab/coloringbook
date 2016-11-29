@@ -1,13 +1,13 @@
 {#
-    (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
-    Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 #}
 
 {% extends 'admin/model/edit.html' %}
 {% import 'admin/forms.html' as forms %}
 
 {% block tail %}
-    {{ super() }}
-    <script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
-    {{ forms.enable_select2multiple() }}
+	{{ super() }}
+	<script src="//code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+	{{ forms.enable_select2multiple() }}
 {% endblock %}
