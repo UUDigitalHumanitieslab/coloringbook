@@ -300,7 +300,7 @@ class SurveyView (ModelView):
         'ending_form', 'success_text', 'failure_text', 'button_set',
     )
     form_extra_fields = {
-        'page_list': Select2MultipleField('Pages', choices=db.session.query(Page.id, Page.name).order_by(Page.name).all(), coerce=int),
+        'page_list': Select2MultipleField('Pages', coerce=int),
     }
     form_args = {
         'duration': {
@@ -311,7 +311,17 @@ class SurveyView (ModelView):
         'name': 'Used for your reference and for generating the survey URL.',
         'title': 'Shown on the first page of the survey and in the window title.',
     }
-        
+    
+    def create_form(self, obj=None):
+        form = super(SurveyView, self).create_form(obj)
+        form.page_list.choices = db.session.query(Page.id, Page.name).order_by(Page.name).all()
+        return form
+    
+    def edit_form(self, obj=None):
+        form = super(SurveyView, self).edit_form(obj)
+        form.page_list.choices = db.session.query(Page.id, Page.name).order_by(Page.name).all()
+        return form
+    
     def on_model_change(self, form, model, is_created=False):
         if not is_created:
             self.session.query(SurveyPage).filter_by(survey=model).delete()
