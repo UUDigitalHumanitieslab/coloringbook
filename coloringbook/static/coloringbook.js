@@ -291,6 +291,7 @@ handle_evaluation = function(form) {
 // Upload all data and handle possible failure.
 send_data = function() {
 	var data = JSON.stringify({
+		survey: window.location.href,
 		subject: form_data,
 		results: page_data,
 		evaluation: evaluation_data,
