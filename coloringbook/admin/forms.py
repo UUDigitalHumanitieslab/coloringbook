@@ -28,9 +28,6 @@ class Select2MultipleWidget(widgets.HiddenInput):
     def __call__(self, field, **kwargs):
         kwargs.setdefault('data-choices', self.json_choices(field))
         kwargs.setdefault('type', 'hidden')  # see flask-admin issue #511
-        # Accomodate for deferred data-fetch because of url_for
-        if 'data-fetch' in kwargs and callable(kwargs['data-fetch']):
-            kwargs['data-fetch'] = kwargs['data-fetch']()
         return super(Select2MultipleWidget, self).__call__(field, **kwargs)
     
     @staticmethod

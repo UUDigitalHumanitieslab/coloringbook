@@ -307,14 +307,6 @@ class SurveyView (ModelView):
             'validators': [validators.NumberRange(min=0, max=60000)],
         },
     }
-    # Enforce asynchronous loading of pages
-    form_widget_args = {
-        'page_list': {
-            'data-choices': '',
-            # Lambda because endpoint is unknown at view instantiation time.
-            'data-fetch': lambda: url_for('survey.getpages'),
-        },
-    }
     column_descriptions = {
         'name': 'Used for your reference and for generating the survey URL.',
         'title': 'Shown on the first page of the survey and in the window title.',
@@ -333,19 +325,6 @@ class SurveyView (ModelView):
             .order_by(SurveyPage.ordering)
             .all()
         )
-    
-    @expose('/getpages')
-    def getpages(self):
-        form = self.get_form()()
-        field = form.page_list
-        # In theory, you can leave out the response code, but in practice,
-        # doing so results in
-        #     AttributeError: 'dict' object has no attribute 'encode'
-        # because Flask is trying to interpret the headers dict as the
-        # response code.
-        return field.widget.json_choices(field), 200, {
-            'Content-Type': 'application/json',
-        }
     
     def __init__(self, session, **kwargs):
         super(SurveyView, self).__init__(Survey, session, name='Surveys', **kwargs)
