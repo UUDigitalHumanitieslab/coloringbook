@@ -24,6 +24,80 @@ var images = {};
 var image_count = 0;
 var sentence_image_delay = 6000;  // milliseconds
 
+// ConnectivityFsm is based directly on the example from machina-js.org.
+// Most important difference is that checkHeartbeat is simply a member
+// of the state machine itself.
+var ConnectivityFsm = machina.Fsm.extend({
+	namespace: 'connectivity',
+
+	initialState: 'probing',
+	
+	requestData: {
+		url: 'ping',
+		method: 'HEAD',
+		timeout: 5000
+	},
+
+	checkHeartbeat: function() {
+		var self = this;
+		self.emit('checking-heartbeat');
+		$.ajax(self.requestData).done(function() {
+			self.emit('heartbeat');
+		}).fail(function() {
+			self.emit('no-heartbeat');
+		});
+	},
+
+	initialize: function() {
+		var self = this;
+		self.on('heartbeat', function() {
+			self.handle('heartbeat');
+		});
+		self.on('no-heartbeat', function() {
+			self.handle('no-heartbeat');
+		});
+		$(window).bind('online', function() {
+			self.handle('window.online');
+		});
+		$(window).bind( 'offline', function() {
+			self.handle('window.offline');
+		});
+		$(window.applicationCache).bind('error', function() {
+			self.handle('appCache.error');
+		});
+		$(window.applicationCache).bind('downloading', function() {
+			self.handle('appCache.downloading');
+		});
+		$(document).on('resume', function () {
+			self.handle('device.resume');
+		});
+		if (self.origin) self.requestData = _.create(self.requestData, {
+			url: self.origin + self.requestData.url
+		});
+	},
+
+	states: {
+		probing: {
+			_onEnter: function() {
+				this.checkHeartbeat();
+			},
+			'heartbeat': 'online',
+			'no-heartbeat': 'disconnected',
+		},
+		online: {
+			'window.offline': 'probing',
+			'appCache.error': 'probing',
+			'request.timeout': 'probing',
+			'device.resume': 'probing',
+		},
+		disconnected: {
+			'window.online': 'probing',
+			'appCache.downloading': 'probing',
+			'device.resume': 'probing',
+		}
+	}
+});
+
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
 function lang_field(count) {

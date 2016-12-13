@@ -23,6 +23,11 @@ MAX_AGE_TOLERANCE = 36524  # approx. number of days in 100 years
 site = Blueprint('site', __name__)
 
 
+@site.route('/ping', methods=['HEAD'])
+def ping():
+    return current_app.response_class()
+
+
 @site.route('/')
 def index():
     return 'Welkom bij Coloring Book.'
