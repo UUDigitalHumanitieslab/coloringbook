@@ -13,8 +13,7 @@ var base = (function() {
 var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
 var color_chosen;
 var simultaneous = false;
-var first_command = null;
-var last_command = null;
+var first_command, last_command;
 var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
 var image_count = 0;
@@ -314,6 +313,7 @@ function add_coloring_book_events() {
 function start_page() {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
+	first_command = last_command = null;
 	window.setTimeout(start_image, sentence_image_delay);
 	if (page.audio) {
 		ion.sound.play(page.audio);
@@ -352,7 +352,6 @@ function end_page() {
 	$('#sentence').hide();
 	page_data.push(serialize_commands(first_command));
 	if (++pagenum < pages.length) {
-		first_command = last_command = null;
 		start_page();
 	} else {
 		$('#ending_form').show();
@@ -432,7 +431,7 @@ function launch_fill_command(target, value) {
 // Serialize all actions taken by the test subject (since
 // `current_cmd`) into a single array, and return said array.
 function serialize_commands(current_cmd) {
-	sequence = [];
+	var sequence = [];
 	while (current_cmd) {
 		sequence.push(current_cmd.json);
 		current_cmd = current_cmd.next;
