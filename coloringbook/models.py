@@ -325,6 +325,7 @@ class ButtonSet(db.Model):
     name = db.Column(db.String(30), nullable=False, unique=True)
     post_instruction_button = db.Column(db.String(30), nullable=False)
     post_page_button = db.Column(db.String(30), nullable=False)
+    post_survey_button = db.Column(db.String(40), nullable=False)
     
     def __str__(self):
         return self.name

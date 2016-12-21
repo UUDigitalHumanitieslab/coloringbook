@@ -154,12 +154,18 @@ input.error {
 
 <p id="success_message">
 	{{ survey.success_text.content|safe }}
+	<input type="button" value="{{
+		survey.button_set.post_survey_button
+	}}" onclick="initCycle();">
 </p>
 
 <p id="failure_message">
 	{{ survey.failure_text.content|safe }}
 	<br>
 	<textarea id="errorbox" style="width: 300px; height: 200px;"></textarea>
+	<input type="button" value="{{
+		survey.button_set.post_survey_button
+	}}" onclick="initCycle();">
 </p>
 
 </body>

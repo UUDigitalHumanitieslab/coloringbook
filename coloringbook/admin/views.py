@@ -609,6 +609,7 @@ class ButtonSetView(ModelView):
         'name': 'For your reference.',
         'post_instruction_button': 'This text appears in the button to confirm the instruction.',
         'post_page_button': 'This text appears in the button to finish a page.',
+        'post_survey_button': 'This text appears in the button to restart the survey with a new test subject.',
     }
     
     def __init__(self, session, **kwargs):
