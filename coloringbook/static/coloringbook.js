@@ -16,7 +16,7 @@ var simultaneous = false;
 var first_command, last_command;
 var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
-var image_count = 0;
+var image_count, images_ready, sound_count, sounds_ready;
 var sentence_image_delay = 6000;  // milliseconds
 
 // ConnectivityFsm is based directly on the example from machina-js.org.
@@ -120,6 +120,7 @@ function button(color) {
 // All the things that need to be done after the DOM is ready.
 function init_application() {
 	initCycle();
+	$('#starting_form input[type="submit"]').hide();
 	var now = new Date(),
 	    century_ago = new Date();
 	century_ago.setFullYear(now.getFullYear() - 100);
@@ -144,31 +145,9 @@ function init_application() {
 		type: 'GET',
 		url: window.location.pathname,
 		dataType: 'json',
-		success: function(resp, xmlstatus) {
-			var i, l;
-			for (l = resp.images.length, i = 0; i < l; ++i) {
-				load_image(resp.images[i]);
-			}
-			image_count = resp.images.length;
-			var sounds = [];
-			for (l = resp.sounds.length, i = 0; i < l; ++i) {
-				sounds.push({name: resp.sounds[i]});
-			}
-			ion.sound({"sounds": sounds, path: base + '/media/', preload:true});
-			pages = resp.pages;
-			if (resp.simultaneous) {
-				simultaneous = true;
-				sentence_image_delay = 0; // show image at same time as sentence
-				$('#sentence').css('font-size', '24pt');
-			} else {
-				sentence_image_delay = resp.duration;
-				$('#sentence').css('font-size', '48pt');
-			}
-		},
-		error: function(xhr, status, error) {
-			alert(error);
-			console.log(xhr);
-		},
+	}).done(initResources).fail(function(xhr, status, error) {
+		alert(error);
+		console.log(xhr);
 	});
 }
 
@@ -184,6 +163,47 @@ function initCycle() {
 	$('#ending_form').hide()[0].reset();
 	$('#success_message').hide();
 	$('#failure_message').hide();
+}
+
+// Retrieve the data and report when all is done.
+function initResources(resp, xmlstatus) {
+	var i;
+	images_ready = sounds_ready = 0;
+	for (image_count = resp.images.length, i = 0; i < image_count; ++i) {
+		load_image(resp.images[i]);
+	}
+	var sounds = [];
+	for (sound_count = resp.sounds.length, i = 0; i < sound_count; ++i) {
+		sounds.push({name: resp.sounds[i]});
+	}
+	ion.sound({
+		'sounds': sounds,
+		path: base + '/media/',
+		preload: true,
+		ready_callback: sound_done,
+	});
+	pages = resp.pages;
+	if (resp.simultaneous) {
+		simultaneous = true;
+		sentence_image_delay = 0; // show image at same time as sentence
+		$('#sentence').css('font-size', '24pt');
+	} else {
+		sentence_image_delay = resp.duration;
+		$('#sentence').css('font-size', '48pt');
+	}
+}
+
+// Triggered when a sound is loaded, checks whether all resources are ready.
+function sound_done() {
+	if (++sounds_ready == sound_count && images_ready == image_count) {
+		unlock_application();
+	}
+}
+
+// Called when all resources are ready.
+function unlock_application() {
+	$('#patience').hide();
+	$('#starting_form input[type="submit"]').show();
 }
 
 // Return strings of the format YYYY-MM-DD.
@@ -284,7 +304,7 @@ function create_swatches(colors) {
 	$('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
-// Retrieve an SVG image by filename.
+// Retrieve an SVG image by filename and check whether resources are complete.
 function load_image(name) {
 	$.ajax({
 		type: 'GET',
@@ -292,6 +312,9 @@ function load_image(name) {
 		dataType: 'html',
 		success: function(svg_resp, xmlstatus) {
 			images[name] = svg_resp;
+			if (++images_ready == image_count && sounds_ready == sound_count) {
+				unlock_application();
+			}
 		},
 		error: function(xhr, status, error) {
 			alert(error);
