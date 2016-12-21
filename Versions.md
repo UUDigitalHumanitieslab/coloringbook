@@ -1,6 +1,13 @@
 # Coloring Book -- version history #
 
-## 1.4 (current) ##
+## 1.4.1 (current) ##
+
+  * Fixes the problem that caused coloring pages to be unavailable the first few days after creation (#13).
+  * From now on, the survey URL is included in the raw data when the subject or supervisor is requested to send the data manually (#7).
+  * Further coding style improvements.
+
+
+## 1.4 ##
 
   * All text that is shown to the subjects is now customizable.
   * Several small enhancements to the admin pages.
