@@ -15,11 +15,7 @@ var color_chosen;
 var simultaneous = false;
 var first_command = null;
 var last_command = null;
-var page_onset;
-var page, pages;
-var pagenum = 0;
-var page_data = [];
-var form_data, evaluation_data = {};
+var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
 var image_count = 0;
 var sentence_image_delay = 6000;  // milliseconds
@@ -124,12 +120,7 @@ function button(color) {
 
 // All the things that need to be done after the DOM is ready.
 function init_application() {
-	$('#instructions').hide();
-	$('#sentence').hide();
-	$('#speaker-icon').hide();
-	$('#controls').hide();
-	$('#success_message').hide();
-	$('#failure_message').hide();
+	initCycle();
 	var now = new Date(),
 	    century_ago = new Date();
 	century_ago.setFullYear(now.getFullYear() - 100);
@@ -142,7 +133,7 @@ function init_application() {
 			},
 		},
 	});
-	$('#ending_form').hide().validate({
+	$('#ending_form').validate({
 		submitHandler: handle_evaluation,
 		onkeyup: false,
 	});
@@ -180,6 +171,20 @@ function init_application() {
 			console.log(xhr);
 		},
 	});
+}
+
+// What needs to be done when the survey is started (again)
+function initCycle() {
+	pagenum = 0;
+	page_data = [];
+	$('#starting_form').show()[0].reset();
+	$('#instructions').hide();
+	$('#sentence').hide();
+	$('#speaker-icon').hide();
+	$('#controls').hide();
+	$('#ending_form').hide()[0].reset();
+	$('#success_message').hide();
+	$('#failure_message').hide();
 }
 
 // Return strings of the format YYYY-MM-DD.
@@ -357,6 +362,7 @@ function end_page() {
 // Serialize the evaluation form data and trigger uploading of all data.
 function handle_evaluation(form) {
 	var raw_data = $(form).serializeArray();
+	evaluation_data = {};
 	for (var l = raw_data.length, i = 0; i < l; ++i) {
 		evaluation_data[raw_data[i].name] = raw_data[i].value;
 	}
