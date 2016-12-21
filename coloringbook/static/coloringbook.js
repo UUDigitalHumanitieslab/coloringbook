@@ -26,7 +26,7 @@ var sentence_image_delay = 6000;  // milliseconds
 
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
-lang_field = function(count) {
+function lang_field(count) {
 	var lang = '="language' + count + '"';
 	var level = '="level' + count + '"';
 	return '<label for' + lang + '>' + extra_language_label + ' ' + count +
@@ -38,7 +38,7 @@ lang_field = function(count) {
 }
 
 // Generates the HTML code for a swatch.
-button = function(color) {
+function button(color) {
 	return $(
 		'<span class="color_choice" style="background-color: ' +
 		color +
@@ -49,7 +49,7 @@ button = function(color) {
 }
 
 // All the things that need to be done after the DOM is ready.
-init_application = function() {
+function init_application() {
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#speaker-icon').hide();
@@ -81,12 +81,13 @@ init_application = function() {
 		url: window.location.pathname,
 		dataType: 'json',
 		success: function(resp, xmlstatus) {
-			for (var l = resp.images.length, i = 0; i < l; ++i) {
+			var i, l;
+			for (l = resp.images.length, i = 0; i < l; ++i) {
 				load_image(resp.images[i]);
 			}
 			image_count = resp.images.length;
 			var sounds = [];
-			for (var n = resp.sounds.length, i = 0; i < n; ++i) {
+			for (l = resp.sounds.length, i = 0; i < l; ++i) {
 				sounds.push({name: resp.sounds[i]});
 			}
 			ion.sound({"sounds": sounds, path: base + '/media/', preload:true});
@@ -110,7 +111,7 @@ init_application = function() {
 // Return strings of the format YYYY-MM-DD.
 Date.prototype.toShortString = function() {
 	return this.toISOString().substring(0, 10);
-}
+};
 
 // Daterange checker for jQuery.validate.
 // adapted from http://stackoverflow.com/questions/3761185/jquery-validate-date-range
@@ -124,16 +125,16 @@ $.validator.addMethod('daterange', function(value, element, arg) {
 	if (isNaN(enteredDate)) return false;
 
 	return ((startDate <= enteredDate) && (enteredDate <= endDate));
-}, $.validator.format("De datum moet tussen {0} en {1} liggen."))
+}, $.validator.format("De datum moet tussen {0} en {1} liggen."));
 
 // Put personalia form data into compact JSON format.
 // Result saved globally.
-handle_form = function(form) {
+function handle_form(form) {
 	$(form).hide();
 	$('#instructions').show();
 	var raw_form = $(form).serializeArray();
 	form_data = { languages: [] };
-	for (i in raw_form) {
+	for (var i in raw_form) {
 		if (raw_form[i].name == 'nativelang') {
 			form_data.languages.push([raw_form[i].value, 10]);
 		} else if (raw_form[i].name.match('language[0-9]')) {
@@ -148,7 +149,7 @@ handle_form = function(form) {
 }
 
 // Event handler for the "klaar" button.
-finish_instructions = function() {
+function finish_instructions() {
 	$('#instructions').hide();
 	if (image_count > 0 && Object.keys(images).length == image_count) {
 		start_page();
@@ -158,7 +159,7 @@ finish_instructions = function() {
 }
 
 // Add more language fields when requested.
-init_controls = function() {
+function init_controls() {
 	$('#starting_form >[name="more"]').click(function() {
 		var self = $(this);
 		var count = self.data('count');
@@ -169,7 +170,7 @@ init_controls = function() {
 }
 
 // Ensure that the page fills the screen exactly by scaling the SVG image.
-set_image_dimensions = function() {
+function set_image_dimensions() {
 	var image = $('svg');
 	var win = $(window);
 	var padding = $('body').css('padding').split('px')[0];
@@ -182,10 +183,10 @@ set_image_dimensions = function() {
 // Insert swatch buttons into the appropriate container element,
 // adding click event handlers as well as a white button.
 // Also sets the initially selected color.
-insert_swatches = function(colors) {
+function insert_swatches(colors) {
 	var swatches = $('#swatches');
 	swatches.empty();
-	for (index in colors) {
+	for (var index in colors) {
 		swatches.append(button(colors[index]));
 	}
 	$(button('#fff')).appendTo(swatches);
@@ -199,14 +200,14 @@ insert_swatches = function(colors) {
 }
 
 // Insert swatches and disguise the last (white) swatch as an eraser.
-create_swatches = function(colors) {
+function create_swatches(colors) {
 	insert_swatches(colors);
 		var eraser_path = base + '/static/lmproulx_eraser.png';
 	$('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
 // Retrieve an SVG image by filename.
-load_image = function(name) {
+function load_image(name) {
 	$.ajax({
 		type: 'GET',
 		url: base + '/media/' + name,
@@ -221,7 +222,7 @@ load_image = function(name) {
 }
 
 // Add click event handlers to all .colorable areas in the SVG.
-add_coloring_book_events = function() {
+function add_coloring_book_events() {
 	$('path[class~="colorable"]').mousedown(function(event) {
 		event.preventDefault();  // helpful on touchscreen devices
 		launch_fill_command(this, color_chosen.data('color'));
@@ -231,7 +232,7 @@ add_coloring_book_events = function() {
 
 // Start a new coloring page by (dis)playing the sentence and set a
 // timeout for displaying the image (possibly zero).
-start_page = function() {
+function start_page() {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	window.setTimeout(start_image, sentence_image_delay);
@@ -246,13 +247,13 @@ start_page = function() {
 
 // Play the sound for the current page, if available.
 // Click event handler for $('#speaker-icon') and its clones.
-play_sound = function() {
+function play_sound() {
 	ion.sound.play(pages[pagenum].audio);
 }
 
 // Display the colorable image and prepare it for coloring.
 // Initializes the clock for coloring actions.
-start_image = function() {
+function start_image() {
 	var image = $('#coloring_book_image');
 	image.empty();
 	image.append(images[page.image]);
@@ -266,7 +267,7 @@ start_image = function() {
 // Serialize data and do some cleanup after the subject is done
 // coloring the page. Prepare for the next stage, i.e. either another
 // coloring page or the evaluation form.
-end_page = function() {
+function end_page() {
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
@@ -280,7 +281,7 @@ end_page = function() {
 }
 
 // Serialize the evaluation form data and trigger uploading of all data.
-handle_evaluation = function(form) {
+function handle_evaluation(form) {
 	var raw_data = $(form).serializeArray();
 	for (var l = raw_data.length, i = 0; i < l; ++i) {
 		evaluation_data[raw_data[i].name] = raw_data[i].value;
@@ -289,8 +290,9 @@ handle_evaluation = function(form) {
 }
 
 // Upload all data and handle possible failure.
-send_data = function() {
+function send_data() {
 	var data = JSON.stringify({
+		survey: window.location.href,
 		subject: form_data,
 		results: page_data,
 		evaluation: evaluation_data,
@@ -313,7 +315,7 @@ send_data = function() {
 }
 
 // Abstraction of an action taken by a test subject.
-command = function(previous) {
+function command(previous) {
 	if (previous) {
 		this.prev = previous;
 		previous.next = this;
@@ -331,7 +333,7 @@ command = function(previous) {
 // Note of historical interest: there used to be other types of
 // commands, but they became irrelevant when the user interface was
 // simplified.
-launch_fill_command = function(target, value) {
+function launch_fill_command(target, value) {
 	var cmd = new command(last_command);
 	cmd.target = target;
 	cmd.color = value;
@@ -339,7 +341,7 @@ launch_fill_command = function(target, value) {
 	cmd.do = function() {
 		this.toggle();
 		$(cmd.target).attr('fill', this.color);
-	}
+	};
 	cmd.json.action = 'fill';
 	cmd.json.target = target.id;
 	cmd.json.color = value;
@@ -349,7 +351,7 @@ launch_fill_command = function(target, value) {
 
 // Serialize all actions taken by the test subject (since
 // `current_cmd`) into a single array, and return said array.
-serialize_commands = function(current_cmd) {
+function serialize_commands(current_cmd) {
 	sequence = [];
 	while (current_cmd) {
 		sequence.push(current_cmd.json);
