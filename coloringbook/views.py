@@ -129,11 +129,12 @@ def store_subject_data(survey, data):
             s.add_all(fills_from_json(survey, page, subject, result))
         s.commit()
         return True
-    except Exception as e:
+    except:
         current_app.logger.error(
-            'Subject store failed for survey "{}". Traceback:\n{}'.format(
+            'Subject store failed for survey "{}".\n{}Data:\n{}'.format(
                 survey.name,
-                traceback.format_exc()
+                traceback.format_exc(),
+                json.dumps(data),
             )
         )
         return False
