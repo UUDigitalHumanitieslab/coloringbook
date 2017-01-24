@@ -125,8 +125,14 @@ def store_subject_data(survey, data):
         pages = get_survey_pages(survey)
         results = data['results']
         assert len(pages) == len(results)
-        for page, result in zip(pages, results):
-            s.add_all(fills_from_json(survey, page, subject, result))
+        for pagenum, (page, result) in enumerate(zip(pages, results)):
+            try:
+                s.add_all(fills_from_json(survey, page, subject, result))
+            except:
+                current_app.logger.error(
+                    'Next exception thrown on page {}.'.format(pagenum),
+                )
+                raise
         s.commit()
         return True
     except:
@@ -335,12 +341,20 @@ def fills_from_json(survey, page, subject, data):
     colors = Color.query
     areas = Area.query.filter_by(drawing=page.drawing)
     fills = []
-    for datum in data:
-        fills.append(Fill(
-            survey=survey,
-            page=page,
-            area=areas.filter_by(name=datum['target']).one(),
-            subject=subject,
-            time=int(datum['time']),
-            color=colors.filter_by(code=datum['color']).one() ))
+    for fillnum, datum in enumerate(data):
+        try:
+            fills.append(Fill(
+                survey=survey,
+                page=page,
+                area=areas.filter_by(name=datum['target']).one(),
+                subject=subject,
+                time=int(datum['time']),
+                color=colors.filter_by(code=datum['color']).one() ))
+        except:
+            current_app.logger.error(
+                'Next exception thrown in fill {} of the current page'.format(
+                    fillnum,
+                ),
+            )
+            raise
     return fills
