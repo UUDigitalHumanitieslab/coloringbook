@@ -393,12 +393,12 @@ function handle_evaluation(form) {
 
 // Upload all data and handle possible failure.
 function send_data() {
-	var data = JSON.stringify({
+	var data = JSON.stringify([{
 		survey: window.location.href,
 		subject: form_data,
 		results: page_data,
 		evaluation: evaluation_data,
-	});
+	}]);
 	$.ajax({
 		type: 'POST',
 		url: window.location.pathname + '/submit',

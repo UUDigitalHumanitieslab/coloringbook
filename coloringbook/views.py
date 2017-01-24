@@ -11,6 +11,7 @@
 """
 
 from datetime import date, datetime
+from functools import partial
 import traceback
 
 from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app
@@ -96,11 +97,28 @@ def fetch_coloringbook(survey_name):
 @site.route('/book/<survey_name>/submit', methods=['POST'])
 def submit(survey_name):
     """ Parse and store data sent by the test subject, all in one go. """
-    
-    s = db.session
     try:
         survey = Survey.query.filter_by(name = survey_name).one()
         data = request.get_json()
+    except:
+        current_app.logger.error(
+            'Batch submit failed for survey "{}".\n{}Data:\n{}'.format(
+                survey_name,
+                traceback.format_exc(),
+                request.data,
+            )
+        )
+        return 'Error'
+    if all(map(partial(store_subject_data, survey), data)):
+        return 'Success'
+    else:
+        return 'Error'
+
+
+def store_subject_data(survey, data):
+    """ Store complete survey data for a single subject. """
+    s = db.session
+    try:
         subject = subject_from_json(data['subject'])
         s.add(subject)
         bind_survey_subject(survey, subject, data['evaluation'])
@@ -110,15 +128,15 @@ def submit(survey_name):
         for page, result in zip(pages, results):
             s.add_all(fills_from_json(survey, page, subject, result))
         s.commit()
-        return 'Success'
+        return True
     except Exception as e:
         current_app.logger.error(
-            'Submit failed for survey "{}". Traceback:\n{}'.format(
-                survey_name,
+            'Subject store failed for survey "{}". Traceback:\n{}'.format(
+                survey.name,
                 traceback.format_exc()
             )
         )
-        return 'Error'
+        return False
 
 
 def subject_from_json(data):
