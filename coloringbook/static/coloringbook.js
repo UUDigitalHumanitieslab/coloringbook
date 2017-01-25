@@ -93,6 +93,95 @@ var ConnectivityFsm = machina.Fsm.extend({
 	}
 });
 
+// TransferFsm has the single responsibility for uploading subject data.
+// Its interface consists of a single method, `push`, which accepts data
+// from a single subject and which will do the right thing depending on
+// the connectivity state. Data are uploaded in batch as soon as possible.
+// When instantiating, pass a configuration object with a `connectivity`
+// member containing an instance of ConnectivityFsm.
+var TransferFsm = machina.Fsm.extend({
+	namespace: 'transfer',
+	initialState: 'finished',
+	states: {
+		finished: {
+			push: 'waitingForConnection',
+		},
+		waitingForConnection: {
+			_onEnter: function() {
+				this.clearQueue();
+				this.handle(this.connectivity.state);
+			},
+			online: 'inProgress',
+		},
+		inProgress: {
+			_onEnter: function() {
+				if (this.buffer.length) {
+					this.startUpload();
+				} else {
+					this.transition('finished');
+				}
+			},
+			push: function() {
+				this.deferUntilTransition();
+			},
+			uploadDone: 'finished',
+			uploadFail: 'waitingForConnection',
+		},
+	},
+	initialize: function() {
+		var self = this;
+		self.connectivity.on('heartbeat', function() {
+			self.handle('online');
+		});
+		self.connectivity.on('no-heartbeat', function() {
+			self.handle('disconnected');
+		});
+		self.buffer = [];
+		self.errors = false;
+	},
+	push: function(datum) {
+		this.buffer.push(datum);
+		this.handle('push');
+	},
+	// Only implementation details below this line. Do not call.
+	startUpload: function() {
+		var self = this;
+		var submittedData = self.buffer;
+		self.buffer = [];
+		var request = $.ajax({
+			type: 'POST',
+			url: window.location.pathname + '/submit',
+			data: JSON.stringify(submittedData),
+			contentType: 'application/json',
+		});
+		var interceptor = self.connectivity.on(
+			'no-heartbeat',
+			request.abort.bind(request)
+		);
+		request.always(function uploadEnd(arg, textStatus) {
+			interceptor.off();
+			if (textStatus === 'timeout') {
+				self.connectivity.handle('request.timeout');
+			}
+		}).done(
+			self.uploadDone.bind(self)
+		).fail(
+			self.uploadFail.bind(self, submittedData)
+		);
+	},
+	uploadDone: function(response) {
+		if (response === 'Error') {
+			this.emit('uploadError');
+			this.errors = true;
+		}
+		this.handle('uploadDone');
+	},
+	uploadFail: function(transientData) {
+		this.buffer = transientData.concat(buffer);
+		this.handle('uploadFail');
+	},
+});
+
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
 function lang_field(count) {
