@@ -18,6 +18,7 @@ var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
 var image_count, images_ready, sound_count, sounds_ready;
 var sentence_image_delay = 6000;  // milliseconds
+var connectivityFsm, transferFsm;
 
 // ConnectivityFsm is based directly on the example from machina-js.org.
 // Most important difference is that checkHeartbeat is simply a member
@@ -233,6 +234,8 @@ function init_application() {
 	});
 	init_controls();
 	create_swatches(colors);
+	connectivityFsm = new ConnectivityFsm({origin: '/'});
+	transferFsm = new TransferFsm({connectivity: connectivityFsm});
 	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
@@ -477,37 +480,27 @@ function end_page() {
 
 // Serialize the evaluation form data and trigger uploading of all data.
 function handle_evaluation(form) {
-	var raw_data = $(form).serializeArray();
+	var raw_data = $(form).hide().serializeArray();
 	evaluation_data = {};
 	for (var l = raw_data.length, i = 0; i < l; ++i) {
 		evaluation_data[raw_data[i].name] = raw_data[i].value;
 	}
-	send_data();
-}
-
-// Upload all data and handle possible failure.
-function send_data() {
-	var data = JSON.stringify([{
-		survey: window.location.href,
+	transferFsm.push({
 		subject: form_data,
 		results: page_data,
 		evaluation: evaluation_data,
-	}]);
-	$.ajax({
-		type: 'POST',
-		url: window.location.pathname + '/submit',
-		'data': data,
-		contentType: 'application/json',
-		success: function(result) {
-			$('#ending_form').hide();
-			if (result == 'Success') {
-				$('#success_message').show();
-			} else {
-				$('#failure_message').show();
-				$('#errorbox').val(data).focus().select();
-			}
-		}
 	});
+	$('#success_message').show();
+}
+
+// Reveal the data in the transfer buffer to the user.
+function show_buffer() {
+	$('#failure_message').show();
+	$('#errorbox').val([
+		(new Date()).toISOString(),
+		window.location.href,
+		JSON.stringify(transferFsm.buffer),
+	].join('\n')).focus().select();
 }
 
 // Abstraction of an action taken by a test subject.
