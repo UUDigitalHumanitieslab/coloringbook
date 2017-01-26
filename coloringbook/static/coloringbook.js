@@ -177,7 +177,7 @@ var TransferFsm = machina.Fsm.extend({
 	uploadFail: function(transientData, xhr, textStatus) {
 		// No confirmation from the server that the data were stored, not even
 		// invalid. So prepend the submitted data back into the buffer.
-		this.buffer = transientData.concat(buffer);
+		this.buffer = transientData.concat(this.buffer);
 		this.handle('uploadFail');
 		// Might need to check the connectivity if the request timed out.
 		if (textStatus === 'timeout') {
