@@ -90,7 +90,11 @@ var ConnectivityFsm = machina.Fsm.extend({
 			'appCache.downloading': 'probing',
 			'device.resume': 'probing',
 		}
-	}
+	},
+	
+	probe: function() {
+		this.transition('probing');
+	},
 });
 
 // TransferFsm has the single responsibility for uploading subject data.
@@ -178,11 +182,8 @@ var TransferFsm = machina.Fsm.extend({
 		// No confirmation from the server that the data were stored, not even
 		// invalid. So prepend the submitted data back into the buffer.
 		this.buffer = transientData.concat(this.buffer);
+		this.connectivity.probe();
 		this.handle('uploadFail');
-		// Might need to check the connectivity if the request timed out.
-		if (textStatus === 'timeout') {
-			self.connectivity.handle('request.timeout');
-		}
 	},
 });
 
