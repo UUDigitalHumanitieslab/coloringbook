@@ -101,31 +101,36 @@ var ConnectivityFsm = machina.Fsm.extend({
 // member containing an instance of ConnectivityFsm.
 var TransferFsm = machina.Fsm.extend({
 	namespace: 'transfer',
-	initialState: 'finished',
+	initialState: 'noData',
 	states: {
-		finished: {
+		noData: {
 			push: 'waitingForConnection',
 		},
 		waitingForConnection: {
 			_onEnter: function() {
-				this.clearQueue();
+				// Invariant: `this.buffer` contains `push`ed data.
+				this.clearQueue();  // See `this.states.inProgress.push`.
 				this.handle(this.connectivity.state);
 			},
 			online: 'inProgress',
 		},
 		inProgress: {
 			_onEnter: function() {
-				if (this.buffer.length) {
-					this.startUpload();
-				} else {
-					this.transition('finished');
-				}
+				// Invariants: `this.buffer` contains `push`ed data AND
+				//             `this.connectivity.state` is 'online'.
+				this.startUpload(); // Clears the buffer.
 			},
 			push: function() {
+				// Remember it if new data are `pushed` during upload.
 				this.deferUntilTransition();
 			},
 			uploadDone: 'finished',
+			// The function that calls `this.handle('uploadFail')`
+			// ensures that former content of `this.buffer` is restored.
 			uploadFail: 'waitingForConnection',
+		},
+		finished: {
+			push: 'waitingForConnection',
 		},
 	},
 	initialize: function() {
@@ -140,29 +145,20 @@ var TransferFsm = machina.Fsm.extend({
 		self.errors = false;
 	},
 	push: function(datum) {
+		// `datum` contains the complete survey data from a single subject.
 		this.buffer.push(datum);
 		this.handle('push');
 	},
-	// Only implementation details below this line. Do not call.
+	// Only implementation details below this line. Do not call manually.
 	startUpload: function() {
 		var self = this;
 		var submittedData = self.buffer;
 		self.buffer = [];
-		var request = $.ajax({
+		$.ajax({
 			type: 'POST',
 			url: window.location.pathname + '/submit',
 			data: JSON.stringify(submittedData),
 			contentType: 'application/json',
-		});
-		var interceptor = self.connectivity.on(
-			'no-heartbeat',
-			request.abort.bind(request)
-		);
-		request.always(function uploadEnd(arg, textStatus) {
-			interceptor.off();
-			if (textStatus === 'timeout') {
-				self.connectivity.handle('request.timeout');
-			}
 		}).done(
 			self.uploadDone.bind(self)
 		).fail(
@@ -171,14 +167,22 @@ var TransferFsm = machina.Fsm.extend({
 	},
 	uploadDone: function(response) {
 		if (response === 'Error') {
+			// The data were somehow invalid, but still safely stored
+			// on the server.
 			this.emit('uploadError');
 			this.errors = true;
 		}
 		this.handle('uploadDone');
 	},
-	uploadFail: function(transientData) {
+	uploadFail: function(transientData, xhr, textStatus) {
+		// No confirmation from the server that the data were stored, not even
+		// invalid. So prepend the submitted data back into the buffer.
 		this.buffer = transientData.concat(buffer);
 		this.handle('uploadFail');
+		// Might need to check the connectivity if the request timed out.
+		if (textStatus === 'timeout') {
+			self.connectivity.handle('request.timeout');
+		}
 	},
 });
 
