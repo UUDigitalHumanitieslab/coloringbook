@@ -494,8 +494,8 @@ function handle_evaluation(form) {
 }
 
 // Reveal status details as well as the data in the transfer buffer to the user.
-function show_status() {
-	$('#status_details').show();
+function toggle_status() {
+	$('#status_details').toggle();
 	$('#bufferbox').val([
 		(new Date()).toISOString(),
 		window.location.href,
