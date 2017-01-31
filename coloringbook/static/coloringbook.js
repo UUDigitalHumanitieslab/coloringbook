@@ -258,8 +258,8 @@ function initCycle() {
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#ending_form').hide()[0].reset();
-	$('#success_message').hide();
-	$('#failure_message').hide();
+	$('#finish_controls').hide();
+	$('#status_details').hide();
 }
 
 // Retrieve the data and report when all is done.
@@ -490,13 +490,13 @@ function handle_evaluation(form) {
 		results: page_data,
 		evaluation: evaluation_data,
 	});
-	$('#success_message').show();
+	$('#finish_controls').show();
 }
 
 // Reveal the data in the transfer buffer to the user.
 function show_buffer() {
-	$('#failure_message').show();
-	$('#errorbox').val([
+	$('#status_details').show();
+	$('#bufferbox').val([
 		(new Date()).toISOString(),
 		window.location.href,
 		JSON.stringify(transferFsm.buffer),
