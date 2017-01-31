@@ -25,15 +25,12 @@ var connectivityFsm, transferFsm;
 // of the state machine itself.
 var ConnectivityFsm = machina.Fsm.extend({
 	namespace: 'connectivity',
-
 	initialState: 'probing',
-	
 	requestData: {
 		url: 'ping',
 		method: 'HEAD',
 		timeout: 5000
 	},
-
 	checkHeartbeat: function() {
 		var self = this;
 		self.emit('checking-heartbeat');
@@ -43,7 +40,6 @@ var ConnectivityFsm = machina.Fsm.extend({
 			self.emit('no-heartbeat');
 		});
 	},
-
 	initialize: function() {
 		var self = this;
 		self.on('heartbeat', function() {
@@ -71,7 +67,6 @@ var ConnectivityFsm = machina.Fsm.extend({
 			url: self.origin + self.requestData.url
 		});
 	},
-
 	states: {
 		probing: {
 			_onEnter: function() {
@@ -92,7 +87,6 @@ var ConnectivityFsm = machina.Fsm.extend({
 			'device.resume': 'probing',
 		}
 	},
-	
 	probe: function() {
 		this.transition('probing');
 	},
