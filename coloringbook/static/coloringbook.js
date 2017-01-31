@@ -236,6 +236,8 @@ function init_application() {
 	create_swatches(colors);
 	connectivityFsm = new ConnectivityFsm({origin: '/'});
 	transferFsm = new TransferFsm({connectivity: connectivityFsm});
+	connectivityFsm.on('transition', refreshConnectivityState);
+	transferFsm.on('transition', refreshTransferState);
 	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
@@ -401,6 +403,37 @@ function create_swatches(colors) {
 	$('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
+// Update UI elements to reflect the latest connectivity state.
+function refreshConnectivityState(transitionInfo) {
+	$('#connectivity_status').text(transitionInfo.toState);
+}
+
+// Update UI elements to reflect the latest transfer state.
+function refreshTransferState(transitionInfo) {
+	$('#transfer_status').text(transitionInfo.toState);
+	switch (transitionInfo.toState) {
+	case 'finished':
+		$('#cogwheel').css('fill', colors[4]);  // blue
+		refreshBufferbox();
+		break;
+	case 'inProgress':
+		$('#cogwheel').css('fill', colors[5]);  // purple
+		break;
+	case 'waitingForConnection':
+		$('#cogwheel').css('fill', colors[0]);  // red
+		refreshBufferbox();
+	}
+}
+
+// Update the #bufferbox contents.
+function refreshBufferbox() {
+	$('#bufferbox').val([
+		(new Date()).toISOString(),
+		window.location.href,
+		JSON.stringify(transferFsm.buffer),
+	].join('\n')).focus().select();
+}
+
 // Retrieve an SVG image by filename and check whether resources are complete.
 function load_image(name) {
 	$.ajax({
@@ -496,11 +529,7 @@ function handle_evaluation(form) {
 // Reveal status details as well as the data in the transfer buffer to the user.
 function toggle_status() {
 	$('#status_details').toggle();
-	$('#bufferbox').val([
-		(new Date()).toISOString(),
-		window.location.href,
-		JSON.stringify(transferFsm.buffer),
-	].join('\n')).focus().select();
+	$('#bufferbox').focus().select();
 }
 
 // Abstraction of an action taken by a test subject.
