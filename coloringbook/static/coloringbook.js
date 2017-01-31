@@ -115,9 +115,16 @@ var TransferFsm = machina.Fsm.extend({
 			_onEnter: function() {
 				// Invariant: `this.buffer` contains `push`ed data.
 				this.clearQueue();  // See `this.states.inProgress.push`.
+				this.timer = setInterval(
+					this.connectivity.probe.bind(this.connectivity),
+					10000
+				);
 				this.handle(this.connectivity.state);
 			},
 			online: 'inProgress',
+			_onExit: function() {
+				clearInterval(this.timer);
+			}
 		},
 		inProgress: {
 			_onEnter: function() {
