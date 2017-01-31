@@ -166,15 +166,13 @@ input.error {
 	}}" onclick="initCycle();">
 </p>
 
-<p id="status_details">
-	{{ survey.failure_text.content|safe }}
-	<br>
-	<textarea id="bufferbox" style="width: 300px; height: 200px;"></textarea>
-	<br>
-	<input type="button" value="{{
-		survey.button_set.post_survey_button
-	}}" onclick="initCycle();">
-</p>
+<table id="status_details">
+	<tr><th>Server</th><td id=server_status></td></tr>
+	<tr><th>Transfer</th><td id=buffer_status></td></tr>
+	<tr><th style="vertical-align: top;">Buffer</th><td>
+		<textarea id="bufferbox" style="width: 300px; height: 200px;"></textarea>
+	</td></tr>
+</table>
 
 </body>
 </html>

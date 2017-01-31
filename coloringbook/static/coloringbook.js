@@ -493,8 +493,8 @@ function handle_evaluation(form) {
 	$('#finish_controls').show();
 }
 
-// Reveal the data in the transfer buffer to the user.
-function show_buffer() {
+// Reveal status details as well as the data in the transfer buffer to the user.
+function show_status() {
 	$('#status_details').show();
 	$('#bufferbox').val([
 		(new Date()).toISOString(),
