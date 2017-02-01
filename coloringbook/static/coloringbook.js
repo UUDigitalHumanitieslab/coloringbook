@@ -172,9 +172,11 @@ var TransferFsm = machina.Fsm.extend({
 		);
 	},
 	uploadDone: function(response) {
+		console.log(response);
 		if (response === 'Error') {
 			// The data were somehow invalid, but still safely stored
 			// on the server.
+			console.log('if error');
 			this.emit('uploadError');
 			this.errors = true;
 		}
@@ -239,6 +241,7 @@ function init_application() {
 	transferFsm = new TransferFsm({connectivity: connectivityFsm});
 	connectivityFsm.on('transition', refreshConnectivityState);
 	transferFsm.on('transition', refreshTransferState);
+	transferFsm.on('uploadError', showError);
 	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
@@ -433,6 +436,14 @@ function refreshBufferbox() {
 		window.location.href,
 		JSON.stringify(transferFsm.buffer),
 	].join('\n')).focus().select();
+}
+
+// Make it visible to the user that the server emitted at least one error.
+function showError() {
+	console.log('showError');
+	$('#error_indicator').text('!');
+	$('#error_status').text('yes (notify maintainer)');
+	transferFsm.off('uploadError', showError);
 }
 
 // Retrieve an SVG image by filename and check whether resources are complete.
