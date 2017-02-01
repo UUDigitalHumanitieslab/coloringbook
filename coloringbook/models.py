@@ -279,11 +279,6 @@ class SuccessText(Text, db.Model):
     __tablename__ = 'success_text'
 
 
-class FailureText(Text, db.Model):
-    """ The message shown after failed data submission. """
-    __tablename__ = 'failure_text'
-
-
 class StartingForm(db.Model):
     """ Customization parameters for display of the initial form. """
     
@@ -373,10 +368,6 @@ class Survey(db.Model):
         db.Integer,
         db.ForeignKey('success_text.id'),
         nullable=False )
-    failure_text_id = db.Column(
-        db.Integer,
-        db.ForeignKey('failure_text.id'),
-        nullable=False )
     button_set_id = db.Column(
         db.Integer,
         db.ForeignKey('button_set.id'),
@@ -388,7 +379,6 @@ class Survey(db.Model):
     instruction_text = db.relationship('InstructionText')
     ending_form = db.relationship('EndingForm')
     success_text = db.relationship('SuccessText')
-    failure_text = db.relationship('FailureText')
     button_set = db.relationship('ButtonSet')
     
     def __str__(self):

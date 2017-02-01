@@ -297,7 +297,7 @@ class SurveyView (ModelView):
         'name', 'title', 'language', 'begin', 'end', 'duration',
         'simultaneous', 'information', 'page_list',
         'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
-        'ending_form', 'success_text', 'failure_text', 'button_set',
+        'ending_form', 'success_text', 'button_set',
     )
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', coerce=int),

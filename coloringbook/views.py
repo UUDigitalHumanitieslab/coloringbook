@@ -227,9 +227,8 @@ def bind_survey_subject(survey, subject, evaluation):
         >>> testwelcome = m.WelcomeText(name='a', content='a')
         >>> testprivacy = m.PrivacyText(name='a', content='a')
         >>> testsuccess = m.SuccessText(name='a', content='a')
-        >>> testfailure = m.FailureText(name='a', content='a')
         >>> testinstruction = m.InstructionText(name='a', content='a')
-        >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
+        >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction)
         >>> testsubject = m.Subject(name='Koos', birth=datetime.now())
         >>> testevaluation = {
         ...     'difficulty': 5,
@@ -284,12 +283,11 @@ def fills_from_json(survey, page, subject, data):
         >>> testwelcome = m.WelcomeText(name='a', content='a')
         >>> testprivacy = m.PrivacyText(name='a', content='a')
         >>> testsuccess = m.SuccessText(name='a', content='a')
-        >>> testfailure = m.FailureText(name='a', content='a')
         >>> testinstruction = m.InstructionText(name='a', content='a')
         >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
         >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
         >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a')
-        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[
