@@ -27,7 +27,7 @@ var ConnectivityFsm = machina.Fsm.extend({
 	namespace: 'connectivity',
 	initialState: 'probing',
 	requestData: {
-		url: 'ping',
+		url: '/ping',
 		method: 'HEAD',
 		timeout: 5000
 	},
@@ -237,7 +237,8 @@ function init_application() {
 	});
 	init_controls();
 	create_swatches(colors);
-	connectivityFsm = new ConnectivityFsm({origin: '/'});
+	console.log(base);
+	connectivityFsm = new ConnectivityFsm({origin: base});
 	transferFsm = new TransferFsm({connectivity: connectivityFsm});
 	connectivityFsm.on('transition', refreshConnectivityState);
 	transferFsm.on('transition', refreshTransferState);
