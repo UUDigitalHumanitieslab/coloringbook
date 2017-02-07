@@ -28,9 +28,11 @@
 {% block body %}
 	{{ super() }}
 	
-	<p>Welcome to the Coloring Book administration interface. This is version 1.4.</p>
+	<h1>Coloring Book</h1>
 	
-	<h3>How to create new surveys</h3>
+	<p>Manual for version 1.4.</p>
+	
+	<h2>How to create new surveys</h2>
 	
 	<p>You can upload recorded sentences (in MP3 format) and prepared colorable SVG files to the <a href="{{ url_for('sound.index_view') }}">Sounds</a> and <a href="{{ url_for('drawing.index_view') }}">Drawings</a> tabs, respectively. After uploading a drawing, it is necessary to edit it (by clicking on a pencil icon at the left side of the list) in order to identify all colorable areas. You need to do this only once per uploaded drawing.</p>
 	
@@ -62,7 +64,7 @@
 	
 	<p>The survey form ends with several fields that enable you to customize any text that appears during the survey. This includes the welcome text, the registration form, the instruction text and even the text that appears in some of the buttons. The composition of the registration form can also be customized to some extent. The database includes a Dutch language default for each of the fields. You can add new texts under the <a href="#top" onmouseup="setTimeout(flickerTextsTab, 200)">Texts</a> tab, for example if you need translated form labels or if you need to work with slightly different instructions. If you have pre-existing surveys, it is recommended not to change the defaults, as this may change the appearance of surveys that are currently being conducted.</p>
 	
-	<h3>Using your survey</h3>
+	<h2>Using your survey</h2>
 	
 	<p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
 	
@@ -90,7 +92,7 @@
 	
 	<p>If the cogwheel icon stays red for more than twenty seconds after you reconnect to the internet, it means that something is preventing the application from uploading the (last batch of) data to the server. If this happens, tap or click on the cogwheel icon. A table with more detailed information will appear. Copy the contents of the &ldquo;<strong>Buffer:</strong>&rdquo; text box to your clipboard in order to backup your data. Next, veryify whether you are truly connected to the internet. If you really cannot convince the application to upload your data, or if your application state is lost in the process of trying to reconnect (for example because of switching to another application on an iPad), paste the contents of your clipboard (i.e., the buffer) into an email and send it to the system maintainer. He or she will know what to do.</p>
 	
-	<h3 id=obtain-data>How to obtain the data for analysis</h3>
+	<h2 id=obtain-data>How to obtain the data for analysis</h2>
 	
 	<p>All actions that test subjects take, up to the exact time in milliseconds since the drawing appeared, are stored and can be accessed in the <a href="{{ url_for('fill.index_view') }}">Data</a> tab. This tab also allows you to sort and filter the data. You can export the (possibly filtered) data to a CSV format which works well with both Microsoft Excel and IBM SPSS. This functionality can be accessed from the pulldown menu in the top right. There are three flavours of export: <emph>raw</emph>, where the data are simply exported as shown, <emph>final</emph>, where the final results for each area and each subject are exported together with additional information such as the total number of clicks in the area and a comparison with your expectation, and <emph>compared</emph>, which is similar to final but takes your expectations as the starting point. The consequence is that final includes data of coloring actions in areas about which you didn't express any expectations, while compared includes entries for areas in which you expressed expectations, but which weren't colored by test subjects. In other words, the former tells you the complete story of what subjects have done, while the latter tells you the full story of to what extend your expectations have come out.</p>
 	
