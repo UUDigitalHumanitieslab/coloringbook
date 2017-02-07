@@ -16,7 +16,7 @@ from flask.ext.admin import Admin
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin.contrib.fileadmin import FileAdmin
 
-from ..models import db, WelcomeText, PrivacyText, InstructionText, SuccessText, FailureText
+from ..models import db, WelcomeText, PrivacyText, InstructionText, SuccessText
 
 
 def create_admin(app):
@@ -51,7 +51,6 @@ def create_admin(app):
     admin.add_view(TextView(InstructionText, sess, name='Instruction Text', endpoint='instruction_text'))
     admin.add_view(EndingFormView(sess))
     admin.add_view(TextView(SuccessText, sess, name='Success Text', endpoint='success_text'))
-    admin.add_view(TextView(FailureText, sess, name='Failure Text', endpoint='failure_text'))
     admin.add_view(ButtonSetView(sess))
     admin.add_view(ColorView(sess, category='Utilities'))
     admin.add_view(LanguageView(sess, category='Utilities'))

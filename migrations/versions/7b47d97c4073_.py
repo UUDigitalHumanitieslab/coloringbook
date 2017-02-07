@@ -81,7 +81,7 @@ def upgrade():
         survey_success_text,
         [{
             'name': 'default (NL)',
-            'content': 'Dank voor je deelname aan dit experiment.<br>\nJe invoer is opgeslagen. Je kunt het venster nu sluiten.',
+            'content': 'Dank voor je deelname aan dit experiment.',
         }]
     )
     op.bulk_insert(

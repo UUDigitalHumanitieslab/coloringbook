@@ -297,7 +297,7 @@ class SurveyView (ModelView):
         'name', 'title', 'language', 'begin', 'end', 'duration',
         'simultaneous', 'information', 'page_list',
         'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
-        'ending_form', 'success_text', 'failure_text', 'button_set',
+        'ending_form', 'success_text', 'button_set',
     )
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', coerce=int),
@@ -609,6 +609,7 @@ class ButtonSetView(ModelView):
         'name': 'For your reference.',
         'post_instruction_button': 'This text appears in the button to confirm the instruction.',
         'post_page_button': 'This text appears in the button to finish a page.',
+        'post_survey_button': 'This text appears in the button to restart the survey with a new test subject.',
     }
     
     def __init__(self, session, **kwargs):
