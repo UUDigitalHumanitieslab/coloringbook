@@ -609,7 +609,13 @@ class ButtonSetView(ModelView):
         'name': 'For your reference.',
         'post_instruction_button': 'This text appears in the button to confirm the instruction.',
         'post_page_button': 'This text appears in the button to finish a page.',
+        'page_back_button': 'To undo a premature press on the post page button. Leave this empty to disable the back button.',
         'post_survey_button': 'This text appears in the button to restart the survey with a new test subject.',
+    }
+    form_widget_args = {
+        'page_back_button': {
+            'placeholder': '(empty, disabled)',
+        },
     }
     
     def __init__(self, session, **kwargs):
