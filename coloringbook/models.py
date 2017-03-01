@@ -433,6 +433,49 @@ class SurveyPage(db.Model):
             cascade='all, delete-orphan'))
 
 
+class Action(db.Model):
+    """ General container for actions without additional data. """
+    
+    survey_id = db.Column(
+        db.Integer,
+        db.ForeignKey('survey.id'),
+        primary_key=True,
+        nullable=False,
+    )
+    page_id = db.Column(
+        db.Integer,
+        db.ForeignKey('page.id'),
+        primary_key=True,
+        nullable=False,
+    )
+    subject_id = db.Column(
+        db.Integer,
+        db.ForeignKey('subject.id'),
+        primary_key=True,
+        nullable=False,
+    )
+    time = db.Column(  # msecs from page start
+        db.Integer,
+        primary_key=True,
+        autoincrement=False,
+        nullable=False,
+    )
+    action = db.Column(db.String(30), nullable=False)
+    
+    survey = db.relationship(  # many-one
+        'Survey',
+        backref=db.backref('actions', lazy='dynamic'),
+    )
+    page = db.relationship(  # many-one
+        'Page',
+        backref=db.backref('actions', lazy='dynamic'),
+    )
+    subject = db.relationship(  # many-one
+        'Subject',
+        backref=db.backref('actions', lazy='dynamic'),
+    )
+
+
 class Fill(db.Model):
     """ The Color a Subject filled an Area of a Page in a Survey with at #ms."""
     

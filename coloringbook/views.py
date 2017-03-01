@@ -292,17 +292,20 @@ def fills_from_json(survey, page, subject, data):
         >>> # the to be added new contents for the database
         >>> testdata = '''[
         ...     {
-        ...         "color": "#000",
+        ...         "action": "fill",
+                    "color": "#000",
         ...         "target": "left door",
         ...         "time": 1000
         ...     },
         ...     {
-        ...         "color": "#fff",
+        ...         "action": "fill",
+                    "color": "#fff",
         ...         "target": "left door",
         ...         "time": 2000
         ...     },
         ...     {
-        ...         "color": "#000",
+        ...         "action": "fill",
+                    "color": "#000",
         ...         "target": "right door",
         ...         "time": 3000
         ...     }
@@ -338,21 +341,31 @@ def fills_from_json(survey, page, subject, data):
     
     colors = Color.query
     areas = Area.query.filter_by(drawing=page.drawing)
-    fills = []
-    for fillnum, datum in enumerate(data):
+    actions = []
+    for actnum, datum in enumerate(data):
         try:
-            fills.append(Fill(
-                survey=survey,
-                page=page,
-                area=areas.filter_by(name=datum['target']).one(),
-                subject=subject,
-                time=int(datum['time']),
-                color=colors.filter_by(code=datum['color']).one() ))
+            if datum['action'] == 'fill':
+                actions.append(Fill(
+                    survey=survey,
+                    page=page,
+                    area=areas.filter_by(name=datum['target']).one(),
+                    subject=subject,
+                    time=int(datum['time']),
+                    color=colors.filter_by(code=datum['color']).one(),
+                ))
+            else:
+                actions.append(Action(
+                    survey=survey,
+                    page=page,
+                    subject=subject,
+                    time=int(datum['time']),
+                    action=datum['action'],
+                ))
         except:
             current_app.logger.error(
-                'Next exception thrown in fill {} of the current page'.format(
-                    fillnum,
+                'Next exception thrown in action {} of the current page'.format(
+                    actnum,
                 ),
             )
             raise
-    return fills
+    return actions
