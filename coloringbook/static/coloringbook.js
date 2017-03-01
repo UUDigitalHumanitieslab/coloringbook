@@ -580,6 +580,14 @@ function launch_fill_command(target, value) {
 	last_command = cmd;
 }
 
+// Create a command object for page resumption.
+function launch_resume_command() {
+	var cmd = new command(last_command);
+	cmd.toggle();
+	cmd.json.action = 'resume';
+	last_command = cmd;
+}
+
 // Serialize all actions taken by the test subject (since
 // `current_cmd`) into a single array, and return said array.
 function serialize_commands(current_cmd) {
