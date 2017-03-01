@@ -18,7 +18,14 @@ var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
 var image_count, images_ready, sound_count, sounds_ready;
 var sentence_image_delay = 6000;  // milliseconds
-var connectivityFsm, transferFsm;
+var connectivityFsm, transferFsm, pagingFsm;
+
+// Create a constant function: like f but ignoring any arguments.
+function constant(f) {
+	return function() {
+		return f();
+	};
+}
 
 // ConnectivityFsm is based directly on the example from machina-js.org.
 // Most important difference is that checkHeartbeat is simply a member
@@ -191,6 +198,72 @@ var TransferFsm = machina.Fsm.extend({
 	},
 });
 
+var PagingFsm = machina.Fsm.extend({
+	namespace: 'paging',
+	initialState: 'beforeFirst',
+	states: {
+		beforeFirst: {
+			_onEnter: constant(initCycle),
+			next: 'firstPage',
+			_onExit: function() {
+				$('#instructions').hide();
+			},
+		},
+		firstPage: {
+			_onEnter: function() {
+				pagenum = 0;
+				start_page();
+			},
+			// for handling of 'next', see `initialize`.
+			_onExit: constant(end_page),
+		},
+		goingForward: {
+			_onEnter: constant(start_page),
+			// for handling of 'next', see `initialize`.
+			previous: 'resuming',
+			_onExit: constant(end_page),
+		},
+		resuming: {
+			_onEnter: function() {
+				--pagenum;
+				page_onset = $.now() - this.savedOffset;
+				start_page(this.savedImage);
+			},
+			// for handling of 'next', see `initialize`.
+			_onExit: function() {
+				end_page(page_data[page_data.length - 1]);
+			},
+		},
+		pastEnd: {
+			_onEnter: function() {
+				$('#ending_form').show();
+			},
+			next: 'beforeFirst',
+			previous: 'resuming',
+		},
+	},
+	initialize: function() {
+		this.states.firstPage.next = this.increment;
+		this.states.goingForward.next = this.increment;
+		this.states.resuming.next = this.increment;
+	},
+	next: function() {
+		this.handle('next');
+	},
+	previous: function() {
+		this.handle('previous');
+	},
+	increment: function() {
+		this.savedImage = $('#coloring_book_image > svg');
+		this.savedOffset = $.now() - page_onset;
+		if (++pagenum < pages.length) {
+			this.transition('goingForward');
+		} else {
+			this.transition('pastEnd');
+		}
+	},
+});
+
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
 function lang_field(count) {
@@ -217,7 +290,13 @@ function button(color) {
 
 // All the things that need to be done after the DOM is ready.
 function init_application() {
-	initCycle();
+	pagingFsm = new PagingFsm();
+	connectivityFsm = new ConnectivityFsm({origin: base});
+	transferFsm = new TransferFsm({connectivity: connectivityFsm});
+	connectivityFsm.on('transition', refreshConnectivityState);
+	transferFsm.on('transition', refreshTransferState);
+	transferFsm.on('uploadError', showError);
+
 	$('#starting_form input[type="submit"]').hide();
 	var now = new Date(),
 	    century_ago = new Date();
@@ -238,11 +317,6 @@ function init_application() {
 	init_controls();
 	create_swatches(colors);
 	console.log(base);
-	connectivityFsm = new ConnectivityFsm({origin: base});
-	transferFsm = new TransferFsm({connectivity: connectivityFsm});
-	connectivityFsm.on('transition', refreshConnectivityState);
-	transferFsm.on('transition', refreshTransferState);
-	transferFsm.on('uploadError', showError);
 	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
@@ -257,7 +331,6 @@ function init_application() {
 
 // What needs to be done when the survey is started (again)
 function initCycle() {
-	pagenum = 0;
 	page_data = [];
 	$('#starting_form').show()[0].reset();
 	$('#instructions').hide();
@@ -347,16 +420,6 @@ function handle_form(form) {
 		} else {
 			form_data[raw_form[i].name] = raw_form[i].value;
 		}
-	}
-}
-
-// Event handler for the "klaar" button.
-function finish_instructions() {
-	$('#instructions').hide();
-	if (image_count > 0 && Object.keys(images).length == image_count) {
-		start_page();
-	} else {
-		$(document).ajaxStop(start_page);
 	}
 }
 
@@ -536,11 +599,6 @@ function end_page(prehistory) {
 		prehistory.push.apply(prehistory, results);
 	} else {
 		page_data.push(results);
-	}
-	if (++pagenum < pages.length) {
-		start_page();
-	} else {
-		$('#ending_form').show();
 	}
 }
 

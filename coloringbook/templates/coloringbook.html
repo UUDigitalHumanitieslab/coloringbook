@@ -143,7 +143,7 @@ th:after {
 	<br>
 	<input type="button" value="{{
 		survey.button_set.post_instruction_button
-	}}" style="margin: 0 auto;" onclick="finish_instructions();">
+	}}" style="margin: 0 auto;" onclick="pagingFsm.next();">
 </p>
 
 <p id="sentence" style="text-align: center; margin: auto;"></p>
@@ -156,11 +156,11 @@ th:after {
 		{%- if survey.button_set.page_back_button %}
 		<input type="button" value="{{
 			survey.button_set.page_back_button
-		}}">
+		}}" onclick="pagingFsm.previous();">
 		{%- endif %}
 		<input type="button" value="{{
 			survey.button_set.post_page_button
-		}}" onclick="end_page();">
+		}}" onclick="pagingFsm.next();">
 	</p>
 </div>
 
