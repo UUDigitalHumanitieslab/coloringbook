@@ -474,15 +474,23 @@ function add_coloring_book_events() {
 	});
 }
 
-// Start a new coloring page by (dis)playing the sentence and set a
+// Start a coloring page by (dis)playing the sentence and set a
 // timeout for displaying the image (possibly zero).
-function start_page() {
+// If `resumed` is defined, it must be a previously used SVG image.
+// Passing an SVG to resume signals that the page start is a
+// resumption, otherwise it is a new page.
+function start_page(resumed) {
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	first_command = last_command = null;
-	window.setTimeout(start_image, sentence_image_delay);
+	if (resumed) {
+		launch_resume_command();
+		start_image(resumed);
+	} else {
+		window.setTimeout(start_image, sentence_image_delay);
+	}
 	if (page.audio) {
-		ion.sound.play(page.audio);
+		if (!resumed) ion.sound.play(page.audio);
 		$('#speaker-icon').show();
 		if (simultaneous) {
 			$('#speaker-icon').clone().attr({id: null}).prependTo('#sentence');
@@ -497,26 +505,38 @@ function play_sound() {
 }
 
 // Display the colorable image and prepare it for coloring.
-// Initializes the clock for coloring actions.
-function start_image() {
+// Initializes the clock for coloring actions if the page is new.
+// For resumed images, preparations have been done already.
+function start_image(resumed) {
 	var image = $('#coloring_book_image');
 	image.empty();
-	image.append(images[page.image]);
+	if (resumed) {
+		image.append(resumed);
+	} else {
+		image.append(images[page.image]);
+		set_image_dimensions();
+		add_coloring_book_events();
+		page_onset = $.now();
+	}
 	if (! simultaneous) $('#sentence').hide();
 	$('#controls').show();
-	set_image_dimensions();
-	add_coloring_book_events();
-	page_onset = $.now();
 }
 
 // Serialize data and do some cleanup after the subject is done
 // coloring the page. Prepare for the next stage, i.e. either another
 // coloring page or the evaluation form.
-function end_page() {
+// If `prehistory` is defined, it should be an array of serialized
+// commands. Use this if the current page was a resumption.
+function end_page(prehistory) {
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
-	page_data.push(serialize_commands(first_command));
+	var results = serialize_commands(first_command);
+	if (prehistory) {
+		prehistory.push.apply(prehistory, results);
+	} else {
+		page_data.push(results);
+	}
 	if (++pagenum < pages.length) {
 		start_page();
 	} else {
@@ -560,10 +580,6 @@ function command(previous) {
 
 // Create a command object for filling a particular area in the
 // drawing with a particular color.
-// 
-// Note of historical interest: there used to be other types of
-// commands, but they became irrelevant when the user interface was
-// simplified.
 function launch_fill_command(target, value) {
 	var cmd = new command(last_command);
 	cmd.target = target;
