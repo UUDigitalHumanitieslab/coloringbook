@@ -593,11 +593,11 @@ function start_image(resumed) {
 		image.append(images[page.image]);
 		set_image_dimensions();
 	}
+	if (! simultaneous) $('#sentence').hide();
+	$('#controls').show();
 	add_coloring_book_events();
 	if (! resumed) page_onset = $.now();
 	console.log(page_onset);
-	if (! simultaneous) $('#sentence').hide();
-	$('#controls').show();
 }
 
 // Serialize data and do some cleanup after the subject is done
