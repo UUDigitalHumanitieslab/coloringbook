@@ -320,6 +320,7 @@ class ButtonSet(db.Model):
     name = db.Column(db.String(30), nullable=False, unique=True)
     post_instruction_button = db.Column(db.String(30), nullable=False)
     post_page_button = db.Column(db.String(30), nullable=False)
+    page_back_button = db.Column(db.String(30), nullable=False)
     post_survey_button = db.Column(db.String(40), nullable=False)
     
     def __str__(self):
@@ -430,6 +431,49 @@ class SurveyPage(db.Model):
         backref=db.backref(
             'page_surveys',
             cascade='all, delete-orphan'))
+
+
+class Action(db.Model):
+    """ General container for actions without additional data. """
+    
+    survey_id = db.Column(
+        db.Integer,
+        db.ForeignKey('survey.id'),
+        primary_key=True,
+        nullable=False,
+    )
+    page_id = db.Column(
+        db.Integer,
+        db.ForeignKey('page.id'),
+        primary_key=True,
+        nullable=False,
+    )
+    subject_id = db.Column(
+        db.Integer,
+        db.ForeignKey('subject.id'),
+        primary_key=True,
+        nullable=False,
+    )
+    time = db.Column(  # msecs from page start
+        db.Integer,
+        primary_key=True,
+        autoincrement=False,
+        nullable=False,
+    )
+    action = db.Column(db.String(30), nullable=False)
+    
+    survey = db.relationship(  # many-one
+        'Survey',
+        backref=db.backref('actions', lazy='dynamic'),
+    )
+    page = db.relationship(  # many-one
+        'Page',
+        backref=db.backref('actions', lazy='dynamic'),
+    )
+    subject = db.relationship(  # many-one
+        'Subject',
+        backref=db.backref('actions', lazy='dynamic'),
+    )
 
 
 class Fill(db.Model):

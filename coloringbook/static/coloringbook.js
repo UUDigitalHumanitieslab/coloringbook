@@ -18,7 +18,14 @@ var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
 var image_count, images_ready, sound_count, sounds_ready;
 var sentence_image_delay = 6000;  // milliseconds
-var connectivityFsm, transferFsm;
+var connectivityFsm, transferFsm, pagingFsm;
+
+// Create a constant function: like f but ignoring any arguments.
+function constant(f) {
+	return function() {
+		return f();
+	};
+}
 
 // ConnectivityFsm is based directly on the example from machina-js.org.
 // Most important difference is that checkHeartbeat is simply a member
@@ -191,6 +198,83 @@ var TransferFsm = machina.Fsm.extend({
 	},
 });
 
+// PagingFsm manages page turns with the confirmation and back buttons.
+// On an instance, call either .previous() or .next(). Depending on the
+// current state, it will resume a previous coloring page, go to a next
+// page or finish the survey.
+var PagingFsm = machina.Fsm.extend({
+	namespace: 'paging',
+	initialState: 'beforeFirst',
+	states: {
+		beforeFirst: {
+			_onEnter: constant(initCycle),
+			next: 'firstPage',
+			_onExit: function() {
+				$('#instructions').hide();
+			},
+		},
+		firstPage: {
+			_onEnter: function() {
+				pagenum = 0;
+				start_page();
+			},
+			// for handling of 'next', see `initialize`.
+		},
+		goingForward: {
+			_onEnter: function() {
+				$('.back').show();
+			},
+			// for handling of 'next', see `initialize`.
+			previous: 'resuming',
+		},
+		resuming: {
+			_onEnter: function() {
+				--pagenum;
+				page_onset = $.now() - this.savedOffset;
+				$('.back').hide();
+				start_page(this.savedImage);
+			},
+			// for handling of 'next', see `initialize`.
+			_onExit: function() {
+				$('.back').show();
+			},
+		},
+		pastEnd: {
+			_onEnter: function() {
+				$('#ending_form').show();
+			},
+			next: 'beforeFirst',
+			previous: 'resuming',
+			_onExit: function() {
+				$('#ending_form').hide();
+			},
+		},
+	},
+	initialize: function() {
+		var nextHandler = this.increment.bind(this);
+		this.states.firstPage.next = nextHandler;
+		this.states.goingForward.next = nextHandler;
+		this.states.resuming.next = nextHandler;
+	},
+	next: function() {
+		this.handle('next');
+	},
+	previous: function() {
+		this.handle('previous');
+	},
+	increment: function() {
+		this.savedImage = $('#coloring_book_image > svg');
+		this.savedOffset = $.now() - page_onset;
+		end_page(this.state === 'resuming' && page_data[page_data.length - 1]);
+		if (++pagenum < pages.length) {
+			this.transition('goingForward');
+			start_page();
+		} else {
+			this.transition('pastEnd');
+		}
+	},
+});
+
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
 function lang_field(count) {
@@ -217,7 +301,13 @@ function button(color) {
 
 // All the things that need to be done after the DOM is ready.
 function init_application() {
-	initCycle();
+	pagingFsm = new PagingFsm();
+	connectivityFsm = new ConnectivityFsm({origin: base});
+	transferFsm = new TransferFsm({connectivity: connectivityFsm});
+	connectivityFsm.on('transition', refreshConnectivityState);
+	transferFsm.on('transition', refreshTransferState);
+	transferFsm.on('uploadError', showError);
+
 	$('#starting_form input[type="submit"]').hide();
 	var now = new Date(),
 	    century_ago = new Date();
@@ -238,11 +328,6 @@ function init_application() {
 	init_controls();
 	create_swatches(colors);
 	console.log(base);
-	connectivityFsm = new ConnectivityFsm({origin: base});
-	transferFsm = new TransferFsm({connectivity: connectivityFsm});
-	connectivityFsm.on('transition', refreshConnectivityState);
-	transferFsm.on('transition', refreshTransferState);
-	transferFsm.on('uploadError', showError);
 	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
@@ -257,12 +342,12 @@ function init_application() {
 
 // What needs to be done when the survey is started (again)
 function initCycle() {
-	pagenum = 0;
 	page_data = [];
 	$('#starting_form').show()[0].reset();
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#speaker-icon').hide();
+	$('.back').hide();
 	$('#controls').hide();
 	$('#ending_form').hide()[0].reset();
 	$('#finish_controls').hide();
@@ -347,16 +432,6 @@ function handle_form(form) {
 		} else {
 			form_data[raw_form[i].name] = raw_form[i].value;
 		}
-	}
-}
-
-// Event handler for the "klaar" button.
-function finish_instructions() {
-	$('#instructions').hide();
-	if (image_count > 0 && Object.keys(images).length == image_count) {
-		start_page();
-	} else {
-		$(document).ajaxStop(start_page);
 	}
 }
 
@@ -474,15 +549,24 @@ function add_coloring_book_events() {
 	});
 }
 
-// Start a new coloring page by (dis)playing the sentence and set a
+// Start a coloring page by (dis)playing the sentence and set a
 // timeout for displaying the image (possibly zero).
-function start_page() {
+// If `resumed` is defined, it must be a previously used SVG image.
+// Passing an SVG to resume signals that the page start is a
+// resumption, otherwise it is a new page.
+function start_page(resumed) {
+	console.log('start_page', !!resumed);
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	first_command = last_command = null;
-	window.setTimeout(start_image, sentence_image_delay);
+	if (resumed) {
+		launch_resume_command();
+		start_image(resumed);
+	} else {
+		window.setTimeout(start_image, sentence_image_delay);
+	}
 	if (page.audio) {
-		ion.sound.play(page.audio);
+		if (!resumed) ion.sound.play(page.audio);
 		$('#speaker-icon').show();
 		if (simultaneous) {
 			$('#speaker-icon').clone().attr({id: null}).prependTo('#sentence');
@@ -497,30 +581,40 @@ function play_sound() {
 }
 
 // Display the colorable image and prepare it for coloring.
-// Initializes the clock for coloring actions.
-function start_image() {
+// Initializes the clock for coloring actions if the page is new.
+// For resumed images, preparations have been done already.
+function start_image(resumed) {
+	console.log('start_image', !!resumed);
 	var image = $('#coloring_book_image');
 	image.empty();
-	image.append(images[page.image]);
+	if (resumed) {
+		image.append(resumed);
+	} else {
+		image.append(images[page.image]);
+		set_image_dimensions();
+	}
 	if (! simultaneous) $('#sentence').hide();
 	$('#controls').show();
-	set_image_dimensions();
 	add_coloring_book_events();
-	page_onset = $.now();
+	if (! resumed) page_onset = $.now();
+	console.log(page_onset);
 }
 
 // Serialize data and do some cleanup after the subject is done
 // coloring the page. Prepare for the next stage, i.e. either another
 // coloring page or the evaluation form.
-function end_page() {
+// If `prehistory` is defined, it should be an array of serialized
+// commands. Use this if the current page was a resumption.
+function end_page(prehistory) {
+	console.log('end_page', !!prehistory);
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
-	page_data.push(serialize_commands(first_command));
-	if (++pagenum < pages.length) {
-		start_page();
+	var results = serialize_commands(first_command);
+	if (prehistory) {
+		prehistory.push.apply(prehistory, results);
 	} else {
-		$('#ending_form').show();
+		page_data.push(results);
 	}
 }
 
@@ -560,10 +654,6 @@ function command(previous) {
 
 // Create a command object for filling a particular area in the
 // drawing with a particular color.
-// 
-// Note of historical interest: there used to be other types of
-// commands, but they became irrelevant when the user interface was
-// simplified.
 function launch_fill_command(target, value) {
 	var cmd = new command(last_command);
 	cmd.target = target;
@@ -577,6 +667,14 @@ function launch_fill_command(target, value) {
 	cmd.json.target = target.id;
 	cmd.json.color = value;
 	cmd.do();
+	last_command = cmd;
+}
+
+// Create a command object for page resumption.
+function launch_resume_command() {
+	var cmd = new command(last_command);
+	cmd.toggle();
+	cmd.json.action = 'resume';
 	last_command = cmd;
 }
 
