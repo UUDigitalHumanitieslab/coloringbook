@@ -238,6 +238,9 @@ var PagingFsm = machina.Fsm.extend({
 			},
 			next: 'beforeFirst',
 			previous: 'resuming',
+			_onExit: function() {
+				$('#ending_form').hide();
+			},
 		},
 	},
 	initialize: function() {

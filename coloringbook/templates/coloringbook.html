@@ -172,6 +172,11 @@ th:after {
 	<input type="text" id="topic" name="topic" size="30"><br><br>
 	<label for="comments">{{ survey.ending_form.comments_label }}</label>
 	<textarea id="comments" name="comments" rows="3" cols="30"></textarea><br>
+	{%- if survey.button_set.page_back_button %}
+	<input type="button" value="{{
+		survey.button_set.page_back_button
+	}}" onclick="pagingFsm.previous();">
+	{%- endif %}
 	<input type="submit">
 </form>
 
