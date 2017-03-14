@@ -198,6 +198,10 @@ var TransferFsm = machina.Fsm.extend({
 	},
 });
 
+// PagingFsm manages page turns with the confirmation and back buttons.
+// On an instance, call either .previous() or .next(). Depending on the
+// current state, it will resume a previous coloring page, go to a next
+// page or finish the survey.
 var PagingFsm = machina.Fsm.extend({
 	namespace: 'paging',
 	initialState: 'beforeFirst',
@@ -206,36 +210,34 @@ var PagingFsm = machina.Fsm.extend({
 			_onEnter: constant(initCycle),
 			next: 'firstPage',
 			_onExit: function() {
+				console.log('beforeFirst exit');
 				$('#instructions').hide();
 			},
 		},
 		firstPage: {
 			_onEnter: function() {
 				pagenum = 0;
+				console.log('firstPage enter', pagenum);
 				start_page();
 			},
 			// for handling of 'next', see `initialize`.
-			_onExit: constant(end_page),
 		},
 		goingForward: {
-			_onEnter: constant(start_page),
 			// for handling of 'next', see `initialize`.
 			previous: 'resuming',
-			_onExit: constant(end_page),
 		},
 		resuming: {
 			_onEnter: function() {
 				--pagenum;
 				page_onset = $.now() - this.savedOffset;
+				console.log('resuming enter', pagenum, page_onset);
 				start_page(this.savedImage);
 			},
 			// for handling of 'next', see `initialize`.
-			_onExit: function() {
-				end_page(page_data[page_data.length - 1]);
-			},
 		},
 		pastEnd: {
 			_onEnter: function() {
+				console.log('pastEnd enter');
 				$('#ending_form').show();
 			},
 			next: 'beforeFirst',
@@ -243,9 +245,25 @@ var PagingFsm = machina.Fsm.extend({
 		},
 	},
 	initialize: function() {
-		this.states.firstPage.next = this.increment;
-		this.states.goingForward.next = this.increment;
-		this.states.resuming.next = this.increment;
+		var nextHandler = this.increment.bind(this);
+		this.states.firstPage.next = nextHandler;
+		this.states.goingForward.next = nextHandler;
+		this.states.resuming.next = nextHandler;
+		var selfReport = (function() {
+			console.log('PagingFsm internal state and context:');
+			console.log('fsm state', this.state);
+			console.log('pagenum', pagenum);
+			console.log('fsm saved offset', this.savedOffset);
+			console.log('fsm saved image size', (this.savedImage && this.savedImage.html().length));
+		}).bind(this);
+		this.on('handling', function(eventData) {
+			console.log('PagingFsm handling ' + eventData.inputType);
+			selfReport();
+		});
+		this.on('transition', function(eventData) {
+			console.log('PagingFsm transitioning from ' + eventData.fromState + ' to ' + eventData.toState);
+			selfReport();
+		});
 	},
 	next: function() {
 		this.handle('next');
@@ -256,8 +274,11 @@ var PagingFsm = machina.Fsm.extend({
 	increment: function() {
 		this.savedImage = $('#coloring_book_image > svg');
 		this.savedOffset = $.now() - page_onset;
+		console.log('increment', this.savedImage.html().length, this.savedOffset);
+		end_page(this.state === 'resuming' && page_data[page_data.length - 1]);
 		if (++pagenum < pages.length) {
 			this.transition('goingForward');
+			start_page();
 		} else {
 			this.transition('pastEnd');
 		}
@@ -543,6 +564,7 @@ function add_coloring_book_events() {
 // Passing an SVG to resume signals that the page start is a
 // resumption, otherwise it is a new page.
 function start_page(resumed) {
+	console.log('start_page', !!resumed);
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	first_command = last_command = null;
@@ -571,6 +593,7 @@ function play_sound() {
 // Initializes the clock for coloring actions if the page is new.
 // For resumed images, preparations have been done already.
 function start_image(resumed) {
+	console.log('start_image', !!resumed);
 	var image = $('#coloring_book_image');
 	image.empty();
 	if (resumed) {
@@ -578,9 +601,10 @@ function start_image(resumed) {
 	} else {
 		image.append(images[page.image]);
 		set_image_dimensions();
-		add_coloring_book_events();
-		page_onset = $.now();
 	}
+	add_coloring_book_events();
+	if (! resumed) page_onset = $.now();
+	console.log(page_onset);
 	if (! simultaneous) $('#sentence').hide();
 	$('#controls').show();
 }
@@ -591,6 +615,7 @@ function start_image(resumed) {
 // If `prehistory` is defined, it should be an array of serialized
 // commands. Use this if the current page was a resumption.
 function end_page(prehistory) {
+	console.log('end_page', !!prehistory);
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
