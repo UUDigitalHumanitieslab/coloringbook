@@ -210,14 +210,12 @@ var PagingFsm = machina.Fsm.extend({
 			_onEnter: constant(initCycle),
 			next: 'firstPage',
 			_onExit: function() {
-				console.log('beforeFirst exit');
 				$('#instructions').hide();
 			},
 		},
 		firstPage: {
 			_onEnter: function() {
 				pagenum = 0;
-				console.log('firstPage enter', pagenum);
 				start_page();
 			},
 			// for handling of 'next', see `initialize`.
@@ -230,14 +228,12 @@ var PagingFsm = machina.Fsm.extend({
 			_onEnter: function() {
 				--pagenum;
 				page_onset = $.now() - this.savedOffset;
-				console.log('resuming enter', pagenum, page_onset);
 				start_page(this.savedImage);
 			},
 			// for handling of 'next', see `initialize`.
 		},
 		pastEnd: {
 			_onEnter: function() {
-				console.log('pastEnd enter');
 				$('#ending_form').show();
 			},
 			next: 'beforeFirst',
@@ -249,21 +245,6 @@ var PagingFsm = machina.Fsm.extend({
 		this.states.firstPage.next = nextHandler;
 		this.states.goingForward.next = nextHandler;
 		this.states.resuming.next = nextHandler;
-		var selfReport = (function() {
-			console.log('PagingFsm internal state and context:');
-			console.log('fsm state', this.state);
-			console.log('pagenum', pagenum);
-			console.log('fsm saved offset', this.savedOffset);
-			console.log('fsm saved image size', (this.savedImage && this.savedImage.html().length));
-		}).bind(this);
-		this.on('handling', function(eventData) {
-			console.log('PagingFsm handling ' + eventData.inputType);
-			selfReport();
-		});
-		this.on('transition', function(eventData) {
-			console.log('PagingFsm transitioning from ' + eventData.fromState + ' to ' + eventData.toState);
-			selfReport();
-		});
 	},
 	next: function() {
 		this.handle('next');
@@ -274,7 +255,6 @@ var PagingFsm = machina.Fsm.extend({
 	increment: function() {
 		this.savedImage = $('#coloring_book_image > svg');
 		this.savedOffset = $.now() - page_onset;
-		console.log('increment', this.savedImage.html().length, this.savedOffset);
 		end_page(this.state === 'resuming' && page_data[page_data.length - 1]);
 		if (++pagenum < pages.length) {
 			this.transition('goingForward');
