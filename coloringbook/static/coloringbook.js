@@ -221,6 +221,9 @@ var PagingFsm = machina.Fsm.extend({
 			// for handling of 'next', see `initialize`.
 		},
 		goingForward: {
+			_onEnter: function() {
+				$('.back').show();
+			},
 			// for handling of 'next', see `initialize`.
 			previous: 'resuming',
 		},
@@ -228,9 +231,13 @@ var PagingFsm = machina.Fsm.extend({
 			_onEnter: function() {
 				--pagenum;
 				page_onset = $.now() - this.savedOffset;
+				$('.back').hide();
 				start_page(this.savedImage);
 			},
 			// for handling of 'next', see `initialize`.
+			_onExit: function() {
+				$('.back').show();
+			},
 		},
 		pastEnd: {
 			_onEnter: function() {
@@ -340,6 +347,7 @@ function initCycle() {
 	$('#instructions').hide();
 	$('#sentence').hide();
 	$('#speaker-icon').hide();
+	$('.back').hide();
 	$('#controls').hide();
 	$('#ending_form').hide()[0].reset();
 	$('#finish_controls').hide();
