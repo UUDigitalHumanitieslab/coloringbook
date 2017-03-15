@@ -38,12 +38,12 @@ class FillView(ModelView):
     can_delete = False
     column_list = 'survey page area subject time color'.split()
     column_sortable_list = (
-        ('survey', Survey.name),
-        ('page', Page.name),
-        ('area', Area.name),
-        ('subject', Subject.id),
+        ('survey', 'survey.name'),
+        ('page', 'page.name'),
+        ('area', 'area.name'),
+        ('subject', 'subject.id'),
         'time',
-        ('color', Color.code),
+        ('color', 'color.code'),
     )
     column_filters = (
         'survey',
@@ -283,8 +283,8 @@ class SurveyView (ModelView):
         'simultaneous': 'Whether the sentence is presented at the same time as the drawing',
     }
     column_sortable_list = (
-        ('name', Survey.name),
-        ('language', Language.name),
+        ('name', 'survey.name'),
+        ('language', 'language.name'),
         'begin',
         'end',
         'simultaneous',
@@ -349,9 +349,9 @@ class PageView(ModelView):
     column_list = 'name drawing language text sound'.split()
     column_sortable_list = (
         'name',
-        ('drawing', Drawing.name),
-        ('language', Language.name),
-        ('sound', Sound.name),
+        ('drawing', 'drawing.name'),
+        ('language', 'language.name'),
+        ('sound', 'sound.name'),
     )
     column_auto_select_related = True
     column_searchable_list = ('name', 'text',)

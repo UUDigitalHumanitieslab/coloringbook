@@ -53,10 +53,10 @@ def TableArgsMeta(parent_class, table_args):
 
 class InnoDBSQLAlchemy(fsqla.SQLAlchemy):
     """ Subclass in order to enable TableArgsMeta. """
-    def make_declarative_base(self, metadata=None):
+    def make_declarative_base(self, model_class=fsqla.Model, metadata=None):
         """Creates the declarative base."""
         base = fsqla.declarative_base(
-            cls = fsqla.Model,
+            cls = model_class,
             name = 'Model',
             metadata = metadata,
             metaclass = TableArgsMeta(
