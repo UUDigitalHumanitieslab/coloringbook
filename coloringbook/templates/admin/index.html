@@ -1,5 +1,5 @@
 {#
-	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	(c) 2014-2017 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 #}
 
@@ -28,9 +28,21 @@
 {% block body %}
 	{{ super() }}
 	
-	<p>Welcome to the Coloring Book administration interface. This is version 1.4.1.</p>
+	<h1>Coloring Book</h1>
 	
-	<h3>How to create new surveys</h3>
+	<p>Manual for version 2.0.</p>
+	
+	<ul>
+		<li><a href="#create-new">How to create new surveys</a>
+		<li><a href="#use-survey">Using your survey</a><ul>
+			<li><a href="#offline-use">Going offline during use</a>
+			<li><a href="#troubleshooting">Troubleshooting</a>
+		</ul>
+		<li><a href="#obtain-data">How to obtain the data for analysis</a>
+	</ul>
+	
+	<section id="create-new">
+	<h2>How to create new surveys</h2>
 	
 	<p>You can upload recorded sentences (in MP3 format) and prepared colorable SVG files to the <a href="{{ url_for('sound.index_view') }}">Sounds</a> and <a href="{{ url_for('drawing.index_view') }}">Drawings</a> tabs, respectively. After uploading a drawing, it is necessary to edit it (by clicking on a pencil icon at the left side of the list) in order to identify all colorable areas. You need to do this only once per uploaded drawing.</p>
 	
@@ -61,14 +73,44 @@
 	</script>
 	
 	<p>The survey form ends with several fields that enable you to customize any text that appears during the survey. This includes the welcome text, the registration form, the instruction text and even the text that appears in some of the buttons. The composition of the registration form can also be customized to some extent. The database includes a Dutch language default for each of the fields. You can add new texts under the <a href="#top" onmouseup="setTimeout(flickerTextsTab, 200)">Texts</a> tab, for example if you need translated form labels or if you need to work with slightly different instructions. If you have pre-existing surveys, it is recommended not to change the defaults, as this may change the appearance of surveys that are currently being conducted.</p>
+	</section>
+	
+	<section id="use-survey">
+	<h2>Using your survey</h2>
 	
 	<p>Please observe that test subjects should run a HTML5 capable web browser in order to take the survey. This includes any version of Firefox, Chrome, Safari or Opera of the past two years, or Internet Explorer 9 or later.</p>
 	
 	<p>It is possible to &ldquo;install&rdquo; a survey as a fullscreen &ldquo;app&rdquo; on the home screen of an Apple iPad. This has the advantage that the address bar is hidden. In order to do it, visit the survey URL (as illustrated above) with Safari on the iPad, click on the share button (square box with upwards escaping arrow) in the address bar, and choose &ldquo;Add to home screen&rdquo;. This will add an icon to the home screen which will run the survey in full screen when pressed. Likewise, browsers on a regular PC can often be configured to hide their address bar or to run fullscreen.</p>
 	
-	<p>Regardless of whether the survey is taken in full screen or not, subjects first see a short welcome text and a personal information form. After filling out the form, the subject receives instruction on how to use the coloring book controls. The subject is then presented with the pages of the survey one by one. After the last page, an evaluation form is offered. When the subject presses &ldquo;Send&rdquo;, all data including the coloring actions and the initial personal information form are submitted to the server at once. If the upload is successful, the subject gets a success message; otherwise they get the option to copy and send their data by email.</p>
+	<p>Regardless of whether the survey is taken in full screen or not, subjects first see a short welcome text and a personal information form. After filling out the form, the subject receives instruction on how to use the coloring book controls. The subject is then presented with the pages of the survey one by one. After the last page, an evaluation form is offered. When this form is submitted, the coloring data from the subject are either directly sent to the server or queued for later uploading, depending on whether a connection with the server is available. See the next section for details. In either case, you can repeat the survey with another subject after this.</p>
 	
-	<h3>How to obtain the data</h3>
+	<section id=offline-use>
+	<h3>Going offline during use</h3>
+	
+	<p>As of release 2.0, it is possible to go out into the field and test multiple subjects without needing to connect to the internet in between. You only need internet connectivity for the initial downloading of the survey and for the final uploading of the subject data (see below for details). The application intelligently queues up data when there is no connection. When a connection is reestablished, the application automatically uploads the data. Do note that the application has to be at the foreground in order for the uploading to occur.</p>
+	
+	<p>As long as the data are not uploaded to the server, they are only stored in the working memory of your device. For this reason, it is important that you do not close the browser tab or full-screen window in which Coloring Book is running. In addition, if you are using a mobile device such as an iPad, it is strongly recommended that you do not open other apps or browser tabs in the meanwhile. It is probably safe to lock your screen, but this has not been tested.</p>
+	
+	<p>You know that the survey is fully downloaded when there is a submit button at the bottom of the personal information form. Otherwise you will see a notice, saying &ldquo;Please wait, retrieving resources...&rdquo;. When the submit button has appeared, you can safely cut off your internet connection.</p>
+	
+	<p>Every time after a subject has confirmed the final evaluation form, a screen with a thank you message appears. This screen contains a button for repeating the survey with a new subject, as well as a cogwheel icon. The latter icon will change colour to indicate the current state of uploading progress. If the icon is <em>blue</em>, all data collected so far have been uploaded to the server. If the icon is <em>red</em>, there are still data queued on your device and the application is currently waiting for an internet connection. In this state, it will try reconnecting every ten seconds. The icon is <em>purple</em> when an upload is currently in progress; since uploading tends to be fast, you are unlikely to see this in practice.</p>
+	
+	<p>In principle, you can ignore the cogwheel until your last subject has finished the survey. At this point, you will want to connect to the internet in order to upload the data that you collected. Once you are connected to the internet, the cogwheel should turn blue soon and then stay blue. To make sure that it stays blue, waiting ten seconds is sufficient. If it does not turn blue and stay blue, or if there is a red exclamation mark next to the cogwheel, read on below for troubleshooting.</p>
+	</section>
+	
+	<section id=troubleshooting>
+	<h3>Troubleshooting</h3>
+	
+	<p>There are two ways in which uploading problems may be indicated. Firstly, when you are connected to the internet, the cogwheel might stay red (or even purple) instead of turning blue. Secondly, a red exclamation mark may sometimes appear next to the cogwheel. These problem indicators are mostly independent, so it is possible that either occurs or both. Below, the meaning of these indicators is discussed, as well as the best course of action in each case.</p>
+	
+	<p>When a red exclamation appears next to the cogwheel, it means that some data were not accepted by the server, even though they were uploaded successfully. When this happens, the data are not stored in the database but they are still stored in the server log. In this case, it is sufficient to notify the system maintainer about the rejected data. You do not need to send any data from within the application, unless you also have the persistently red cogwheel problem.</p>
+	
+	<p>If the cogwheel icon stays red for more than twenty seconds after you reconnect to the internet, it means that something is preventing the application from uploading the (last batch of) data to the server. If this happens, tap or click on the cogwheel icon. A table with more detailed information will appear. Copy the contents of the &ldquo;<strong>Buffer:</strong>&rdquo; text box to your clipboard in order to backup your data. Next, veryify whether you are truly connected to the internet. If you really cannot convince the application to upload your data, or if your application state is lost in the process of trying to reconnect (for example because of switching to another application on an iPad), paste the contents of your clipboard (i.e., the buffer) into an email and send it to the system maintainer. He or she will know what to do.</p>
+	</section>
+	</section>
+	
+	<section id=obtain-data>
+	<h2>How to obtain the data for analysis</h2>
 	
 	<p>All actions that test subjects take, up to the exact time in milliseconds since the drawing appeared, are stored and can be accessed in the <a href="{{ url_for('fill.index_view') }}">Data</a> tab. This tab also allows you to sort and filter the data. You can export the (possibly filtered) data to a CSV format which works well with both Microsoft Excel and IBM SPSS. This functionality can be accessed from the pulldown menu in the top right. There are three flavours of export: <emph>raw</emph>, where the data are simply exported as shown, <emph>final</emph>, where the final results for each area and each subject are exported together with additional information such as the total number of clicks in the area and a comparison with your expectation, and <emph>compared</emph>, which is similar to final but takes your expectations as the starting point. The consequence is that final includes data of coloring actions in areas about which you didn't express any expectations, while compared includes entries for areas in which you expressed expectations, but which weren't colored by test subjects. In other words, the former tells you the complete story of what subjects have done, while the latter tells you the full story of to what extend your expectations have come out.</p>
 	
@@ -106,4 +148,5 @@
 		<tr><th>topic</th><td>what the subject thought the survey was about (evaluation)</td></tr>
 		<tr><th>comments</th><td>any other remarks that the subject may have (evaluation)</td></tr>
 	</table>
+	</section>
 {% endblock body %}

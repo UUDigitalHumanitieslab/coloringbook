@@ -1,4 +1,4 @@
-# (c) 2014, 2016 Digital Humanities Lab, Utrecht University
+# (c) 2014, 2016-2017 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -11,6 +11,7 @@
 """
 
 from datetime import date, datetime
+from functools import partial
 import traceback
 
 from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app
@@ -21,6 +22,11 @@ from .models import *
 MAX_AGE_TOLERANCE = 36524  # approx. number of days in 100 years
 
 site = Blueprint('site', __name__)
+
+
+@site.route('/ping', methods=['HEAD'])
+def ping():
+    return current_app.response_class()
 
 
 @site.route('/')
@@ -91,29 +97,53 @@ def fetch_coloringbook(survey_name):
 @site.route('/book/<survey_name>/submit', methods=['POST'])
 def submit(survey_name):
     """ Parse and store data sent by the test subject, all in one go. """
-    
-    s = db.session
     try:
         survey = Survey.query.filter_by(name = survey_name).one()
         data = request.get_json()
+    except:
+        current_app.logger.error(
+            'Batch submit failed for survey "{}".\n{}Data:\n{}'.format(
+                survey_name,
+                traceback.format_exc(),
+                request.data,
+            )
+        )
+        return 'Error'
+    if all(map(partial(store_subject_data, survey), data)):
+        return 'Success'
+    else:
+        return 'Error'
+
+
+def store_subject_data(survey, data):
+    """ Store complete survey data for a single subject. """
+    s = db.session
+    try:
         subject = subject_from_json(data['subject'])
         s.add(subject)
         bind_survey_subject(survey, subject, data['evaluation'])
         pages = get_survey_pages(survey)
         results = data['results']
         assert len(pages) == len(results)
-        for page, result in zip(pages, results):
-            s.add_all(fills_from_json(survey, page, subject, result))
+        for pagenum, (page, result) in enumerate(zip(pages, results)):
+            try:
+                s.add_all(fills_from_json(survey, page, subject, result))
+            except:
+                current_app.logger.error(
+                    'Next exception thrown on page {}.'.format(pagenum),
+                )
+                raise
         s.commit()
-        return 'Success'
-    except Exception as e:
+        return True
+    except:
         current_app.logger.error(
-            'Submit failed for survey "{}". Traceback:\n{}'.format(
-                survey_name,
-                traceback.format_exc()
+            'Subject store failed for survey "{}".\n{}Data:\n{}'.format(
+                survey.name,
+                traceback.format_exc(),
+                json.dumps(data),
             )
         )
-        return 'Error'
+        return False
 
 
 def subject_from_json(data):
@@ -197,9 +227,8 @@ def bind_survey_subject(survey, subject, evaluation):
         >>> testwelcome = m.WelcomeText(name='a', content='a')
         >>> testprivacy = m.PrivacyText(name='a', content='a')
         >>> testsuccess = m.SuccessText(name='a', content='a')
-        >>> testfailure = m.FailureText(name='a', content='a')
         >>> testinstruction = m.InstructionText(name='a', content='a')
-        >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction)
+        >>> testsurvey = m.Survey(name='test', welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction)
         >>> testsubject = m.Subject(name='Koos', birth=datetime.now())
         >>> testevaluation = {
         ...     'difficulty': 5,
@@ -254,26 +283,28 @@ def fills_from_json(survey, page, subject, data):
         >>> testwelcome = m.WelcomeText(name='a', content='a')
         >>> testprivacy = m.PrivacyText(name='a', content='a')
         >>> testsuccess = m.SuccessText(name='a', content='a')
-        >>> testfailure = m.FailureText(name='a', content='a')
         >>> testinstruction = m.InstructionText(name='a', content='a')
         >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
         >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
-        >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a')
-        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, failure_text=testfailure, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
+        >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a', post_survey_button='a', page_back_button='a')
+        >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
         >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
         >>> # the to be added new contents for the database
         >>> testdata = '''[
         ...     {
+        ...         "action": "fill",
         ...         "color": "#000",
         ...         "target": "left door",
         ...         "time": 1000
         ...     },
         ...     {
+        ...         "action": "fill",
         ...         "color": "#fff",
         ...         "target": "left door",
         ...         "time": 2000
         ...     },
         ...     {
+        ...         "action": "fill",
         ...         "color": "#000",
         ...         "target": "right door",
         ...         "time": 3000
@@ -310,13 +341,31 @@ def fills_from_json(survey, page, subject, data):
     
     colors = Color.query
     areas = Area.query.filter_by(drawing=page.drawing)
-    fills = []
-    for datum in data:
-        fills.append(Fill(
-            survey=survey,
-            page=page,
-            area=areas.filter_by(name=datum['target']).one(),
-            subject=subject,
-            time=int(datum['time']),
-            color=colors.filter_by(code=datum['color']).one() ))
-    return fills
+    actions = []
+    for actnum, datum in enumerate(data):
+        try:
+            if datum['action'] == 'fill':
+                actions.append(Fill(
+                    survey=survey,
+                    page=page,
+                    area=areas.filter_by(name=datum['target']).one(),
+                    subject=subject,
+                    time=int(datum['time']),
+                    color=colors.filter_by(code=datum['color']).one(),
+                ))
+            else:
+                actions.append(Action(
+                    survey=survey,
+                    page=page,
+                    subject=subject,
+                    time=int(datum['time']),
+                    action=datum['action'],
+                ))
+        except:
+            current_app.logger.error(
+                'Next exception thrown in action {} of the current page'.format(
+                    actnum,
+                ),
+            )
+            raise
+    return actions

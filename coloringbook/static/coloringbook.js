@@ -1,5 +1,5 @@
 /*
-	(c) 2014-2016 Digital Humanities Lab, Utrecht University
+	(c) 2014-2017 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 	
 	It is helpful to think of this script as an event-driven state machine.
@@ -13,16 +13,267 @@ var base = (function() {
 var colors = ["#d01", "#f90", "#ee4", "#5d2", "#06e", "#717", "#953"];
 var color_chosen;
 var simultaneous = false;
-var first_command = null;
-var last_command = null;
-var page_onset;
-var page, pages;
-var pagenum = 0;
-var page_data = [];
-var form_data, evaluation_data = {};
+var first_command, last_command;
+var page_onset, page, pages, pagenum, page_data, form_data, evaluation_data;
 var images = {};
-var image_count = 0;
+var image_count, images_ready, sound_count, sounds_ready;
 var sentence_image_delay = 6000;  // milliseconds
+var connectivityFsm, transferFsm, pagingFsm;
+
+// Create a constant function: like f but ignoring any arguments.
+function constant(f) {
+	return function() {
+		return f();
+	};
+}
+
+// ConnectivityFsm is based directly on the example from machina-js.org.
+// Most important difference is that checkHeartbeat is simply a member
+// of the state machine itself.
+var ConnectivityFsm = machina.Fsm.extend({
+	namespace: 'connectivity',
+	initialState: 'probing',
+	requestData: {
+		url: '/ping',
+		method: 'HEAD',
+		timeout: 5000
+	},
+	checkHeartbeat: function() {
+		var self = this;
+		self.emit('checking-heartbeat');
+		$.ajax(self.requestData).done(function() {
+			self.emit('heartbeat');
+		}).fail(function() {
+			self.emit('no-heartbeat');
+		});
+	},
+	initialize: function() {
+		var self = this;
+		self.on('heartbeat', function() {
+			self.handle('heartbeat');
+		});
+		self.on('no-heartbeat', function() {
+			self.handle('no-heartbeat');
+		});
+		$(window).bind('online', function() {
+			self.handle('window.online');
+		});
+		$(window).bind( 'offline', function() {
+			self.handle('window.offline');
+		});
+		$(window.applicationCache).bind('error', function() {
+			self.handle('appCache.error');
+		});
+		$(window.applicationCache).bind('downloading', function() {
+			self.handle('appCache.downloading');
+		});
+		$(document).on('resume', function () {
+			self.handle('device.resume');
+		});
+		if (self.origin) self.requestData = _.create(self.requestData, {
+			url: self.origin + self.requestData.url
+		});
+	},
+	states: {
+		probing: {
+			_onEnter: function() {
+				this.checkHeartbeat();
+			},
+			'heartbeat': 'online',
+			'no-heartbeat': 'disconnected',
+		},
+		online: {
+			'window.offline': 'probing',
+			'appCache.error': 'probing',
+			'request.timeout': 'probing',
+			'device.resume': 'probing',
+		},
+		disconnected: {
+			'window.online': 'probing',
+			'appCache.downloading': 'probing',
+			'device.resume': 'probing',
+		}
+	},
+	probe: function() {
+		this.transition('probing');
+	},
+});
+
+// TransferFsm has the single responsibility for uploading subject data.
+// Its interface consists of a single method, `push`, which accepts data
+// from a single subject and which will do the right thing depending on
+// the connectivity state. Data are uploaded in batch as soon as possible.
+// When instantiating, pass a configuration object with a `connectivity`
+// member containing an instance of ConnectivityFsm.
+var TransferFsm = machina.Fsm.extend({
+	namespace: 'transfer',
+	initialState: 'noData',
+	states: {
+		noData: {
+			push: 'waitingForConnection',
+		},
+		waitingForConnection: {
+			_onEnter: function() {
+				// Invariant: `this.buffer` contains `push`ed data.
+				this.clearQueue();  // See `this.states.inProgress.push`.
+				this.timer = setInterval(
+					this.connectivity.probe.bind(this.connectivity),
+					10000
+				);
+				this.handle(this.connectivity.state);
+			},
+			online: 'inProgress',
+			_onExit: function() {
+				clearInterval(this.timer);
+			}
+		},
+		inProgress: {
+			_onEnter: function() {
+				// Invariants: `this.buffer` contains `push`ed data AND
+				//             `this.connectivity.state` is 'online'.
+				this.startUpload(); // Clears the buffer.
+			},
+			push: function() {
+				// Remember it if new data are `pushed` during upload.
+				this.deferUntilTransition();
+			},
+			uploadDone: 'finished',
+			// The function that calls `this.handle('uploadFail')`
+			// ensures that former content of `this.buffer` is restored.
+			uploadFail: 'waitingForConnection',
+		},
+		finished: {
+			push: 'waitingForConnection',
+		},
+	},
+	initialize: function() {
+		var self = this;
+		self.connectivity.on('heartbeat', function() {
+			self.handle('online');
+		});
+		self.connectivity.on('no-heartbeat', function() {
+			self.handle('disconnected');
+		});
+		self.buffer = [];
+		self.errors = false;
+	},
+	push: function(datum) {
+		// `datum` contains the complete survey data from a single subject.
+		this.buffer.push(datum);
+		this.handle('push');
+	},
+	// Only implementation details below this line. Do not call manually.
+	startUpload: function() {
+		var self = this;
+		var submittedData = self.buffer;
+		self.buffer = [];
+		$.ajax({
+			type: 'POST',
+			url: window.location.pathname + '/submit',
+			data: JSON.stringify(submittedData),
+			contentType: 'application/json',
+		}).done(
+			self.uploadDone.bind(self)
+		).fail(
+			self.uploadFail.bind(self, submittedData)
+		);
+	},
+	uploadDone: function(response) {
+		console.log(response);
+		if (response === 'Error') {
+			// The data were somehow invalid, but still safely stored
+			// on the server.
+			console.log('if error');
+			this.emit('uploadError');
+			this.errors = true;
+		}
+		this.handle('uploadDone');
+	},
+	uploadFail: function(transientData, xhr, textStatus) {
+		// No confirmation from the server that the data were stored, not even
+		// invalid. So prepend the submitted data back into the buffer.
+		this.buffer = transientData.concat(this.buffer);
+		this.connectivity.probe();
+		this.handle('uploadFail');
+	},
+});
+
+// PagingFsm manages page turns with the confirmation and back buttons.
+// On an instance, call either .previous() or .next(). Depending on the
+// current state, it will resume a previous coloring page, go to a next
+// page or finish the survey.
+var PagingFsm = machina.Fsm.extend({
+	namespace: 'paging',
+	initialState: 'beforeFirst',
+	states: {
+		beforeFirst: {
+			_onEnter: constant(initCycle),
+			next: 'firstPage',
+			_onExit: function() {
+				$('#instructions').hide();
+			},
+		},
+		firstPage: {
+			_onEnter: function() {
+				pagenum = 0;
+				start_page();
+			},
+			// for handling of 'next', see `initialize`.
+		},
+		goingForward: {
+			_onEnter: function() {
+				$('.back').show();
+			},
+			// for handling of 'next', see `initialize`.
+			previous: 'resuming',
+		},
+		resuming: {
+			_onEnter: function() {
+				--pagenum;
+				page_onset = $.now() - this.savedOffset;
+				$('.back').hide();
+				start_page(this.savedImage);
+			},
+			// for handling of 'next', see `initialize`.
+			_onExit: function() {
+				$('.back').show();
+			},
+		},
+		pastEnd: {
+			_onEnter: function() {
+				$('#ending_form').show();
+			},
+			next: 'beforeFirst',
+			previous: 'resuming',
+			_onExit: function() {
+				$('#ending_form').hide();
+			},
+		},
+	},
+	initialize: function() {
+		var nextHandler = this.increment.bind(this);
+		this.states.firstPage.next = nextHandler;
+		this.states.goingForward.next = nextHandler;
+		this.states.resuming.next = nextHandler;
+	},
+	next: function() {
+		this.handle('next');
+	},
+	previous: function() {
+		this.handle('previous');
+	},
+	increment: function() {
+		this.savedImage = $('#coloring_book_image > svg');
+		this.savedOffset = $.now() - page_onset;
+		end_page(this.state === 'resuming' && page_data[page_data.length - 1]);
+		if (++pagenum < pages.length) {
+			this.transition('goingForward');
+			start_page();
+		} else {
+			this.transition('pastEnd');
+		}
+	},
+});
 
 // Generates the HTML code for the form fields that let the subject
 // add another language (i.e. the `count`th language).
@@ -50,12 +301,14 @@ function button(color) {
 
 // All the things that need to be done after the DOM is ready.
 function init_application() {
-	$('#instructions').hide();
-	$('#sentence').hide();
-	$('#speaker-icon').hide();
-	$('#controls').hide();
-	$('#success_message').hide();
-	$('#failure_message').hide();
+	pagingFsm = new PagingFsm();
+	connectivityFsm = new ConnectivityFsm({origin: base});
+	transferFsm = new TransferFsm({connectivity: connectivityFsm});
+	connectivityFsm.on('transition', refreshConnectivityState);
+	transferFsm.on('transition', refreshTransferState);
+	transferFsm.on('uploadError', showError);
+
+	$('#starting_form input[type="submit"]').hide();
 	var now = new Date(),
 	    century_ago = new Date();
 	century_ago.setFullYear(now.getFullYear() - 100);
@@ -68,44 +321,78 @@ function init_application() {
 			},
 		},
 	});
-	$('#ending_form').hide().validate({
+	$('#ending_form').validate({
 		submitHandler: handle_evaluation,
 		onkeyup: false,
 	});
 	init_controls();
 	create_swatches(colors);
+	console.log(base);
 	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
 		type: 'GET',
 		url: window.location.pathname,
 		dataType: 'json',
-		success: function(resp, xmlstatus) {
-			var i, l;
-			for (l = resp.images.length, i = 0; i < l; ++i) {
-				load_image(resp.images[i]);
-			}
-			image_count = resp.images.length;
-			var sounds = [];
-			for (l = resp.sounds.length, i = 0; i < l; ++i) {
-				sounds.push({name: resp.sounds[i]});
-			}
-			ion.sound({"sounds": sounds, path: base + '/media/', preload:true});
-			pages = resp.pages;
-			if (resp.simultaneous) {
-				simultaneous = true;
-				sentence_image_delay = 0; // show image at same time as sentence
-				$('#sentence').css('font-size', '24pt');
-			} else {
-				sentence_image_delay = resp.duration;
-				$('#sentence').css('font-size', '48pt');
-			}
-		},
-		error: function(xhr, status, error) {
-			alert(error);
-			console.log(xhr);
-		},
+	}).done(initResources).fail(function(xhr, status, error) {
+		alert(error);
+		console.log(xhr);
 	});
+}
+
+// What needs to be done when the survey is started (again)
+function initCycle() {
+	page_data = [];
+	$('#starting_form').show()[0].reset();
+	$('#instructions').hide();
+	$('#sentence').hide();
+	$('#speaker-icon').hide();
+	$('.back').hide();
+	$('#controls').hide();
+	$('#ending_form').hide()[0].reset();
+	$('#finish_controls').hide();
+	$('#status_details').hide();
+}
+
+// Retrieve the data and report when all is done.
+function initResources(resp, xmlstatus) {
+	var i;
+	images_ready = sounds_ready = 0;
+	for (image_count = resp.images.length, i = 0; i < image_count; ++i) {
+		load_image(resp.images[i]);
+	}
+	var sounds = [];
+	for (sound_count = resp.sounds.length, i = 0; i < sound_count; ++i) {
+		sounds.push({name: resp.sounds[i]});
+	}
+	ion.sound({
+		'sounds': sounds,
+		path: base + '/media/',
+		preload: true,
+		ready_callback: sound_done,
+	});
+	pages = resp.pages;
+	if (resp.simultaneous) {
+		simultaneous = true;
+		sentence_image_delay = 0; // show image at same time as sentence
+		$('#sentence').css('font-size', '24pt');
+	} else {
+		sentence_image_delay = resp.duration;
+		$('#sentence').css('font-size', '48pt');
+	}
+}
+
+// Triggered when a sound is loaded, checks whether all resources are ready.
+function sound_done() {
+	if (++sounds_ready == sound_count && images_ready == image_count) {
+		unlock_application();
+	}
+}
+
+// Called when all resources are ready.
+function unlock_application() {
+	$('#patience').hide();
+	$('#starting_form input[type="submit"]').show();
 }
 
 // Return strings of the format YYYY-MM-DD.
@@ -145,16 +432,6 @@ function handle_form(form) {
 		} else {
 			form_data[raw_form[i].name] = raw_form[i].value;
 		}
-	}
-}
-
-// Event handler for the "klaar" button.
-function finish_instructions() {
-	$('#instructions').hide();
-	if (image_count > 0 && Object.keys(images).length == image_count) {
-		start_page();
-	} else {
-		$(document).ajaxStop(start_page);
 	}
 }
 
@@ -206,7 +483,46 @@ function create_swatches(colors) {
 	$('.color_choice').last().append('<img src="' + eraser_path + '" title="Gum" alt="Gum"/>');
 }
 
-// Retrieve an SVG image by filename.
+// Update UI elements to reflect the latest connectivity state.
+function refreshConnectivityState(transitionInfo) {
+	$('#connectivity_status').text(transitionInfo.toState);
+}
+
+// Update UI elements to reflect the latest transfer state.
+function refreshTransferState(transitionInfo) {
+	$('#transfer_status').text(transitionInfo.toState);
+	switch (transitionInfo.toState) {
+	case 'finished':
+		$('#cogwheel').css('fill', colors[4]);  // blue
+		refreshBufferbox();
+		break;
+	case 'inProgress':
+		$('#cogwheel').css('fill', colors[5]);  // purple
+		break;
+	case 'waitingForConnection':
+		$('#cogwheel').css('fill', colors[0]);  // red
+		refreshBufferbox();
+	}
+}
+
+// Update the #bufferbox contents.
+function refreshBufferbox() {
+	$('#bufferbox').val([
+		(new Date()).toISOString(),
+		window.location.href,
+		JSON.stringify(transferFsm.buffer),
+	].join('\n')).focus().select();
+}
+
+// Make it visible to the user that the server emitted at least one error.
+function showError() {
+	console.log('showError');
+	$('#error_indicator').text('!');
+	$('#error_status').text('yes (notify maintainer)');
+	transferFsm.off('uploadError', showError);
+}
+
+// Retrieve an SVG image by filename and check whether resources are complete.
 function load_image(name) {
 	$.ajax({
 		type: 'GET',
@@ -214,6 +530,9 @@ function load_image(name) {
 		dataType: 'html',
 		success: function(svg_resp, xmlstatus) {
 			images[name] = svg_resp;
+			if (++images_ready == image_count && sounds_ready == sound_count) {
+				unlock_application();
+			}
 		},
 		error: function(xhr, status, error) {
 			alert(error);
@@ -230,14 +549,24 @@ function add_coloring_book_events() {
 	});
 }
 
-// Start a new coloring page by (dis)playing the sentence and set a
+// Start a coloring page by (dis)playing the sentence and set a
 // timeout for displaying the image (possibly zero).
-function start_page() {
+// If `resumed` is defined, it must be a previously used SVG image.
+// Passing an SVG to resume signals that the page start is a
+// resumption, otherwise it is a new page.
+function start_page(resumed) {
+	console.log('start_page', !!resumed);
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
-	window.setTimeout(start_image, sentence_image_delay);
+	first_command = last_command = null;
+	if (resumed) {
+		launch_resume_command();
+		start_image(resumed);
+	} else {
+		window.setTimeout(start_image, sentence_image_delay);
+	}
 	if (page.audio) {
-		ion.sound.play(page.audio);
+		if (!resumed) ion.sound.play(page.audio);
 		$('#speaker-icon').show();
 		if (simultaneous) {
 			$('#speaker-icon').clone().attr({id: null}).prependTo('#sentence');
@@ -252,66 +581,62 @@ function play_sound() {
 }
 
 // Display the colorable image and prepare it for coloring.
-// Initializes the clock for coloring actions.
-function start_image() {
+// Initializes the clock for coloring actions if the page is new.
+// For resumed images, preparations have been done already.
+function start_image(resumed) {
+	console.log('start_image', !!resumed);
 	var image = $('#coloring_book_image');
 	image.empty();
-	image.append(images[page.image]);
+	if (resumed) {
+		image.append(resumed);
+	} else {
+		image.append(images[page.image]);
+		set_image_dimensions();
+	}
 	if (! simultaneous) $('#sentence').hide();
 	$('#controls').show();
-	set_image_dimensions();
 	add_coloring_book_events();
-	page_onset = $.now();
+	if (! resumed) page_onset = $.now();
+	console.log(page_onset);
 }
 
 // Serialize data and do some cleanup after the subject is done
 // coloring the page. Prepare for the next stage, i.e. either another
 // coloring page or the evaluation form.
-function end_page() {
+// If `prehistory` is defined, it should be an array of serialized
+// commands. Use this if the current page was a resumption.
+function end_page(prehistory) {
+	console.log('end_page', !!prehistory);
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
-	page_data.push(serialize_commands(first_command));
-	if (++pagenum < pages.length) {
-		first_command = last_command = null;
-		start_page();
+	var results = serialize_commands(first_command);
+	if (prehistory) {
+		prehistory.push.apply(prehistory, results);
 	} else {
-		$('#ending_form').show();
+		page_data.push(results);
 	}
 }
 
 // Serialize the evaluation form data and trigger uploading of all data.
 function handle_evaluation(form) {
-	var raw_data = $(form).serializeArray();
+	var raw_data = $(form).hide().serializeArray();
+	evaluation_data = {};
 	for (var l = raw_data.length, i = 0; i < l; ++i) {
 		evaluation_data[raw_data[i].name] = raw_data[i].value;
 	}
-	send_data();
-}
-
-// Upload all data and handle possible failure.
-function send_data() {
-	var data = JSON.stringify({
-		survey: window.location.href,
+	transferFsm.push({
 		subject: form_data,
 		results: page_data,
 		evaluation: evaluation_data,
 	});
-	$.ajax({
-		type: 'POST',
-		url: window.location.pathname + '/submit',
-		'data': data,
-		contentType: 'application/json',
-		success: function(result) {
-			$('#ending_form').hide();
-			if (result == 'Success') {
-				$('#success_message').show();
-			} else {
-				$('#failure_message').show();
-				$('#errorbox').val(data).focus().select();
-			}
-		}
-	});
+	$('#finish_controls').show();
+}
+
+// Reveal status details as well as the data in the transfer buffer to the user.
+function toggle_status() {
+	$('#status_details').toggle();
+	$('#bufferbox').focus().select();
 }
 
 // Abstraction of an action taken by a test subject.
@@ -329,10 +654,6 @@ function command(previous) {
 
 // Create a command object for filling a particular area in the
 // drawing with a particular color.
-// 
-// Note of historical interest: there used to be other types of
-// commands, but they became irrelevant when the user interface was
-// simplified.
 function launch_fill_command(target, value) {
 	var cmd = new command(last_command);
 	cmd.target = target;
@@ -349,10 +670,18 @@ function launch_fill_command(target, value) {
 	last_command = cmd;
 }
 
+// Create a command object for page resumption.
+function launch_resume_command() {
+	var cmd = new command(last_command);
+	cmd.toggle();
+	cmd.json.action = 'resume';
+	last_command = cmd;
+}
+
 // Serialize all actions taken by the test subject (since
 // `current_cmd`) into a single array, and return said array.
 function serialize_commands(current_cmd) {
-	sequence = [];
+	var sequence = [];
 	while (current_cmd) {
 		sequence.push(current_cmd.json);
 		current_cmd = current_cmd.next;

@@ -1,6 +1,13 @@
 # Coloring Book -- version history #
 
-## 1.4.1 (current) ##
+## 2.0 (current) ##
+
+  * The application has been restructured so that multiple subjects can be tested offline. All necessary resources are downloaded immediately at page load, after which internet connectivity is no longer required. When a subject has finished the survey, the survey can be repeated with a new subject without a page reload. Data are uploaded to the server when possible and queued in a buffer until that time. A cogwheel icon indicates the current state of the uploading progress.
+  * The above point has several side effects. The data submission API at the server end now expects a JSON array rather than a single object. If data transfer is successful but the data are found to be invalid at the server end, it is no longer necessary to manually email raw data to the maintainer, because the invalid data are still logged at the server.
+  * Test subjects can now go back to the previous page if they accidentally pressed the "ready" button. This allows the subject to resume coloring where they left off. Time recording continues as if coloring took place in a continuous period, as if the paging back and forth was instantaneous. The time of interruption and resumption is recorded, although these data are currently not visible to the researcher.
+
+
+## 1.4.1 ##
 
   * Fixes the problem that caused coloring pages to be unavailable the first few days after creation (#13).
   * From now on, the survey URL is included in the raw data when the subject or supervisor is requested to send the data manually (#7).

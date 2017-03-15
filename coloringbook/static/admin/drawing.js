@@ -1,5 +1,5 @@
 /*
-	(c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
+	(c) 2014-2016 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 	
 	This script enables the admins to identify colorable areas in a
@@ -56,7 +56,7 @@
 		return function(event) {
 			event.preventDefault();
 			if (current_path) cancel_panel(event);
-			current_path = $(event.target)
+			current_path = $(event.target);
 			panel.show().position({
 				my: 'left bottom',
 				at: 'right top',
@@ -64,7 +64,7 @@
 				within: image,
 			});
 			prefill_func();
-		}
+		};
 	}
 	
 	// Used as the prefill_func above for area editing.

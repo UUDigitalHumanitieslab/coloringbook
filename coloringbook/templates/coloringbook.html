@@ -3,7 +3,7 @@
 <head>
 
 <!--
-	(c) 2014-2016 Digital Humanities Lab, Utrecht University
+	(c) 2014-2017 Digital Humanities Lab, Utrecht University
 	Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 -->
 <meta charset="utf-8">
@@ -60,7 +60,25 @@ input.error {
 #coloring_book_image {
 	margin: 0 0 50px 0;
 }
+td, th {
+	padding-bottom: 1ex;
+}
+td {
+	padding-left: 2ex;
+}
+th {
+	text-align: left;
+}
+th:after {
+	content: ':';
+}
 </style>
+<script src="{{
+	url_for('static', filename='lodash.min.js')
+}}"></script>
+<script src="{{
+	url_for('static', filename='machina.min.js')
+}}"></script>
 <script src="{{
 	url_for('static', filename='jquery-2.1.4.min.js')
 }}"></script>
@@ -79,6 +97,14 @@ input.error {
 
 </head>
 <body onload="init_application();">
+
+{% macro back_button() -%}
+	{%- if survey.button_set.page_back_button %}
+	<input type="button" value="{{
+		survey.button_set.page_back_button
+	}}" class=back onclick="pagingFsm.previous();">
+	{%- endif %}
+{%- endmacro %}
 
 <form id="starting_form">
 	<h2>{{ survey.title }}</h2>
@@ -116,7 +142,7 @@ input.error {
 	</script>
 	<input type="button" name="more" value="+"><br>
 	{%- endif %}
-	<input type="submit"><br><br>
+	<span id=patience>Please wait, retrieving resources...</span><input type="submit"><br><br>
 	{{ survey.privacy_text.content|safe }}
 </form>
 
@@ -125,7 +151,7 @@ input.error {
 	<br>
 	<input type="button" value="{{
 		survey.button_set.post_instruction_button
-	}}" style="margin: 0 auto;" onclick="finish_instructions();">
+	}}" style="margin: 0 auto;" onclick="pagingFsm.next();">
 </p>
 
 <p id="sentence" style="text-align: center; margin: auto;"></p>
@@ -135,9 +161,10 @@ input.error {
 	<p id="swatches" style="float: left; clear: left;"></p>  
 	<p style="float: right; clear: right;">
 		<img src="//upload.wikimedia.org/wikipedia/commons/thumb/2/21/Speaker_Icon.svg/36px-Speaker_Icon.svg.png" style="display: none; margin-right: 24pt; vertical-align: -8px;" id="speaker-icon" onclick="play_sound();">
+		{{ back_button() }}
 		<input type="button" value="{{
 			survey.button_set.post_page_button
-		}}" onclick="end_page();">
+		}}" onclick="pagingFsm.next();">
 	</p>
 </div>
 
@@ -149,18 +176,50 @@ input.error {
 	<input type="text" id="topic" name="topic" size="30"><br><br>
 	<label for="comments">{{ survey.ending_form.comments_label }}</label>
 	<textarea id="comments" name="comments" rows="3" cols="30"></textarea><br>
+	{{ back_button() }}
 	<input type="submit">
 </form>
 
-<p id="success_message">
+<div id="finish_controls">
 	{{ survey.success_text.content|safe }}
-</p>
-
-<p id="failure_message">
-	{{ survey.failure_text.content|safe }}
 	<br>
-	<textarea id="errorbox" style="width: 300px; height: 200px;"></textarea>
-</p>
+	<input type="button" value="{{
+		survey.button_set.post_survey_button
+	}}" onclick="pagingFsm.next();">
+	<p
+		style="margin: 1em 0; cursor: pointer;"
+		onclick="toggle_status();"
+	>
+		{# SVG extracted from cogwheel.svg in the project root. #}
+		<svg
+			xmlns:dc="http://purl.org/dc/elements/1.1/"
+			xmlns:svg="http://www.w3.org/2000/svg"
+			xmlns="http://www.w3.org/2000/svg"
+			version="1.1"
+			viewBox="0 0 6.3499999 6.3500002"
+			height="24"
+			width="24"
+		>
+			<g transform="translate(0,-290.64998)" id="layer1">
+				<path
+					 id="cogwheel"
+					 d="m 3.3032922,290.71003 c -0.095605,-0.003 -0.192166,-0.004 -0.2895896,0.002 -0.2040079,0.0116 -0.4013131,0.0435 -0.592146,0.0916 0.020121,0.32387 0.041939,0.58721 0.064048,0.84677 a 2.295802,2.295802 0 0 0 -0.5862521,0.2884 c -0.1919247,-0.17693 -0.3872101,-0.35632 -0.631439,-0.57131 -0.2344794,0.18293 -0.44152571,0.39804 -0.61493603,0.63889 0.22392065,0.23553 0.41052543,0.42374 0.59450363,0.60865 a 2.295802,2.295802 0 0 0 -0.26404921,0.59765 c -0.25996047,-0.0121 -0.52384493,-0.0237 -0.8479437,-0.0314 -0.05648102,0.26661 -0.08254918,0.54429 -0.06640525,0.82987 0.0010463,0.0185 0.0045333,0.0362 0.0058936,0.0546 0.32181933,0.0363 0.58426814,0.0604 0.84322852,0.0837 a 2.295802,2.295802 0 0 0 0.18074794,0.62869 c -0.20695105,0.15779 -0.41640957,0.31825 -0.66955328,0.52063 0.14001228,0.26441 0.31610118,0.50517 0.52220442,0.7167 0.27027656,-0.17926 0.48730256,-0.32973 0.70098776,-0.47859 a 2.295802,2.295802 0 0 0 0.5426368,0.36543 c -0.057022,0.25363 -0.1142374,0.51095 -0.1779975,0.82829 0.2710698,0.10964 0.5599381,0.18176 0.8613034,0.2114 0.091524,-0.31012 0.160899,-0.5639 0.2286855,-0.81454 a 2.295802,2.295802 0 0 0 0.2133612,-0.002 2.295802,2.295802 0 0 0 0.4369383,-0.0696 c 0.1194472,0.23098 0.2408268,0.46503 0.3960739,0.74931 0.286768,-0.0923 0.5538132,-0.22378 0.7964699,-0.389 -0.1296324,-0.29733 -0.240242,-0.53745 -0.349708,-0.77368 A 2.295802,2.295802 0 0 0 5.053404,295.1729 c 0.2405129,0.1005 0.4849522,0.20194 0.7874323,0.32023 0.1563143,-0.24943 0.2771997,-0.52188 0.3583525,-0.811 -0.2906678,-0.14457 -0.5299487,-0.25753 -0.7658211,-0.36818 a 2.295802,2.295802 0 0 0 0.049902,-0.60983 2.295802,2.295802 0 0 0 -0.00393,-0.042 c 0.2480987,-0.0774 0.4995972,-0.15628 0.8062932,-0.25972 -0.041599,-0.30107 -0.1260512,-0.58648 -0.2455814,-0.85227 -0.3154029,0.0761 -0.570761,0.14343 -0.8224033,0.21022 a 2.295802,2.295802 0 0 0 -0.3850719,-0.52732 c 0.1410936,-0.21989 0.2839576,-0.44369 0.4534418,-0.72181 -0.2196153,-0.19811 -0.4674421,-0.36432 -0.7359585,-0.49391 -0.1933567,0.26182 -0.3464028,0.47847 -0.496664,0.69195 a 2.295802,2.295802 0 0 0 -0.6337968,-0.15718 c -0.033238,-0.25852 -0.067504,-0.52087 -0.1163073,-0.84204 z m -0.071906,2.19491 a 0.92970234,0.92970234 0 0 1 0.8880227,0.87663 0.92970234,0.92970234 0 0 1 -0.8758419,0.98036 0.92970234,0.92970234 0 0 1 -0.9807541,-0.87545 0.92970234,0.92970234 0 0 1 0.8758419,-0.98075 0.92970234,0.92970234 0 0 1 0.092731,-7.6e-4 z"
+					 style="fill:#808080;fill-opacity:1;stroke:none;stroke-width:0.79374999;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+				 />
+			</g>
+		</svg>
+		<span id=error_indicator style="font-weight: bold; color: red;"></span>
+	</p>
+</div>
+
+<table id="status_details">
+	<tr><th>Server</th><td id=connectivity_status></td></tr>
+	<tr><th>Transfer</th><td id=transfer_status>noData</td></tr>
+	<tr><th>Errors</th><td id=error_status>no</td></tr>
+	<tr><th style="vertical-align: top;">Buffer</th><td>
+		<textarea id="bufferbox" style="width: 300px; height: 200px;"></textarea>
+	</td></tr>
+</table>
 
 </body>
 </html>

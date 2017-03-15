@@ -1,4 +1,4 @@
-# (c) 2014-2016 Digital Humanities Lab, Utrecht University
+# (c) 2014-2017 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -297,7 +297,7 @@ class SurveyView (ModelView):
         'name', 'title', 'language', 'begin', 'end', 'duration',
         'simultaneous', 'information', 'page_list',
         'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
-        'ending_form', 'success_text', 'failure_text', 'button_set',
+        'ending_form', 'success_text', 'button_set',
     )
     form_extra_fields = {
         'page_list': Select2MultipleField('Pages', coerce=int),
@@ -609,6 +609,13 @@ class ButtonSetView(ModelView):
         'name': 'For your reference.',
         'post_instruction_button': 'This text appears in the button to confirm the instruction.',
         'post_page_button': 'This text appears in the button to finish a page.',
+        'page_back_button': 'To undo a premature press on the post page button. Leave this empty to disable the back button.',
+        'post_survey_button': 'This text appears in the button to restart the survey with a new test subject.',
+    }
+    form_widget_args = {
+        'page_back_button': {
+            'placeholder': '(empty, disabled)',
+        },
     }
     
     def __init__(self, session, **kwargs):
