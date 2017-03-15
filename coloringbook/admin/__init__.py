@@ -1,4 +1,4 @@
-# (c) 2014, 2016 Digital Humanities Lab, Utrecht University
+# (c) 2014, 2016-2017 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
