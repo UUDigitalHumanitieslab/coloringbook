@@ -1,6 +1,11 @@
 # Coloring Book -- version history #
 
-## 2.0 (current) ##
+## 2.1 (current) ##
+
+  * Updated the index page to redirect to the project website.
+
+
+## 2.0 ##
 
   * The application has been restructured so that multiple subjects can be tested offline. All necessary resources are downloaded immediately at page load, after which internet connectivity is no longer required. When a subject has finished the survey, the survey can be repeated with a new subject without a page reload. Data are uploaded to the server when possible and queued in a buffer until that time. A cogwheel icon indicates the current state of the uploading progress.
   * The above point has several side effects. The data submission API at the server end now expects a JSON array rather than a single object. If data transfer is successful but the data are found to be invalid at the server end, it is no longer necessary to manually email raw data to the maintainer, because the invalid data are still logged at the server.
