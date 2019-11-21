@@ -62,7 +62,7 @@ An overview of the database layout is given in `Database.svg`. For the complete 
 
 ## Supporting users as a maintainer
 
-As of the upcoming release, there are a few enhancements to the way subject data are submitted to and stored on the server. While this is an improvement overall, it does introduce two new ways in which you as a maintainer may be confronted with user problems.
+As of release 2.0, there are a few enhancements to the way subject data are submitted to and stored on the server. While this is an improvement overall, it does introduce two new ways in which you as a maintainer may be confronted with user problems.
 
 
 ### The exclamation mark
