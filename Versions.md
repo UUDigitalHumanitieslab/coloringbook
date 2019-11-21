@@ -91,7 +91,7 @@ A few small but important improvements:
 
   * Addition of a privacy statement.
   * Addition of a favicon and an application icon for the iPad.
-  * Use of the mousedown event instead of the click event, for faster 
+  * Use of the mousedown event instead of the click event, for faster
     response on touch devices.
   * Font size adjustments.
 
