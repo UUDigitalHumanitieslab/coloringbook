@@ -1,9 +1,9 @@
-# (c) 2014, 2016-2017 Digital Humanities Lab, Utrecht University
+# (c) 2014, 2016-2017, 2019 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
     Views for the public frontend of the website, with auxiliary functions.
-    
+
     The views are added to a flask.Blueprint, `site`, which is later
     registered on the application in __init__.create_app. This avoids
     the cyclical import hack demonstrated on
@@ -14,7 +14,7 @@ from datetime import date, datetime
 from functools import partial
 import traceback
 
-from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app
+from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app, redirect
 
 from .models import *
 
@@ -31,7 +31,7 @@ def ping():
 
 @site.route('/')
 def index():
-    return 'Welkom bij Coloring Book.'
+    return redirect('https://coloringbook.wp.hum.uu.nl/')
 
 
 @site.route('/media/<file_name>')
@@ -149,12 +149,12 @@ def store_subject_data(survey, data):
 def subject_from_json(data):
     """
         Take personal information from JSON and put into relational object.
-        
+
         `data` contains the object from the 'subject' key in the
         request data sent from the JavaScript frontend. The return
         value is a Subject as defined in .models. The subject is not
         yet added to the database. Consider the following example code:
-        
+
         >>> import coloringbook.testing as t
         >>> app = t.get_fixture_app()
         >>> testdata = '''{
@@ -182,7 +182,7 @@ def subject_from_json(data):
         >>> testoutput.subject_languages[1].level
         1
     """
-    
+
     if not data['name']:
         raise ValueError('Name must be non-empty')
     if not data['birth']:
@@ -196,13 +196,13 @@ def subject_from_json(data):
         raise ValueError('Age greater than maximum tolerance')
     if current_age.days < 0:
         raise ValueError('Negative age')
-    
+
     subject = Subject(
         name=data['name'],
         numeral=int(data['numeral']) if 'numeral' in data and data['numeral'] else None,
         birth=birth_date,
         eyesight=data['eyesight'] )
-    
+
     for name, level in data['languages']:
         if not name:
             raise ValueError('Incomplete language data')
@@ -210,16 +210,16 @@ def subject_from_json(data):
         if language == None:
             language = Language(name=name)
         SubjectLanguage(subject=subject, language=language, level=level)
-    
+
     return subject
 
 
 def bind_survey_subject(survey, subject, evaluation):
     """
         Create the association between a Survey and a Subject, with associated evaluation data from a parsed JSON dictionary.
-        
+
         Example of usage:
-        
+
         >>> import coloringbook.models as m, coloringbook.testing as t
         >>> from flask import jsonify
         >>> from datetime import datetime
@@ -237,7 +237,7 @@ def bind_survey_subject(survey, subject, evaluation):
         ... }
         >>> with app.app_context():
         ...     bind_survey_subject(testsurvey, testsubject, testevaluation)
-        
+
         >>> testsurvey.subjects[0].name
         'Koos'
         >>> testsurvey.survey_subjects[0].difficulty
@@ -263,7 +263,7 @@ def bind_survey_subject(survey, subject, evaluation):
 def fills_from_json(survey, page, subject, data):
     """
         Take fill actions from JSON and put into [relational object].
-        
+
         `survey`, `page` and `subject` must be pre-instantiated
         objects of the respective models. `data` is a parsed JSON
         object containing one item from the 'results' key in the
@@ -271,7 +271,7 @@ def fills_from_json(survey, page, subject, data):
         Areas referred to from the `data` must already exist in the
         database, otherwise a NoResultFound exception will be thrown.
         Example:
-        
+
         >>> import coloringbook as cb, flask, datetime, coloringbook.testing
         >>> import coloringbook.models as m
         >>> app = coloringbook.testing.get_fixture_app()
@@ -338,7 +338,7 @@ def fills_from_json(survey, page, subject, data):
           ...
         IndexError: list index out of range
     """
-    
+
     colors = Color.query
     areas = Area.query.filter_by(drawing=page.drawing)
     actions = []
