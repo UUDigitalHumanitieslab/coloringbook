@@ -1,4 +1,4 @@
-# (c) 2014, 2016-2017 Digital Humanities Lab, Utrecht University
+# (c) 2014, 2016-2017, 2019 Digital Humanities Lab, Utrecht University
 # Author: Julian Gonggrijp, j.gonggrijp@uu.nl
 
 """
@@ -14,7 +14,7 @@ from datetime import date, datetime
 from functools import partial
 import traceback
 
-from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app
+from flask import Blueprint, render_template, request, json, abort, jsonify, send_from_directory, current_app, redirect
 
 from .models import *
 
@@ -31,7 +31,7 @@ def ping():
 
 @site.route('/')
 def index():
-    return 'Welkom bij Coloring Book.'
+    return redirect('https://coloringbook.wp.hum.uu.nl/')
 
 
 @site.route('/media/<file_name>')
