@@ -4,6 +4,7 @@ A web-based coloring book survey application
 by Research Software Lab, Centre for Digital Humanities Lab, Utrecht University
 
 **Project website:** https://coloringbook.hum.uu.nl/
+
 **Research paper:** Pinto, M., & Zuckerman, S. (2019). Coloring Book: A new method for testing language comprehension. _Behavior research methods_, _51_(6), 2609-2628.
 
 
