@@ -1,7 +1,7 @@
 # Coloring Book
 
 A web-based coloring book survey application
-by Digital Humanities Lab, Utrecht University
+by Research Software Lab, Centre for Digital Humanities Lab, Utrecht University
 
 
 ## Why does it exist?
