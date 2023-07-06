@@ -66,3 +66,8 @@ An overview of the database layout is given in `Database.svg`. For the complete 
 ## Server maintenance
 
 Once deployed, you may need to support users and restore missing data. How to do this is described in detail in the adjacent [ServerAdmin.md](ServerAdmin.md).
+
+
+## License
+
+This software is intended for research purposes. Licensed under the EUPL-1.2 or later. See the adjacent [LICENSE](LICENSE) file for licensing details.
