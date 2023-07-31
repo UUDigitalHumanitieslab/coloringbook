@@ -10,14 +10,14 @@ by Research Software Lab, Centre for Digital Humanities Lab, Utrecht University
 
 ## Why does it exist?
 
-Because it allows researchers to test how subjects parse language, without revealing the intent of the study. Moreover, it is a natural task for test subjects that doesn't make them *feel* like they are being tested. It is designed to work well on tablet devices, in order to accomodate for very young subjects.
+The software allows researchers to test how subjects interpret language (words and sentences), in a playful manner without revealing the intent of the study. Moreover, it is a natural task for test subjects that doesn't make them *feel* like they are being tested. It is designed to work well on tablet devices, in order to accomodate for very young subjects.
 
 
 ## What does it do?
 
 Test subjects are presented with a subscription form, instructions, a series of coloring pages and finally an evaluation form. After both forms have been completed and all pages have been colored, all data are submitted to the server at once.
 
-When a coloring page is presented, initially a sentence is displayed, in written text, sound or both. Then, the drawing is shown and the subject is given the means to pick colors and fill areas of the drawing by point-and-click. The researcher may also opt to offer the sentence simultaneously with the drawing. This also works on touch devices. All data for the coloring pages are downloaded to the client side at once before the survey starts.
+Each coloring page is presented with a coloring instruction sentence (as a written text, sound or both), for example "the blue monkey is jumping". The instruction sentence can appear simultaneously with the coloring page, or before it. The subject is given the means to pick colors and fill areas of the drawing by point-and-click. This also works on touch devices. All data for the coloring pages are downloaded to the client side at once before the survey starts.
 
 On the server side, all coloring data are collected in a table that can be filtered by survey, page, area and subject. Each individual fill action is recorded with the color and the exact elapsed time since the drawing appeared on screen. Researchers can also define expected results for each page and compare the data with their expectations. Tables can be exported to CSV for further processing in any spreadsheet or statistics software.
 
