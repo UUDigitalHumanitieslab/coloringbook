@@ -1,5 +1,6 @@
-# (c) 2014-2017 Digital Humanities Lab, Utrecht University
-# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+# (c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University
+# Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
 
 """
     Model view classes for some of the tables in the database.

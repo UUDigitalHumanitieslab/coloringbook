@@ -61,7 +61,13 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <cc:license
+           rdf:resource="https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12." />
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>(c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University</dc:title>
+          </cc:Agent>
+        </dc:rights>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -740,13 +746,18 @@
        xml:space="preserve"><tspan
          y="1006.119"
          x="526.0011"
-         id="tspan5618"
          sodipodi:role="line"
-         style="font-size:10px;fill:#777777;fill-opacity:1">© 2014 Digital Humanities Lab, Utrecht University.</tspan><tspan
+         style="font-size:10px;line-height:1.25;fill:#777777;fill-opacity:1"
+         id="tspan5620">(c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University</tspan><tspan
          y="1018.619"
          x="526.0011"
          sodipodi:role="line"
-         style="font-size:10px;fill:#777777;fill-opacity:1"
-         id="tspan5620">created by Julian Gonggrijp, j.gonggrijp@uu.nl</tspan></text>
+         style="font-size:10px;line-height:1.25;fill:#777777;fill-opacity:1"
+         id="tspan1">Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at</tspan><tspan
+         y="1031.119"
+         x="526.0011"
+         sodipodi:role="line"
+         style="font-size:10px;line-height:1.25;fill:#777777;fill-opacity:1"
+         id="tspan2">https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.</tspan></text>
   </g>
 </svg>
