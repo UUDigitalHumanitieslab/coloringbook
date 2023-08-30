@@ -51,14 +51,9 @@
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
         <dc:title>Cogwheel icon for Coloring Book</dc:title>
-        <dc:creator>
-          <cc:Agent>
-            <dc:title>Julian Gonggrijp, Digital Humanities Lab</dc:title>
-          </cc:Agent>
-        </dc:creator>
         <dc:rights>
           <cc:Agent>
-            <dc:title>(c) 2017 Digital Humanities Lab, Utrecht University</dc:title>
+            <dc:title>(c) 2017 Research Software Lab, Centre for Digital Humanities, Utrecht University</dc:title>
           </cc:Agent>
         </dc:rights>
         <dc:subject>
