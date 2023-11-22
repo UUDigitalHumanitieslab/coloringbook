@@ -42,4 +42,4 @@ manager.add_option('-A', '--no-admin', dest='disable_admin', default=False, acti
 manager.add_command('db', MigrateCommand)
 
 if __name__ == '__main__':
-    manager.run()
+    manager.run(host='0.0.0.0')
