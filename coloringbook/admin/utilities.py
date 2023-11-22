@@ -1,3 +1,5 @@
+# coding=utf-8
+
 # (c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University
 # Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at
 # https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
