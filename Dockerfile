@@ -17,5 +17,5 @@ COPY CONFIG.py coloringbook/CONFIG.py
 EXPOSE 5000
 
 # Start server
-CMD ["python",  "manage.py",  "-c", "CONFIG.py", "runserver", "-dr", "--host", "0.0.0.0"]
+CMD python manage.py -A -c CONFIG.py db upgrade && python manage.py -c CONFIG.py runserver -dr --host 0.0.0.0
 
