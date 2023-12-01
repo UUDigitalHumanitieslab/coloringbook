@@ -1,11 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM python:2.7.9
 
-# Install GIT
-RUN apt install -y git
-
-# Clone repository
-RUN git clone https://github.com/UUDigitalHumanitieslab/coloringbook.git
+# Copy source files
+COPY . /coloringbook
 
 # Change working directory
 WORKDIR /coloringbook
@@ -20,4 +17,5 @@ COPY CONFIG.py coloringbook/CONFIG.py
 EXPOSE 5000
 
 # Start server
-CMD ["python",  "manage.py",  "-c", "CONFIG.py", "runserver", "-d"]
+CMD ["python",  "manage.py",  "-c", "CONFIG.py", "runserver", "-dr", "--host", "0.0.0.0"]
+
