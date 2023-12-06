@@ -296,7 +296,7 @@ class SurveyView (ModelView):
     column_display_all_relations = True
     form_columns = (
         'name', 'title', 'language', 'begin', 'end', 'duration',
-        'simultaneous', 'information', 'page_list',
+        'simultaneous', 'email_address', 'information', 'page_list',
         'welcome_text', 'starting_form', 'privacy_text', 'instruction_text',
         'ending_form', 'success_text', 'button_set',
     )
@@ -304,6 +304,9 @@ class SurveyView (ModelView):
         'page_list': Select2MultipleField('Pages', coerce=int),
     }
     form_args = {
+        'email_address': {
+            'validators': [validators.Email()],
+        },
         'duration': {
             'validators': [validators.NumberRange(min=0, max=60000)],
         },
@@ -311,6 +314,7 @@ class SurveyView (ModelView):
     column_descriptions = {
         'name': 'Used for your reference and for generating the survey URL.',
         'title': 'Shown on the first page of the survey and in the window title.',
+        'email_address': 'Used to send a notification when a survey is completed and uploaded.',
     }
     
     def create_form(self, obj=None):
