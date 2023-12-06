@@ -1,4 +1,4 @@
 *.pyc
-/config.py
+/coloringbook/config.py
 /instance
 .env
