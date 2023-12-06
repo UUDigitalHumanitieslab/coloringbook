@@ -10,9 +10,6 @@ WORKDIR /coloringbook
 # Install dependencies
 RUN pip install -r requirements.txt
 
-# Copy the config file
-COPY CONFIG.py coloringbook/CONFIG.py
-
 # Expose port
 EXPOSE 5000
 
