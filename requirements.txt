@@ -20,6 +20,8 @@ celery[redis]==4.4.2
     #   celery
 configparser==3.8.1
     # via -r requirements.in
+contextlib2==0.6.0
+    # via -r requirements.in
 flask==0.10.1
     # via
     #   -r requirements.in
@@ -77,7 +79,7 @@ werkzeug==0.11.4
     # via flask
 wtforms==2.1
     # via flask-admin
-zipp==2.2.1
+zipp==1.2.0
     # via
     #   -r requirements.in
     #   importlib-metadata
