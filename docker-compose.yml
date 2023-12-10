@@ -35,6 +35,23 @@ services:
       - MYSQL_DB=coloringbook
     volumes:
       - .:/coloringbook:rw
+  
+  redis:
+    image: redis:6.2
+  
+  worker:
+    build: .
+    command: celery -A coloringbook worker --loglevel=info
+    environment:
+      - FLASK_DEBUG=1
+      - APP_SETTINGS=project.server.config.DevelopmentConfig
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - .:/coloringbook:rw
 
 volumes:
   sql-db:
