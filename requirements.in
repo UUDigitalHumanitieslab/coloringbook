@@ -1,14 +1,15 @@
-Flask
-Flask-Admin
 # Higher versions of Blinker are incompatible with Python 2.7
 blinker==1.5.0
-Flask-Mail
-Flask-SQLAlchemy
-Flask-Script
-Flask-Migrate
-SQLAlchemy
-configparser==3.8.1
-importlib_metadata==1.7.0
-zipp==2.2.1
 celery[redis]==4.4.2
+configparser==3.8.1
+contextlib2==0.6.0
+Flask
+Flask-Admin
+Flask-Mail
+Flask-Migrate
+Flask-Script
+Flask-SQLAlchemy
+importlib_metadata==1.7.0
 MySQL-Python
+SQLAlchemy
+zipp==1.2.0
