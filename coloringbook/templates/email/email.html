@@ -1,4 +1,4 @@
-<p>Hallo!</p>
+<p>Hallo,</p>
 
 <p>Dit is een automatisch gegenereerde e-mail van ColoringBook.</p>
 
@@ -11,16 +11,18 @@
     <caption>{{ result.subject_name }} ({{ result.subject_dob }})</caption>
     <thead>
         <tr>
-            <th>Verwacht woord</th>
-            <th>Tekening</th>
+            <th>Pagina</th>
+            <th>Doel</th>
+            <th>Kleur</th>
             <th>Goed/fout</th>
         </tr>
     </thead>
     <tbody>
         {% for evaluation in result.evaluations %}
         <tr>
-            <td>{{ evaluation.expected }}</td>
-            <td>{{ evaluation.drawing_name }}</td>
+            <td>{{ evaluation.page }}</td>
+            <td>{{ evaluation.target }}</td>
+            <td>{{ evaluation.color }}</td>
             <td>{{ evaluation.correct }}</td>
         </tr>
         {% else %}

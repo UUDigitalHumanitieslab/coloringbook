@@ -198,3 +198,15 @@ def fills_from_json(survey, page, subject, data):
             )
             raise
     return actions
+
+
+def is_fill_correct(fill):
+    actual_color = fill.color
+    expectation = Expectation.query.filter_by(
+        page=fill.page,
+        area=fill.area,
+    )
+    if expectation.count() == 0:
+        return False
+    expected_color = expectation.one().color
+    return actual_color == expected_color
