@@ -1,0 +1,35 @@
+<p>Hallo!</p>
+
+<p>Dit is een automatisch gegenereerde e-mail van ColoringBook.</p>
+
+<p>De vragenlijst {{ context.survey_name }} is ingevuld door {{ context.batch_results | length }} deelnemer(s).
+    
+<p>De resultaten zijn als volgt:</p>
+
+{% for result in context.batch_results %}
+<table>
+    <caption>{{ result.subject_name }} ({{ result.subject_dob }})</caption>
+    <thead>
+        <tr>
+            <th>Verwacht woord</th>
+            <th>Tekening</th>
+            <th>Goed/fout</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for evaluation in result.evaluations %}
+        <tr>
+            <td>{{ evaluation.expected }}</td>
+            <td>{{ evaluation.drawing_name }}</td>
+            <td>{{ evaluation.correct }}</td>
+        </tr>
+        {% else %}
+            <tr>Er zijn geen resultaten geregistreerd.</tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}
+
+<p>Hartelijke groeten,
+
+<p>Het ColoringBookteam</p>
