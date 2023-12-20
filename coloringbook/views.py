@@ -102,7 +102,7 @@ def submit(survey_name):
     if all(map(partial(store_subject_data, survey), data)):
         if survey.email_address:
             send_email(
-                recipients=[survey.email_address],
+                recipient=survey.email_address,
                 survey_data=data,
                 survey=survey
             )

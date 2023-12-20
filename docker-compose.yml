@@ -46,7 +46,7 @@ services:
   
   worker:
     build: .
-    command: celery -A coloringbook --loglevel=info --uid=nobody --gid=nogroup
+    command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
     environment:
       - FLASK_DEBUG=1
       - APP_SETTINGS=project.server.config.DevelopmentConfig
