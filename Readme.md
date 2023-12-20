@@ -45,6 +45,13 @@ Coloring Book obtains the necessary information to connect to the database from 
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
+    MAIL_SERVER = "mail.server.com"
+    MAIL_PORT = 1234
+    MAIL_USE_TLS = True/False
+    MAIL_USE_SSL = True/False
+    MAIL_USERNAME = "username"
+    MAIL_PASSWORD = "password"
+
 
 This file should be saved with a `.py` extension. Your WSGI startup module should pass the absolute path to this file as the first argument to `coloringbook.create_app`.
 
