@@ -32,35 +32,38 @@ Researchers can compose their own surveys with custom images and sounds. The sur
 
 On the client side, test subjects just need to run a HTML5 capable browser.
 
-On the server side, Coloring Book is a WSGI application, which means that it will run on any webserver that supports standard Python web applications. Apart from a WSGI-enabled webserver, install the dependencies using `pip install -r requirements.txt` or preferably `pip-sync` from the pip-tools package.
+Coloring Book is deployed using Docker Compose. The application needs two configuration files. 
 
-Assuming you opt to use MySQL (or anything other than SQLite), you need to create an empty database with pre-configured access rights for the Coloring Book application to use. For example by entering the following commands while running `mysql` as root user:
+Docker needs a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
 
-    create database coloringbook;
-    grant all privileges on coloringbook.* to 'coloringbook'@'localhost' identified by 'myawesomepassword';
+    MYSQL_HOST=abcdefg
+    MYSQL_PORT=1234
+    MYSQL_USER=abcdefg
+    MYSQL_PASSWORD=abcdefg
+    MYSQL_DB=abcdefg
+    MYSQL_ROOT_PASSWORD=abcdefg
 
-**Note** that you should not use the password quoted above. You can choose the name of the database and the name of the user freely as well.
-
-Coloring Book obtains the necessary information to connect to the database from a user-provided configuration file. This is what the file contents should minimally look like:
+Secondly, a file `config.py` should be created in the `colouringbook` package folder with minimally the following contents.
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
 
-This file should be saved with a `.py` extension. Your WSGI startup module should pass the absolute path to this file as the first argument to `coloringbook.create_app`.
+With these files present, running `docker compose up --build` in the root directory of the project will start two containers.
 
-Before running the application, you need to run the database migrations. Use the following command:
+- the Coloring Book web server proper;
+- a MySQL database (MySQL).
+
+Docker should automatically create the database and run the available migrations. To run migrations manually, run
 
     python manage.py -A -c CONFIG db upgrade
 
 where `CONFIG` is the path to your local configuration file, either relative to the `coloringbook` package or absolute. Replace the last part of the command by `db -?` to get a summary of possible database manipulations.
 
+The project source files are automatically mounted to the local file system, so any changes made to the application are applied immediately, and the server is reloaded ('live reload').
+
 The application does not take care of authentication or authorization. You should configure this directly on the webserver by restricting access to `/admin/`, for example using LDAP.
 
-For development, you may run a local test server by invoking
-
-    python manage.py -c CONFIG runserver -dr
-
-The `-dr` flags switch on debugging settings and autoreloading. The application will run on `localhost:5000` by default, but you can change this by passing appropriate flags to the command. See the `-?` flag for details.
+By default, the application will run on `localhost:5000`, but this is customisable in the `Dockerfile`.
 
 
 ## Development
