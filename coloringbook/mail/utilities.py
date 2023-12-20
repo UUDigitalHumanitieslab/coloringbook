@@ -1,4 +1,7 @@
+from celery import shared_task
 from flask import current_app, render_template
+from coloringbook.mail import mail_client
+from flask_mail import Message
 
 from coloringbook.utilities import (
     fills_from_json,
@@ -8,14 +11,11 @@ from coloringbook.utilities import (
 )
 
 
-def send_email(recipients, survey_data, survey):
-    current_app.logger.info("Sending email!")
-
-    sender = current_app.config["MAIL_DEFAULT_SENDER"]
+def send_email(recipient, survey_data, survey):
     message_subject = "ColoringBook - nieuwe resultaten opgeslagen"
 
     batch_results = []
-    # Every datum is a subject.
+    # Every datum corresponds to a subject.
     for datum in survey_data:
         subject = subject_from_json(datum["subject"])
         pages = get_survey_pages(survey)
@@ -47,6 +47,15 @@ def send_email(recipients, survey_data, survey):
 
     html_body = render_template("email/email.html", context=template_context)
 
-    current_app.logger.info("Html template: {}".format(html_body))
+    send_async_email.delay(message_subject, recipient, html_body)
 
-    send_async_email.delay(message_subject, sender, recipients, html_body)
+
+@shared_task
+def send_async_email(subject, recipient, html_body):
+    message = Message(
+        subject=subject,
+        recipients=[recipient],
+        html=html_body,
+    )
+
+    mail_client.send(message)

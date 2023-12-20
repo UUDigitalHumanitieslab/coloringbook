@@ -43,6 +43,7 @@ from .models import db
 from .views import site
 from .admin import create_admin
 from .mail import create_mail
+from .task_worker import celery_init_app
 
 
 migrate = Migrate()
@@ -71,5 +72,6 @@ def create_app(config, disable_admin=False, create_db=False, instance=None):
         create_admin(app)
 
     create_mail(app)
+    celery_init_app(app)
 
     return app
