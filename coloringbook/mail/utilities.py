@@ -31,7 +31,7 @@ def send_email(recipient, survey_data, survey):
                         "page": page.name,
                         "target": fill.area,
                         "color": fill.color,
-                        "correct": "Ja" if is_fill_correct(fill) else "Nee",
+                        "correct": "Goed" if is_fill_correct(fill) else "Fout",
                     }
                 )
 
