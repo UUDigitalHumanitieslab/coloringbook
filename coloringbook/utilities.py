@@ -200,6 +200,85 @@ def fills_from_json(survey, page, subject, data):
 
 
 def is_fill_correct(fill):
+    """
+    Returns whether a fill action is correct.
+
+    `fill` is expected to a Fill object.
+
+    >>> import coloringbook as cb, flask, datetime, coloringbook.testing
+    >>> import coloringbook.models as m
+    >>> app = coloringbook.testing.get_fixture_app()
+
+
+    >>> test_color_correct = m.Color(code='#008000', name='green')
+    >>> test_color_incorrect = m.Color(code='#ff0000', name='red')
+
+    >>> testdrawing = cb.models.Drawing(name='picture')
+    >>> testarealeft = cb.models.Area(name='left door')
+    >>> testarearight = cb.models.Area(name='right door')
+    >>> testdrawing.areas.append(testarealeft)
+    >>> testdrawing.areas.append(testarearight)
+    >>> testpage = cb.models.Page(name='page1', drawing=testdrawing, text='test 123')
+    >>> testwelcome = m.WelcomeText(name='a', content='a')
+    >>> testprivacy = m.PrivacyText(name='a', content='a')
+    >>> testsuccess = m.SuccessText(name='a', content='a')
+    >>> testinstruction = m.InstructionText(name='a', content='a')
+    >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
+    >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
+    >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a', post_survey_button='a', page_back_button='a')
+    >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
+    >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
+
+    >>> test_correct_fill = m.Fill(
+    ...    survey=testsurvey,
+    ...    subject=testsubject,
+    ...    page=testpage,
+    ...    area=testarealeft,
+    ...    time=1000,
+    ...    color=test_color_correct)
+
+    >>> test_incorrect_fill = m.Fill(
+    ...    survey=testsurvey,
+    ...    subject=testsubject,
+    ...    page=testpage,
+    ...    area=testarealeft,
+    ...    time=500,
+    ...    color=test_color_incorrect)
+
+    >>> test_expectation = m.Expectation(
+    ...    page=testpage,
+    ...    area=testarealeft,
+    ...    color=test_color_correct,
+    ...    here=True,
+    ...    motivation='test'
+    ...    )
+
+    # Run test function
+    >>> with app.app_context():
+    ...     correct_result = is_fill_correct(test_correct_fill)
+
+    # Result if there are no expectations
+    >>> correct_result
+    False
+
+    # Add data to the database
+    >>> with app.app_context():
+    ...     s = cb.models.db.session
+    ...     s.add(test_expectation)
+    ...     s.flush()
+    ...     # Run test function
+    ...     correct_result = is_fill_correct(test_correct_fill)
+    ...     incorrect_result = is_fill_correct(test_incorrect_fill)
+
+    # Result if fill matches expectation
+    >>> correct_result
+    True
+
+    # Result if fill does not match expectation
+    >>> incorrect_result
+    False
+    """
+
     actual_color = fill.color
     expectation = Expectation.query.filter_by(
         page=fill.page,
