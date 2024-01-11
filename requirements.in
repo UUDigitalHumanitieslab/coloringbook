@@ -1,5 +1,8 @@
 Flask
 Flask-Admin
+# Higher versions of Blinker are incompatible with Python 2.7
+blinker==1.5.0
+Flask-Mail
 Flask-SQLAlchemy
 Flask-Script
 Flask-Migrate
