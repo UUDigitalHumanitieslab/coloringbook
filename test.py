@@ -12,7 +12,7 @@ from doctest import testmod, ELLIPSIS
 
 import coloringbook, coloringbook.testing
 
-def test_all ( ):
+def test_all():
     testmod(coloringbook.testing)
     testmod(coloringbook)
     testmod(coloringbook.models)
@@ -21,6 +21,7 @@ def test_all ( ):
     testmod(coloringbook.admin.utilities, optionflags = ELLIPSIS)
     testmod(coloringbook.admin.forms)
     testmod(coloringbook.admin.views)
+    testmod(coloringbook.utilities)
 
 if __name__ == '__main__':
     test_all()
