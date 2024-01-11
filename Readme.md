@@ -43,7 +43,7 @@ Docker needs a file called `.env` to be present in the same folder as `docker-co
     MYSQL_DB=abcdefg
     MYSQL_ROOT_PASSWORD=abcdefg
 
-Secondly, a file `config.py` should be created in the `colouringbook` package folder with minimally the following contents.
+Secondly, a file `config.py` should be created in the `coloringbook` package folder with minimally the following contents.
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
