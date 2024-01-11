@@ -14,5 +14,4 @@ RUN pip install -r requirements.txt
 EXPOSE 5000
 
 # Start server
-CMD python manage.py -A -c CONFIG.py db upgrade && python manage.py -c CONFIG.py runserver -dr --host 0.0.0.0
-
+CMD python manage.py -A -c config.py db upgrade && python manage.py -c config.py runserver -dr --host 0.0.0.0
