@@ -47,18 +47,20 @@ Secondly, a file `config.py` should be created in the `coloringbook` package fol
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
-    MAIL_SERVER = "mail.server.com"
+    MAIL_SERVER = 'mail.server.com'
     MAIL_PORT = 1234
     MAIL_USE_TLS = True/False
     MAIL_USE_SSL = True/False
-    MAIL_USERNAME = "username"
-    MAIL_PASSWORD = "password"
-    MAIL_DEFAULT_SENDER = "mysender@email.address"
+    MAIL_USERNAME = 'username'
+    MAIL_PASSWORD = 'password'
+    MAIL_DEFAULT_SENDER = 'mysender@email.address'
 
-With these files present, running `docker compose up --build` in the root directory of the project will start two containers.
+With these files present, running `docker compose up --build` in the root directory of the project will start four containers.
 
 - the Coloring Book web server proper;
-- a MySQL database (MySQL).
+- a MySQL database (MySQL);
+- Celery (for asynchronous tasks);
+- Redis (a message broker).
 
 Docker should automatically create the database and run the available migrations. To run migrations manually, run
 
