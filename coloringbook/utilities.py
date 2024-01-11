@@ -26,6 +26,7 @@ def subject_from_json(data):
     yet added to the database. Consider the following example code:
 
     >>> import coloringbook.testing as t
+    >>> import json
     >>> app = t.get_fixture_app()
     >>> testdata = '''{
     ...     "name": "Bob",
@@ -39,14 +40,12 @@ def subject_from_json(data):
     >>> with app.app_context():
     ...     testoutput = subject_from_json(testinput)
     >>> # inspecting the result
-    >>> testoutput
-    <coloringbook.models.Subject object at 0x...>
     >>> testoutput.birth
     datetime.date(2000, 1, 1)
     >>> testoutput.name
     u'Bob'
-    >>> testoutput.languages
-    [<coloringbook.models.Language object at 0x...>, <coloringbook.models.Language object at 0x...>]
+    >>> len(testoutput.languages)
+    2
     >>> testoutput.subject_languages[0].language.name
     u'German'
     >>> testoutput.subject_languages[1].level

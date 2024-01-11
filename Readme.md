@@ -7,7 +7,7 @@ by the Research Software Lab of the Centre for Digital Humanities at Utrecht Uni
 
 **Research paper:** Pinto, M., & Zuckerman, S. (2019). Coloring Book: A new method for testing language comprehension. _Behavior research methods_, _51_(6), 2609-2628.
 
-**contact information:** Coloringbook@uu.nl
+**Contact information:** coloringbook@uu.nl
 
 **IP and license:** The intellectual property of the ColoringBook method belongs to Utrecht University. This software is intended for research purposes. For the license details see below.
 
