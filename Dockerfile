@@ -13,5 +13,8 @@ RUN pip install -r requirements.txt
 # Expose port
 EXPOSE 5000
 
-# Start server
-CMD python manage.py -A -c config.py db upgrade && python manage.py -c config.py runserver -dr --host 0.0.0.0
+# Set build-time variables
+ARG DEVELOPMENT=0
+
+# Start server. If DEVELOPMENT is set with value 1, then the flag -dr is added.
+CMD if [ "$DEVELOPMENT" = "1" ]; then python manage.py -A -c config.py db upgrade && python manage.py -c config.py runserver --host 0.0.0.0 -dr; else python manage.py -A -c config.py db upgrade && python manage.py -c config.py runserver --host 0.0.0.0; fi
