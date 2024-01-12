@@ -209,10 +209,8 @@ def is_fill_correct(fill):
     >>> import coloringbook.models as m
     >>> app = coloringbook.testing.get_fixture_app()
 
-
     >>> test_color_correct = m.Color(code='#008000', name='green')
     >>> test_color_incorrect = m.Color(code='#ff0000', name='red')
-
     >>> testdrawing = cb.models.Drawing(name='picture')
     >>> testarealeft = cb.models.Area(name='left door')
     >>> testarearight = cb.models.Area(name='right door')
