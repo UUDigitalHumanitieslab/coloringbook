@@ -1,5 +1,6 @@
 from celery import shared_task
-from flask import current_app, render_template
+from celery.exceptions import OperationalError
+from flask import render_template
 from coloringbook.mail import mail_client
 from flask_mail import Message
 
@@ -140,7 +141,11 @@ def send_email(recipient, survey_data, survey, immediate=False):
     send_async_email.delay(message_subject, recipient, html_body)
 
 
-@shared_task
-def send_async_email(subject, recipient, html):
+@shared_task(bind=True, max_retries=3)
+def send_async_email(self, subject, recipient, html):
     message = Message(subject=subject, recipients=[recipient], html=html)
-    mail_client.send(message)
+
+    try:
+        mail_client.send(message)
+    except OperationalError as exc:
+        raise self.retry(exc=exc)
