@@ -21,4 +21,13 @@ def get_fixture_app():
         SQLALCHEMY_DATABASE_URI = 'sqlite://'
         SECRET_KEY = '1234567890'
         SQLALCHEMY_TRACK_MODIFICATIONS = False
+        MAIL_SERVER = "smtp.uu.nl"
+        MAIL_PORT = 587
+        MAIL_USE_TLS = True
+        MAIL_USE_SSL = False
+        MAIL_USERNAME = "test"
+        MAIL_PASSWORD = "test"
+        MAIL_DEFAULT_SENDER = "test"
+        # Ensures Flask Mail does not send any real emails.
+        TESTING = True
     return coloringbook.create_app(config, create_db=True)

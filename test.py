@@ -22,6 +22,7 @@ def test_all():
     testmod(coloringbook.admin.forms)
     testmod(coloringbook.admin.views)
     testmod(coloringbook.utilities)
+    testmod(coloringbook.mail.utilities)
 
 if __name__ == '__main__':
     test_all()
