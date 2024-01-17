@@ -147,5 +147,5 @@ def send_async_email(self, subject, recipient, html):
 
     try:
         mail_client.send(message)
-    except OperationalError as exc:
-        raise self.retry(exc=exc)
+    except Exception as exception:
+        raise self.retry(exc=exception)

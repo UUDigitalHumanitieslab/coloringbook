@@ -1,38 +1,39 @@
 import unittest
 from mock import patch, call
-from utilities import send_async_email
-from celery.exceptions import OperationalError
+from coloringbook.mail.utilities import send_async_email
+from flask_mail import Message
 
 
 class TestSendAsyncEmail(unittest.TestCase):
-    @patch("utilities.mail_client.send")
-    @patch("utilities.send_async_email.retry")
+    @patch("coloringbook.mail.utilities.mail_client.send")
+    @patch("coloringbook.mail.utilities.send_async_email.retry")
     def test_send_async_email(self, mock_retry, mock_send):
-        # Arrange
         subject = "Test Subject"
         recipient = "test@example.com"
         html = "<p>This is a test email.</p>"
 
-        # Act
+        expected_message = Message(subject=subject, recipients=[recipient], html=html)
+
         send_async_email(subject, recipient, html)
 
-        # Assert
-        mock_send.assert_called_once_with(
-            call(subject=subject, recipients=[recipient], html=html)
-        )
+        call_args = mock_send.call_args
 
-    @patch("utilities.mail_client.send", side_effect=OperationalError)
-    @patch("utilities.send_async_email.retry")
-    def test_send_async_email_retry_on_operational_error(self, mock_retry, mock_send):
-        # Arrange
+        self.assertEqual(call_args[0][0].subject, expected_message.subject)
+        self.assertEqual(call_args[0][0].recipients, expected_message.recipients)
+        self.assertEqual(call_args[0][0].html, expected_message.html)
+
+    @patch("coloringbook.mail.utilities.mail_client.send", side_effect=Exception())
+    @patch("coloringbook.mail.utilities.send_async_email.retry")
+    def test_send_async_email_retry_on_error(self, mock_retry, mock_send):
         subject = "Test Subject"
         recipient = "test@example.com"
         html = "<p>This is a test email.</p>"
 
-        # Act
-        send_async_email(subject, recipient, html)
+        try:
+            send_async_email(subject, recipient, html)
+        except Exception:
+            pass
 
-        # Assert
         mock_retry.assert_called_once()
 
 

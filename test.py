@@ -5,10 +5,12 @@
 # https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
 
 """
-    Script for automatically running the doctest test cases.
+    Script for automatically running the doctest and unittest test cases.
 """
 
 from doctest import testmod, ELLIPSIS
+import unittest
+from coloringbook.mail.celery_test import TestSendAsyncEmail
 
 import coloringbook, coloringbook.testing
 
@@ -23,6 +25,8 @@ def test_all():
     testmod(coloringbook.admin.views)
     testmod(coloringbook.utilities)
     testmod(coloringbook.mail.utilities)
+
+    unittest.main()
 
 if __name__ == '__main__':
     test_all()
