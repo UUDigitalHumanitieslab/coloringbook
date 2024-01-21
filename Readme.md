@@ -36,6 +36,7 @@ Coloring Book is deployed using Docker Compose. The application needs two config
 
 Docker needs a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
 
+    CONFIG_FILE=abcdefg
     MYSQL_HOST=abcdefg
     MYSQL_PORT=1234
     MYSQL_USER=abcdefg
@@ -43,7 +44,7 @@ Docker needs a file called `.env` to be present in the same folder as `docker-co
     MYSQL_DB=abcdefg
     MYSQL_ROOT_PASSWORD=abcdefg
 
-Secondly, a file `config.py` should be created in the `coloringbook` package folder with minimally the following contents.
+The setting `CONFIG_FILE` should be refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
