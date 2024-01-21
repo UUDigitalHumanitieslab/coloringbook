@@ -25,6 +25,7 @@ services:
       dockerfile: Dockerfile
       args:
         - DEVELOPMENT=${DEVELOPMENT}
+        - CONFIG_LOCATION=${CONFIG_LOCATION}
     env_file: .env
     ports:
       - 5000:5000
@@ -52,6 +53,7 @@ services:
       - APP_SETTINGS=project.server.config.DevelopmentConfig
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CONFIG_LOCATION=${CONFIG_LOCATION}
     depends_on:
       - redis
       - db

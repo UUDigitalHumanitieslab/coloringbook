@@ -203,7 +203,7 @@ def is_fill_correct(fill):
     """
     Returns whether a fill action is correct.
 
-    `fill` is expected to a Fill object.
+    `fill` is expected to be a Fill object.
 
     >>> import coloringbook as cb, flask, datetime, coloringbook.testing
     >>> import coloringbook.models as m
