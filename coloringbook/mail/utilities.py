@@ -1,5 +1,4 @@
 from celery import shared_task
-from celery.exceptions import OperationalError
 from flask import render_template
 from coloringbook.mail import mail_client
 from flask_mail import Message

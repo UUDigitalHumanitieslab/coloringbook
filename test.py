@@ -10,7 +10,6 @@
 
 from doctest import testmod, ELLIPSIS
 import unittest
-from coloringbook.mail.celery_test import TestSendAsyncEmail
 
 import coloringbook, coloringbook.testing
 
