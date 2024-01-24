@@ -1,6 +1,11 @@
 # Coloring Book -- version history #
 
-## 2.1 (current) ##
+## 2.2 ##
+
+  * An email field has been added to the Survey form. Whenever a batch of survey data is uploaded, an email is sent to the provided email address with a summary of the results.
+  * The application is Dockerized and Celery/Redis are added to handle the sending of emails.
+
+## 2.1 ##
 
   * Updated the index page to redirect to the project website.
 
