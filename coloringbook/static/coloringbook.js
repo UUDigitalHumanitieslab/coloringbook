@@ -180,7 +180,6 @@ var TransferFsm = machina.Fsm.extend({
 		);
 	},
 	uploadDone: function(response) {
-		console.log(response);
 		if (response === 'Error') {
 			// The data were somehow invalid, but still safely stored
 			// on the server.

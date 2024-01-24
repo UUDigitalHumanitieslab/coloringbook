@@ -7,7 +7,7 @@ by the Research Software Lab of the Centre for Digital Humanities at Utrecht Uni
 
 **Research paper:** Pinto, M., & Zuckerman, S. (2019). Coloring Book: A new method for testing language comprehension. _Behavior research methods_, _51_(6), 2609-2628.
 
-**contact information:** Coloringbook@uu.nl
+**Contact information:** coloringbook@uu.nl
 
 **IP and license:** The intellectual property of the ColoringBook method belongs to Utrecht University. This software is intended for research purposes. For the license details see below.
 
@@ -36,6 +36,7 @@ Coloring Book is deployed using Docker Compose. The application needs two config
 
 Docker needs a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
 
+    CONFIG_FILE=abcdefg
     MYSQL_HOST=abcdefg
     MYSQL_PORT=1234
     MYSQL_USER=abcdefg
@@ -43,15 +44,24 @@ Docker needs a file called `.env` to be present in the same folder as `docker-co
     MYSQL_DB=abcdefg
     MYSQL_ROOT_PASSWORD=abcdefg
 
-Secondly, a file `config.py` should be created in the `coloringbook` package folder with minimally the following contents.
+The setting `CONFIG_FILE` should be refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
     SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
+    MAIL_SERVER = 'mail.server.com'
+    MAIL_PORT = 1234
+    MAIL_USE_TLS = True/False
+    MAIL_USE_SSL = True/False
+    MAIL_USERNAME = 'username'
+    MAIL_PASSWORD = 'password'
+    MAIL_DEFAULT_SENDER = 'mysender@email.address'
 
-With these files present, running `docker compose up --build` in the root directory of the project will start two containers.
+With these files present, running `docker compose up --build` in the root directory of the project will start four containers.
 
 - the Coloring Book web server proper;
-- a MySQL database (MySQL).
+- a MySQL database (MySQL);
+- Celery (for asynchronous tasks);
+- Redis (a message broker).
 
 Docker should automatically create the database and run the available migrations. To run migrations manually, run
 

@@ -339,7 +339,7 @@ class Survey(db.Model):
     duration = db.Column(db.Integer, nullable=False, default=6000)
     simultaneous = db.Column(db.Boolean, nullable=False)
     information = db.Column(db.Text)
-    
+    email_address = db.Column(db.String(60))
     language = db.relationship('Language', backref='surveys')  # many-one
     pages = association_proxy('survey_pages', 'page')  # many-many
     subjects = association_proxy('survey_subjects', 'subject')  # many-many

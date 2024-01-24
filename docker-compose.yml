@@ -25,6 +25,7 @@ services:
       dockerfile: Dockerfile
       args:
         - DEVELOPMENT=${DEVELOPMENT}
+        - CONFIG_FILE=${CONFIG_FILE}
     env_file: .env
     ports:
       - 5000:5000
@@ -38,6 +39,24 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - .:/coloringbook:rw
+  
+  redis:
+    image: redis:6.2
+  
+  worker:
+    build: .
+    command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
+    environment:
+      - FLASK_DEBUG=1
+      - APP_SETTINGS=project.server.config.DevelopmentConfig
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CONFIG_FILE=${CONFIG_FILE}
+    depends_on:
+      - redis
+      - db
     volumes:
       - .:/coloringbook:rw
 

@@ -42,6 +42,8 @@ from flask_migrate import Migrate
 from .models import db
 from .views import site
 from .admin import create_admin
+from .mail import create_mail
+from .task_worker import celery_init_app
 
 
 migrate = Migrate()
@@ -49,12 +51,12 @@ migrate = Migrate()
 
 def create_app(config, disable_admin=False, create_db=False, instance=None):
     app = Flask(__name__, instance_path=instance)
-    
-    # The following line may be uncommented, and the corresponding 
+
+    # The following line may be uncommented, and the corresponding
     # file created, if we ever decide that the application needs
     # default settings.
     ## app.config.from_object('coloringbook.defaults')
-    
+
     if type(config) in (str, unicode):
         app.config.from_pyfile(config)
     else:
@@ -63,11 +65,13 @@ def create_app(config, disable_admin=False, create_db=False, instance=None):
     db.init_app(app)
     if create_db:
         db.create_all(app=app)
-    
+
     migrate.init_app(app, db)
     app.register_blueprint(site)
     if not disable_admin:
         create_admin(app)
-    
-    return app
 
+    create_mail(app)
+    celery_init_app(app)
+
+    return app
