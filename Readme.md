@@ -46,7 +46,7 @@ Docker needs a file called `.env` to be present in the same folder as `docker-co
     DB_DB=abcdefg
     DB_ROOT_PASSWORD=abcdefg
 
-`DB_HOST` should be set to `db-dev` if the application is run in `dev` mode. In `prod` mode, the settings should correspond to existing database and user settings on the host machine. The user must be configured to use the `mysql_native_password` authentication plugin. This is not the default in modern versions of MySQL or MariaDB
+`DB_HOST` should be set to `db-dev` if the application is run in `dev` mode. In `prod` mode, the settings should correspond to existing database and user settings on the host machine. The user must be configured to use the `mysql_native_password` authentication plugin. This is not the default in modern versions of MySQL or MariaDB.
 
 The setting `CONFIG_FILE` should be refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
