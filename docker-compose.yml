@@ -1,51 +1,67 @@
 version: '3.9'
+
+x-app-base: &app-base
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - CONFIG_FILE=${CONFIG_FILE}
+    env_file: .env
+    ports:
+      - 5000:5000
+    environment:
+      - DB_DB=${DB_DB}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    volumes:
+      - .:/coloringbook:rw
+
 services:
-  db:
+  app-dev:
+    <<: *app-base
+    profiles: ["dev"]
+    build:
+      args:
+        - DEVELOPMENT=1
+    depends_on:
+      db-dev:
+        condition: service_healthy
+
+  app:
+    <<: *app-base
+    profiles: ["prod"]
+    build:
+      args:
+        - DEVELOPMENT=0
+
+  db-dev:
     image: mysql:5.7
     env_file: .env
+    profiles: ["dev"]
     restart: always
     command: --default-authentication-plugin=mysql_native_password
     environment:
-      MYSQL_DATABASE: ${MYSQL_DB}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${DB_DB}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3307:3306"
     healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-p${MYSQL_PASSWORD}"]
+      test: ["CMD", "mysqladmin" ,"ping", "-p${DB_PASSWORD}"]
       timeout: 20s
       retries: 10
     volumes:
       - sql-db:/var/lib/mysql
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        - DEVELOPMENT=${DEVELOPMENT}
-        - CONFIG_FILE=${CONFIG_FILE}
-    env_file: .env
-    ports:
-      - 5000:5000
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      - MYSQL_DB=${MYSQL_DB}
-      - MYSQL_HOST=${MYSQL_HOST}
-      - MYSQL_PORT=${MYSQL_PORT}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - .:/coloringbook:rw
-  
   redis:
     image: redis:6.2
   
-  worker:
+  worker: &worker-prod
+    profiles: ["prod"]
     build: .
     command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
     environment:
@@ -56,9 +72,15 @@ services:
       - CONFIG_FILE=${CONFIG_FILE}
     depends_on:
       - redis
-      - db
     volumes:
       - .:/coloringbook:rw
+
+  worker-dev:
+    <<: *worker-prod
+    profiles: ["dev"]
+    depends_on:
+      - redis
+      - db-dev
 
 volumes:
   sql-db:

@@ -28,25 +28,29 @@ On the server side, all coloring data are collected in a table that can be filte
 Researchers can compose their own surveys with custom images and sounds. The surveys are made available to test subjects through a fixed URL.
 
 
-## How to deploy?
+## How do I deploy and run the application?
 
 On the client side, test subjects just need to run a HTML5 capable browser.
 
-Coloring Book is deployed using Docker Compose. The application needs two configuration files. 
+Coloring Book is deployed using Docker Compose. It has two deployment modes: `prod` (for production deployment) and `dev` (for local development). There are two main differences between the two. First, `dev` mode will build a container with a MySQL database, while in `prod` mode, the host machine is expected to run a MariaDB that the app will use. Secondly, the containers log much more (debugging)information in `dev` mode than in `prod` mode. 
+
+In either mode, the application needs two configuration files.
 
 Docker needs a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
 
     CONFIG_FILE=abcdefg
-    MYSQL_HOST=abcdefg
-    MYSQL_PORT=1234
-    MYSQL_USER=abcdefg
-    MYSQL_PASSWORD=abcdefg
-    MYSQL_DB=abcdefg
-    MYSQL_ROOT_PASSWORD=abcdefg
+    DB_HOST=abcdefg
+    DB_PORT=1234
+    DB_USER=abcdefg
+    DB_PASSWORD=abcdefg
+    DB_DB=abcdefg
+    DB_ROOT_PASSWORD=abcdefg
+
+`DB_HOST` should be set to `db-dev` if the application is run in `dev` mode. In `prod` mode, the settings should correspond to existing database and user settings on the host machine. The user must be configured to use the `mysql_native_password` authentication plugin. This is not the default in modern versions of MySQL or MariaDB
 
 The setting `CONFIG_FILE` should be refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
-    SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
+    SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@dbhost/coloringbook'
     SECRET_KEY = '12345678901234567890'
     MAIL_SERVER = 'mail.server.com'
     MAIL_PORT = 1234
@@ -56,14 +60,18 @@ The setting `CONFIG_FILE` should be refer to the name of a configuration file (e
     MAIL_PASSWORD = 'password'
     MAIL_DEFAULT_SENDER = 'mysender@email.address'
 
-With these files present, running `docker compose up --build` in the root directory of the project will start four containers.
+In development mode, the part of `SQLALCHEMY_DATABASE_URI` that specifies the host (`dbhost` in the example above) should be set to `db-dev`.
 
-- the Coloring Book web server proper;
-- a MySQL database (MySQL);
-- Celery (for asynchronous tasks);
-- Redis (a message broker).
+With both files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the root directory of the project will start three or four containers, depending on the deployment mode.
 
-Docker should automatically create the database and run the available migrations. To run migrations manually, run
+| Name (`prod`) | Name (`dev`) | Description                              |
+|---------------|--------------|------------------------------------------|
+| `app`         | `app-dev`    | The Coloring book webserver proper       |
+| (NA)          | `db-dev`     | A MySQL DB (only on `dev`)               |
+| `redis`       | `redis`      | A Redis message broker                   |
+| `worker`      | `worker-dev` | A Celery instance for asynchronous tasks |
+
+Docker should automatically create the database (if it does not exist) and run the available migrations. To run migrations manually, run
 
     python manage.py -A -c CONFIG db upgrade
 
