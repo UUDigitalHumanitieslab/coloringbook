@@ -1,46 +1,41 @@
 version: '3.9'
 
-x-app-base: &app-base
+services:
+  app: &app-prod
+    profiles: ["prod"]
+    container_name: cb-app
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        - CONFIG_FILE=${CONFIG_FILE}
     env_file: .env
-    ports:
-      - 5000:5000
     environment:
       - DB_DB=${DB_DB}
-      - DB_HOST=${DB_HOST}
+      - DB_HOST=db
       - DB_PORT=${DB_PORT}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -c "gunicorn -b 0.0.0.0:5000 'coloringbook:prod_app'" 
     volumes:
       - .:/coloringbook:rw
+    ports:
+      - 5000:5000
 
-services:
   app-dev:
-    <<: *app-base
+    <<: *app-prod
     profiles: ["dev"]
-    build:
-      args:
-        - DEVELOPMENT=1
-    depends_on:
-      db-dev:
-        condition: service_healthy
+    command: >
+      bash -c "python manage.py -A -c ${CONFIG_FILE} db upgrade 
+      && python manage.py -c ${CONFIG_FILE} runserver --host 0.0.0.0 -dr"
 
-  app:
-    <<: *app-base
-    profiles: ["prod"]
-    build:
-      args:
-        - DEVELOPMENT=0
-
-  db-dev:
+  db:
     image: mysql:5.7
+    container_name: cb-db
     env_file: .env
-    profiles: ["dev"]
     restart: always
     command: --default-authentication-plugin=mysql_native_password
     environment:
@@ -61,16 +56,18 @@ services:
     image: redis:6.2
   
   worker: &worker-prod
-    profiles: ["prod"]
     build: .
-    command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
+    container_name: cb-worker
+    profiles: ["prod"]
+    command: celery -A make_celery worker --uid=nobody --gid=nogroup
     environment:
-      - FLASK_DEBUG=1
+      - FLASK_DEBUG=0
       - APP_SETTINGS=project.server.config.DevelopmentConfig
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CONFIG_FILE=${CONFIG_FILE}
     depends_on:
+      - db
       - redis
     volumes:
       - .:/coloringbook:rw
@@ -78,9 +75,13 @@ services:
   worker-dev:
     <<: *worker-prod
     profiles: ["dev"]
-    depends_on:
-      - redis
-      - db-dev
+    command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
+    environment:
+      - FLASK_DEBUG=1
+      - APP_SETTINGS=project.server.config.DevelopmentConfig
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+      - CONFIG_FILE=${CONFIG_FILE}
 
 volumes:
   sql-db:

@@ -36,6 +36,7 @@
     potentially be served in production.
 """
 
+from os import environ
 from flask import Flask
 from flask_migrate import Migrate
 
@@ -75,3 +76,7 @@ def create_app(config, disable_admin=False, create_db=False, instance=None):
     celery_init_app(app)
 
     return app
+
+# Used to start Gunicorn.
+config_file = environ.get("CONFIG_FILE", "config.py")
+prod_app = create_app(config_file)

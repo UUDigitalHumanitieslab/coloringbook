@@ -30,27 +30,24 @@ Researchers can compose their own surveys with custom images and sounds. The sur
 
 ## How do I deploy and run the application?
 
-On the client side, test subjects just need to run a HTML5 capable browser.
+On the client side, test subjects just need to run a HTML5 capable browser. If you want to serve Coloring Book yourself, you need a system with Docker installed.
 
-Coloring Book is deployed using Docker Compose. It has two deployment modes: `prod` (for production deployment) and `dev` (for local development). There are two main differences between the two. First, `dev` mode will build a container with a MySQL database, while in `prod` mode, the host machine is expected to run a MariaDB that the app will use. Secondly, the containers log much more (debugging)information in `dev` mode than in `prod` mode. 
+Coloring Book is deployed using Docker Compose. It has two deployment modes: `prod` (for production deployment) and `dev` (for local development). In `prod` mode, the application is run with a production-safe WSGI-server and the containers log much less (debugging) information compared to `prod` mode.
 
-In either mode, the application needs two configuration files.
+For either mode to work, you need to add two configuration files.
 
-Docker needs a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
+Docker expects a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
 
     CONFIG_FILE=abcdefg
-    DB_HOST=abcdefg
     DB_PORT=1234
     DB_USER=abcdefg
     DB_PASSWORD=abcdefg
     DB_DB=abcdefg
     DB_ROOT_PASSWORD=abcdefg
 
-`DB_HOST` should be set to `db-dev` if the application is run in `dev` mode. In `prod` mode, the settings should correspond to existing database and user settings on the host machine. The user must be configured to use the `mysql_native_password` authentication plugin. This is not the default in modern versions of MySQL or MariaDB.
+The setting `CONFIG_FILE` should refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
-The setting `CONFIG_FILE` should be refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
-
-    SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@dbhost/coloringbook'
+    SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@db/coloringbook'
     SECRET_KEY = '12345678901234567890'
     MAIL_SERVER = 'mail.server.com'
     MAIL_PORT = 1234
@@ -60,16 +57,17 @@ The setting `CONFIG_FILE` should be refer to the name of a configuration file (e
     MAIL_PASSWORD = 'password'
     MAIL_DEFAULT_SENDER = 'mysender@email.address'
 
-In development mode, the part of `SQLALCHEMY_DATABASE_URI` that specifies the host (`dbhost` in the example above) should be set to `db-dev`.
+The `SQLALCHEMY_DATABASE_URI` should contain the same information as the `.env` file, in the structure:
 
-With both files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the root directory of the project will start three or four containers, depending on the deployment mode.
+    mysql://<username>:<password>@db/<database-name>
 
-| Name (`prod`) | Name (`dev`) | Description                              |
-|---------------|--------------|------------------------------------------|
-| `app`         | `app-dev`    | The Coloring book webserver proper       |
-| (NA)          | `db-dev`     | A MySQL DB (only on `dev`)               |
-| `redis`       | `redis`      | A Redis message broker                   |
-| `worker`      | `worker-dev` | A Celery instance for asynchronous tasks |
+With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the root directory of the project. This will start the following containers. 
+
+
+- `app`: the Coloring book webserver proper;
+- `db-dev`: a MySQL DB;
+- `redis`: a Redis message broker;
+- `worker`: Celery instance for asynchronous tasks
 
 Docker should automatically create the database (if it does not exist) and run the available migrations. To run migrations manually, run
 
@@ -87,8 +85,6 @@ By default, the application will run on `localhost:5000`, but this is customisab
 ## Development
 
 An overview of the database layout is given in `Database.svg`. For the complete specification, refer to `coloringbook/models.py`. Anything in `admin` subfolders is specific to the admin interface. Everything else in the `coloringbook` package is involved in delivering surveys to subjects and receiving data from them. Run `python test.py` for doctest-based testing. Motivations are documented throughout the code in comments; with some referencing to documentation for Flask, SQLAlchemy and jQuery, you should be able to find your way.
-
-It is possible to run the server in the development mode by adding the following line to `.env`. 
 
 ```
 DEVELOPMENT=1
