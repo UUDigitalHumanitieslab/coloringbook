@@ -32,7 +32,7 @@ Researchers can compose their own surveys with custom images and sounds. The sur
 
 On the client side, test subjects just need to run a HTML5 capable browser. If you want to serve Coloring Book yourself, you need a system with Docker installed.
 
-Coloring Book is deployed using Docker Compose. It has two deployment modes: `prod` (for production deployment) and `dev` (for local development). In `prod` mode, the application is run with a production-safe WSGI-server and the containers log much less (debugging) information compared to `prod` mode.
+Coloring Book is deployed using Docker Compose. It has two deployment modes: `prod` (for production deployment) and `dev` (for local development). In `prod` mode, the application is run with a production-safe WSGI server and the containers log much less (debugging) information compared to `prod` mode.
 
 For either mode to work, you need to add two configuration files.
 
@@ -47,7 +47,7 @@ Docker expects a file called `.env` to be present in the same folder as `docker-
 
 The setting `CONFIG_FILE` should refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
-    SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@db/coloringbook'
+    SQLALCHEMY_DATABASE_URI = 'mysql://myusername:myawesomepassword@db/coloringbook'
     SECRET_KEY = '12345678901234567890'
     MAIL_SERVER = 'mail.server.com'
     MAIL_PORT = 1234
@@ -61,15 +61,17 @@ The `SQLALCHEMY_DATABASE_URI` should contain the same information as the `.env` 
 
     mysql://<username>:<password>@db/<database-name>
 
-With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the root directory of the project. This will start the following containers. 
+With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the same location as `docker-compose.yml`. This will start the following containers. 
 
 
-- `app`: the Coloring book webserver proper;
-- `db-dev`: a MySQL DB;
-- `redis`: a Redis message broker;
-- `worker`: Celery instance for asynchronous tasks
+| Name   | Description                                                                                  |
+|--------|----------------------------------------------------------------------------------------------|
+| `app`    | The Coloring Book (Flask) web application proper, with a Gunicorn server in production mode. |
+| `db`     | A MySQL (5.7) DB.                                                                            |
+| `redis`  | A Redis (6.2) message broker.                                                                |
+| `worker` | A Celery instance for asynchronous tasks.                                                    |
 
-Docker should automatically create the database (if it does not exist) and run the available migrations. To run migrations manually, run
+Docker should automatically create the database (if it does not exist) and run the available migrations when the `app` container starts. To run migrations manually, run
 
     python manage.py -A -c CONFIG db upgrade
 
@@ -85,13 +87,6 @@ By default, the application will run on `localhost:5000`, but this is customisab
 ## Development
 
 An overview of the database layout is given in `Database.svg`. For the complete specification, refer to `coloringbook/models.py`. Anything in `admin` subfolders is specific to the admin interface. Everything else in the `coloringbook` package is involved in delivering surveys to subjects and receiving data from them. Run `python test.py` for doctest-based testing. Motivations are documented throughout the code in comments; with some referencing to documentation for Flask, SQLAlchemy and jQuery, you should be able to find your way.
-
-```
-DEVELOPMENT=1
-``` 
-
-This will print debug messages in the container logs and enable automatic reloading when the source files are changed.
-
 
 ## Server maintenance
 

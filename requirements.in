@@ -12,5 +12,5 @@ Flask-SQLAlchemy
 importlib_metadata==1.7.0
 mock==3.0.5
 MySQL-Python
-SQLAlchemy==1.2.9
+SQLAlchemy==1.2.0b3
 zipp==1.2.0

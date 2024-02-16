@@ -2,8 +2,9 @@ version: '3.9'
 
 services:
   app: &app-prod
-    profiles: ["prod"]
     container_name: cb-app
+    image: cb-app-prod 
+    profiles: ["prod"]
     build:
       context: .
       dockerfile: Dockerfile
@@ -27,6 +28,7 @@ services:
 
   app-dev:
     <<: *app-prod
+    image: cb-app-dev
     profiles: ["dev"]
     command: >
       bash -c "python manage.py -A -c ${CONFIG_FILE} db upgrade 
@@ -53,11 +55,13 @@ services:
       - sql-db:/var/lib/mysql
 
   redis:
+    container_name: cb-redis
     image: redis:6.2
   
   worker: &worker-prod
     build: .
     container_name: cb-worker
+    image: cb-worker-prod
     profiles: ["prod"]
     command: celery -A make_celery worker --uid=nobody --gid=nogroup
     environment:
@@ -74,6 +78,7 @@ services:
 
   worker-dev:
     <<: *worker-prod
+    image: cb-worker-dev
     profiles: ["dev"]
     command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
     environment:
