@@ -49,6 +49,22 @@ from .task_worker import celery_init_app
 
 migrate = Migrate()
 
+def compose_db_uri():
+    """
+    Compose the database URI (SQLALCHEMY_DATABASE_URI)
+    from environment variables.
+    """
+    db_username = environ.get("DB_USER")
+    db_password = environ.get("DB_PASSWORD")
+    db_host = environ.get("DB_HOST")
+    db_port = environ.get("DB_PORT")
+    db_name = environ.get("DB_DB")
+
+    if not all([db_username, db_password, db_host, db_port, db_name]):
+        raise ValueError("Database environment variables not set.")
+
+    return "mysql://{}:{}@{}:{}/{}".format(db_username, db_password, db_host, db_port, db_name)
+
 
 def create_app(config, disable_admin=False, create_db=False, instance=None):
     app = Flask(__name__, instance_path=instance)
@@ -84,21 +100,3 @@ production_mode = environ.get("DEVELOPMENT", "1") == "0"
 if production_mode is True:
     config_file = environ.get("CONFIG_FILE", "config.py")
     prod_app = create_app(config_file)
-
-
-def compose_db_uri():
-    """
-    Compose the database URI (SQLALCHEMY_DATABASE_URI)
-    from environment variables.
-    """
-    db_username = environ.get("DB_USER")
-    db_password = environ.get("DB_PASSWORD")
-    db_host = environ.get("DB_HOST")
-    db_port = environ.get("DB_PORT")
-    db_name = environ.get("DB_DB")
-
-    if not all([db_username, db_password, db_host, db_port, db_name]):
-        raise ValueError("Database environment variables not set.")
-
-    return "mysql://{}:{}@{}:{}/{}".format(db_username, db_password, db_host, db_port, db_name)
-

@@ -76,7 +76,7 @@ The project source files are automatically mounted to the local file system. In 
 
 The application does not take care of authentication or authorization. You should configure this directly on the webserver by restricting access to `/admin/`, for example using LDAP.
 
-By default, the application will run on `localhost:5000`, but this is customisable in the `Dockerfile`.
+By default, the application will run on `localhost:3000`, but this is customisable in the `docker-compose` file.
 
 
 ## Development

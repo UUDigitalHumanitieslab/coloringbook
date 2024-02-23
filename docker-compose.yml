@@ -27,7 +27,7 @@ services:
     volumes:
       - .:/coloringbook:rw
     ports:
-      - 5000:5000
+      - 3000:5000
 
   app-dev:
     <<: *app-prod
