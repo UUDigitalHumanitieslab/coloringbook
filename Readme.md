@@ -36,18 +36,17 @@ Coloring Book is deployed using Docker Compose. It has two deployment modes: `pr
 
 For either mode to work, you need to add two configuration files.
 
-Docker expects a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
+Docker expects a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings. The `...` should be substituted with the appropriate values.
 
-    CONFIG_FILE=abcdefg
-    DB_PORT=1234
-    DB_USER=abcdefg
-    DB_PASSWORD=abcdefg
-    DB_DB=abcdefg
-    DB_ROOT_PASSWORD=abcdefg
+    CONFIG_FILE=...
+    DB_PORT=...
+    DB_USER=...
+    DB_PASSWORD=...
+    DB_DB=...
+    DB_ROOT_PASSWORD=...
 
 The setting `CONFIG_FILE` should refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
 
-    SQLALCHEMY_DATABASE_URI = 'mysql://myusername:myawesomepassword@db/coloringbook'
     SECRET_KEY = '12345678901234567890'
     MAIL_SERVER = 'mail.server.com'
     MAIL_PORT = 1234
@@ -57,11 +56,7 @@ The setting `CONFIG_FILE` should refer to the name of a configuration file (e.g.
     MAIL_PASSWORD = 'password'
     MAIL_DEFAULT_SENDER = 'mysender@email.address'
 
-The `SQLALCHEMY_DATABASE_URI` should contain the same information as the `.env` file, in the structure:
-
-    mysql://<username>:<password>@db/<database-name>
-
-With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the same location as `docker-compose.yml`. This will start the following containers. 
+With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the same location as `docker-compose.yml`. This will start the following containers.
 
 
 | Name   | Description                                                                                  |
