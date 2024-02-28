@@ -76,7 +76,7 @@ six==1.16.0
     # via
     #   mock
     #   pathlib2
-sqlalchemy==1.2.0
+sqlalchemy==1.1.16
     # via
     #   -r requirements.in
     #   alembic

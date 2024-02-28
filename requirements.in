@@ -7,4 +7,5 @@ Flask-Script
 Flask-SQLAlchemy
 mock
 MySQL-Python
-SQLAlchemy
+# https://github.com/flask-admin/flask-admin/issues/1588#issuecomment-367352233
+SQLAlchemy==1.1.16
