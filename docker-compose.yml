@@ -23,9 +23,13 @@ services:
         condition: service_healthy
     command: >
       bash -c "python manage.py -A -c ${CONFIG_FILE} db upgrade
-      && gunicorn -b 0.0.0.0:5000 'coloringbook:prod_app'"
+      && gunicorn -b 0.0.0.0:5000 'coloringbook:prod_app'
+      --capture-output
+      --access-logfile /logs/access_log
+      --error-logfile /logs/error_log"
     volumes:
       - .:/coloringbook:rw
+      - cb-logs:/logs
     ports:
       - 3000:5000
 
@@ -100,4 +104,5 @@ services:
 
 volumes:
   sql-db:
+  cb-logs:
 
