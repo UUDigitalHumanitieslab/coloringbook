@@ -243,7 +243,20 @@ class SubjectView (ModelView):
             .join(SurveySubject.subject)
             .join(SurveySubject.survey)
             .join(Subject.subject_languages)
-            .group_by(Subject.id, Survey.id)
+            .group_by(
+                Subject.id,
+                Survey.id,
+                Subject.name,
+                Subject.numeral,
+                Subject.birth,
+                Subject.eyesight,
+                SubjectLanguage.language_id,
+                Language.name,
+                Survey.name,
+                SurveySubject.difficulty,
+                SurveySubject.topic,
+                SurveySubject.comments
+            ).join(language_primary, Subject.id == language_primary.subject_id)
             .join(language_primary, Subject.id == language_primary.subject_id)
             .filter(language_primary.level == 10)
             .join(language_primary.language)
