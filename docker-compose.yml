@@ -25,8 +25,8 @@ services:
       bash -c "python manage.py -A -c ${CONFIG_FILE} db upgrade
       && gunicorn -b 0.0.0.0:5000 'coloringbook:prod_app'
       --capture-output
-      --access-logfile /logs/access_log
-      --error-logfile /logs/error_log"
+      --access-logfile /logs/gunicorn-access.log'
+      --error-logfile /logs/gunicorn-error.log"
     volumes:
       - .:/coloringbook:rw
       - cb-logs:/logs
