@@ -13,20 +13,22 @@
     In order to run the create_app function, you need to pass any
     Python object with member variables that can be used to configure
     the application. At the very least this should include
-    SQLALCHEMY_DATABASE_URI. For example,
+    SQLALCHEMY_DATABASE_URI, unless `use_test_db` is set to True, in
+    which case an in-memory SQLite database is used.
+     
+    For example,
 
     >>> class config:
-    ...     SQLALCHEMY_DATABASE_URI = 'sqlite://'  # in-memory database
     ...     SECRET_KEY = 'abcdefghijklmnopqrstuvwxyz'
     ...     TESTING = True
     ...
-    >>> application = create_app(config)
+    >>> application = create_app(config, create_db=True, use_test_db=True)
 
     Note that the class itself is passed as the configuration object
-    in this example. An imported module which has a global
-    SQLALCHEMY_DATABASE_URI constant defined also works. Just make
-    sure that your configuration module is in the PYTHONPATH, and then
-    run `import your_module` and `create_app(your_module)`.
+    in this example. An imported module with global constants defined 
+    also works. Just make sure that your configuration module is in the 
+    PYTHONPATH, and then run `import your_module` and 
+    `create_app(your_module)`.
 
     Instead of importing the module, you may also pass the path to the module
     as a string.
@@ -66,7 +68,21 @@ def compose_db_uri():
     return "mysql://{}:{}@{}:{}/{}".format(db_username, db_password, db_host, db_port, db_name)
 
 
-def create_app(config, disable_admin=False, create_db=False, instance=None):
+def create_app(config, disable_admin=False, create_db=False, use_test_db=False, instance=None):
+    """
+    Create and configure the Flask application.
+
+    Args:
+        config: The configuration object or path to the configuration file.
+        disable_admin: A boolean indicating whether to disable the admin interface. Default is False.
+        create_db: A boolean indicating whether to create a new database. Default is False.
+        use_test_db: A boolean indicating whether to use a (SQLite) test database. Default is False.
+        instance: The path to the instance folder. Default is None.
+
+    Returns:
+        The Flask application.
+
+    """
     app = Flask(__name__, instance_path=instance)
 
     # The following line may be uncommented, and the corresponding
@@ -79,7 +95,10 @@ def create_app(config, disable_admin=False, create_db=False, instance=None):
     else:
         app.config.from_object(config)
 
-    app.config["SQLALCHEMY_DATABASE_URI"] = compose_db_uri()
+    if use_test_db is True:
+        app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite://'
+    else:
+        app.config["SQLALCHEMY_DATABASE_URI"] = compose_db_uri()
 
     db.init_app(app)
     if create_db:

@@ -187,8 +187,8 @@ def bind_survey_subject(survey, subject, evaluation):
         ... }
         >>> with app.app_context():
         ...     bind_survey_subject(testsurvey, testsubject, testevaluation)
+        >>> # No response value should be returned, as the field is empty.
         >>> testsurvey.survey_subjects[1].difficulty
-        None
         >>> testsurvey.survey_subjects[1].topic
         ''
         >>> testsurvey.survey_subjects[1].comments
