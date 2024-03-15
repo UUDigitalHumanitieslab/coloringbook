@@ -257,7 +257,6 @@ class SubjectView (ModelView):
                 SurveySubject.topic,
                 SurveySubject.comments
             ).join(language_primary, Subject.id == language_primary.subject_id)
-            .join(language_primary, Subject.id == language_primary.subject_id)
             .filter(language_primary.level == 10)
             .join(language_primary.language)
             .group_by(Subject.id, Survey.id)
