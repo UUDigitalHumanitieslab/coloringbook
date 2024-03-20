@@ -1,16 +1,11 @@
-# Higher versions of Blinker are incompatible with Python 2.7
-blinker==1.5.0
-celery[redis]==4.4.2
-configparser==3.8.1
-contextlib2==0.6.0
+celery[redis]
 Flask
 Flask-Admin
 Flask-Mail
 Flask-Migrate
 Flask-Script
 Flask-SQLAlchemy
-importlib_metadata==1.7.0
-mock==3.0.5
+mock
 MySQL-Python
-SQLAlchemy
-zipp==1.2.0
+# https://github.com/flask-admin/flask-admin/issues/1588#issuecomment-367352233
+SQLAlchemy==1.1.16

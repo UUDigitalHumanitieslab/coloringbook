@@ -178,10 +178,26 @@ def bind_survey_subject(survey, subject, evaluation):
         'test'
         >>> testsubject.subject_surveys[0].difficulty
         5
+
+        Handle empty inputs correctly:
+        >>> testevaluation = {
+        ...     'difficulty': '',
+        ...     'topic': '',
+        ...     'comments': '',
+        ... }
+        >>> with app.app_context():
+        ...     bind_survey_subject(testsurvey, testsubject, testevaluation)
+        >>> # No response value should be returned, as the field is empty.
+        >>> testsurvey.survey_subjects[1].difficulty
+        >>> testsurvey.survey_subjects[1].topic
+        ''
+        >>> testsurvey.survey_subjects[1].comments
+        ''
     """
     binding = SurveySubject(survey=survey, subject=subject)
     if 'difficulty' in evaluation:
-        binding.difficulty = evaluation['difficulty']
+        # The DB cannot handle empty strings for integer fields.
+        binding.difficulty = evaluation['difficulty'] if evaluation['difficulty'] != '' else None
     if 'topic' in evaluation:
         binding.topic = evaluation['topic']
     if 'comments' in evaluation:
