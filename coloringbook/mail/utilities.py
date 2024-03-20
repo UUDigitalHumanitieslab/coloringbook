@@ -1,7 +1,10 @@
+import csv
+import StringIO
 from celery import shared_task
 from flask import render_template
 from coloringbook.mail import mail_client
 from flask_mail import Message
+import datetime as dt
 
 from coloringbook.utilities import (
     fills_from_json,
@@ -9,6 +12,82 @@ from coloringbook.utilities import (
     get_survey_pages,
     is_fill_correct,
 )
+
+def compose_survey_results_csv(survey_results):
+    """
+    Compose a CSV file with survey results, to be sent as an email attachment.
+
+    >>> import coloringbook as cb, coloringbook.testing as t
+    >>> from coloringbook.admin.views import FillView
+    >>> testapp = t.get_fixture_app()
+    >>> s = cb.models.db.session
+
+    >>> survey_results = [
+    ...     {
+    ...         "survey_name": "Test Survey 1",
+    ...         "subject_name": "Bob",
+    ...         "subject_dob": "2000-01-01",
+    ...         "evaluations": [
+    ...             {"page": "Test page 1", "target": "Car", "color": "black", "correct": 0},
+    ...             {"page": "Test page 2", "target": "Boat", "color": "white", "correct": 1}
+    ...         ],
+    ...         "total_fills": 2,
+    ...         "total_correct": 1,
+    ...         "percentage_correct": 50
+    ...     }, 
+    ...     {
+    ...         "survey_name": "Test Survey 1",
+    ...         "subject_name": "Alice",
+    ...         "subject_dob": "2000-01-01",
+    ...         "evaluations": [
+    ...             {"page": "Test page 1", "target": "Car", "color": "green", "correct": 1},
+    ...             {"page": "Test page 2", "target": "Boat", "color": "white", "correct": 1}
+    ...         ],
+    ...         "total_fills": 2,
+    ...         "total_correct": 2,
+    ...         "percentage_correct": 100
+    ...     }
+    ... ]
+
+    >>> with testapp.test_request_context():
+    ...     csv_file = compose_survey_results_csv(survey_results)
+    >>> csv_reader = csv.reader(StringIO.StringIO(csv_file), delimiter=";")
+    >>> headers = next(csv_reader)
+    >>> headers
+    ['Survey', 'Subject', 'Birthdate', 'Page', 'Target', 'Color', 'Correct', 'Total fills', 'Total correct', 'Percentage correct']
+    >>> rows = [row for row in csv_reader]
+    >>> rows[0]
+    ['Test Survey 1', 'Bob', '2000-01-01', 'Test page 1', 'Car', 'black', '0', '2', '1', '50']
+    >>> rows[1]
+    ['Test Survey 1', 'Bob', '2000-01-01', 'Test page 2', 'Boat', 'white', '1', '2', '1', '50']
+    >>> rows[2]
+    ['Test Survey 1', 'Alice', '2000-01-01', 'Test page 1', 'Car', 'green', '1', '2', '2', '100']
+    >>> rows[3]
+    ['Test Survey 1', 'Alice', '2000-01-01', 'Test page 2', 'Boat', 'white', '1', '2', '2', '100']
+    """
+    headers = ["Survey", "Subject", "Birthdate", "Page", "Target", "Color", "Correct", "Total fills", "Total correct", "Percentage correct"]
+    buffer = StringIO.StringIO(b"")
+    writer = csv.writer(buffer, delimiter=";")
+    writer.writerow(headers)
+
+    for survey_result in survey_results:
+        for evaluation in survey_result["evaluations"]:
+                writer.writerow(
+                    [
+                        survey_result["survey_name"],
+                        survey_result["subject_name"],
+                        survey_result["subject_dob"],
+                        evaluation["page"],
+                        evaluation["target"],
+                        evaluation["color"],
+                        evaluation["correct"],
+                        survey_result["total_fills"],
+                        survey_result["total_correct"],
+                        survey_result["percentage_correct"],
+                    ]
+                )
+
+    return buffer.getvalue()
 
 
 def send_email(recipient, survey_data, survey, immediate=False):
@@ -20,11 +99,10 @@ def send_email(recipient, survey_data, survey, immediate=False):
     :param survey: The survey that the data belongs to.
     :param immediate: If False (default), send the asynchronously via Celery. If True, send the email immediately (for testing purposes).
 
-    # Create test survey
-
     >>> import coloringbook as cb, flask, datetime, coloringbook.testing
     >>> import coloringbook.models as m
     >>> from flask_mail import Mail
+    >>> from HTMLParser import HTMLParser
 
     >>> app = coloringbook.testing.get_fixture_app()
     >>> mail = Mail(app)
@@ -93,9 +171,21 @@ def send_email(recipient, survey_data, survey, immediate=False):
     >>> first_message.subject
     'ColoringBook - nieuwe resultaten opgeslagen'
 
-    >>> first_message.html
-    u'<p>Hallo,</p>\\n\\n<p>Dit is een automatisch gegenereerde e-mail van Coloring Book.</p>\\n\\n<p>De vragenlijst test is ingevuld door 1 deelnemer(s).</p>\\n    \\n<p>De resultaten zijn als volgt:</p>\\n\\n\\n<table>\\n    <caption>Bob (2000-01-01)</caption>\\n    <thead>\\n        <tr>\\n            <th>Pagina</th>\\n            <th>Doel</th>\\n            <th>Kleur</th>\\n            <th>Goed/fout</th>\\n        </tr>\\n    </thead>\\n    <tbody>\\n        \\n        <tr>\\n            <td>testpage</td>\\n            <td>left door</td>\\n            <td>black</td>\\n            <td>Fout</td>\\n        </tr>\\n        \\n        <tr>\\n            <td>testpage</td>\\n            <td>left door</td>\\n            <td>white</td>\\n            <td>Fout</td>\\n        </tr>\\n        \\n    </tbody>\\n</table>\\n\\n\\n<p>Hartelijke groeten,</p>\\n\\n<p>Het Coloring Bookteam</p>'
+    >>> class TestHTMLParser(HTMLParser):
+    ...     def __init__(self):
+    ...         HTMLParser.__init__(self)
+    ...         self.data = []
+    ...     def handle_data(self, data):
+    ...         self.data.append(data.strip())
 
+    >>> parser = TestHTMLParser()
+    >>> parser.feed(first_message.html)
+
+    >>> parser.data[0]
+    u'Hallo,'
+
+    >>> parser.data[4]
+    u'De vragenlijst test is ingevuld door 1 deelnemer(s).'
     """
 
     message_subject = "ColoringBook - nieuwe resultaten opgeslagen"
@@ -117,32 +207,52 @@ def send_email(recipient, survey_data, survey, immediate=False):
                         "page": page.name,
                         "target": fill.area,
                         "color": fill.color,
-                        "correct": "Goed" if is_fill_correct(fill) else "Fout",
+                        "correct": 1 if is_fill_correct(fill) else 0,
                     }
                 )
 
+        total_fills = len(fills)
+        total_correct = sum([evaluation["correct"] for evaluation in evaluations])
+        percentage_correct = (total_correct / total_fills * 100) if total_fills > 0 else 0
+
         batch_results.append(
             {
+                "survey_name": survey.name,
                 "subject_name": datum["subject"]["name"],
                 "subject_dob": datum["subject"]["birth"],
                 "evaluations": evaluations,
+                "total_fills": total_fills,
+                "total_correct": total_correct,
+                "percentage_correct": percentage_correct,
             }
         )
 
-    template_context = {"survey_name": survey.name, "batch_results": batch_results}
-
+    template_context = {"survey_name": survey.name, "number_of_participants": len(survey_data)}
     html_body = render_template("email/email.html", context=template_context)
+
+    csv_file = compose_survey_results_csv(batch_results)
 
     # Only for testing purposes.
     if immediate is True:
-        send_async_email(message_subject, recipient, html_body)
+        send_async_email(message_subject, recipient, html_body, csv_file)
 
-    send_async_email.delay(message_subject, recipient, html_body)
+    send_async_email.delay(message_subject, recipient, html_body, csv_file)
 
 
 @shared_task(bind=True, max_retries=3)
-def send_async_email(self, subject, recipient, html):
+def send_async_email(self, subject, recipient, html, attachment):
     message = Message(subject=subject, recipients=[recipient], html=html)
+
+    attachment_file_name = "{}_{}.csv".format(
+        dt.datetime.now().strftime("%y%m%d%H%M"), 'survey_results'
+    )
+
+    message.attach(
+        filename=attachment_file_name, 
+        content_type="text/csv", 
+        data=attachment, 
+        disposition="attachment"
+    )
 
     try:
         mail_client.send(message)
