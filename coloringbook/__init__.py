@@ -15,7 +15,7 @@
     the application. At the very least this should include
     SQLALCHEMY_DATABASE_URI, unless `use_test_db` is set to True, in
     which case an in-memory SQLite database is used.
-     
+
     For example,
 
     >>> class config:
@@ -25,9 +25,9 @@
     >>> application = create_app(config, create_db=True, use_test_db=True)
 
     Note that the class itself is passed as the configuration object
-    in this example. An imported module with global constants defined 
-    also works. Just make sure that your configuration module is in the 
-    PYTHONPATH, and then run `import your_module` and 
+    in this example. An imported module with global constants defined
+    also works. Just make sure that your configuration module is in the
+    PYTHONPATH, and then run `import your_module` and
     `create_app(your_module)`.
 
     Instead of importing the module, you may also pass the path to the module

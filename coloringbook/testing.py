@@ -4,13 +4,13 @@
 
 """
     Auxiliary functions for testing purposes, only imported from doctests.
-    
+
     Typical way to use this module is to type something like the
     following at the top of your doctest:
-    
+
     >>> import coloringbook.testing as t
     >>> testapp = t.get_fixture_app()
-    
+
 """
 
 import coloringbook
