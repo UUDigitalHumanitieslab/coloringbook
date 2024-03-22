@@ -34,7 +34,7 @@ def compose_survey_results_csv(survey_results):
     ...         "total_fills": 2,
     ...         "total_correct": 1,
     ...         "percentage_correct": 50
-    ...     }, 
+    ...     },
     ...     {
     ...         "survey_name": "Test Survey 1",
     ...         "subject_name": "Alice",
@@ -248,9 +248,9 @@ def send_async_email(self, subject, recipient, html, attachment):
     )
 
     message.attach(
-        filename=attachment_file_name, 
-        content_type="text/csv", 
-        data=attachment, 
+        filename=attachment_file_name,
+        content_type="text/csv",
+        data=attachment,
         disposition="attachment"
     )
 
