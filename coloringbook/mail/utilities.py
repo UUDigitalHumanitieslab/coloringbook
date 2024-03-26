@@ -15,7 +15,7 @@ from coloringbook.utilities import (
 
 def compose_survey_results_csv(survey_results):
     """
-    Compose a CSV file with survey results, to be sent as an email attachment.
+    Compose a list of CSV files with survey results, one for each session, to be sent as email attachments.
 
     >>> import coloringbook as cb, coloringbook.testing as t
     >>> from coloringbook.admin.views import FillView
@@ -50,44 +50,65 @@ def compose_survey_results_csv(survey_results):
     ... ]
 
     >>> with testapp.test_request_context():
-    ...     csv_file = compose_survey_results_csv(survey_results)
-    >>> csv_reader = csv.reader(StringIO.StringIO(csv_file), delimiter=";")
+    ...     csv_files = compose_survey_results_csv(survey_results)
+    ...     csv_file_1 = csv_files[0]
+    ...     csv_file_2 = csv_files[1]
+
+    >>> csv_reader = csv.reader(StringIO.StringIO(csv_file_1), delimiter=";")
     >>> headers = next(csv_reader)
     >>> headers
-    ['Survey', 'Subject', 'Birthdate', 'Page', 'Target', 'Color', 'Correct', 'Total fills', 'Total correct', 'Percentage correct']
+    ['Survey', 'Subject', 'Birthdate', 'Page', 'Target', 'Color', 'Correct']
     >>> rows = [row for row in csv_reader]
     >>> rows[0]
-    ['Test Survey 1', 'Bob', '2000-01-01', 'Test page 1', 'Car', 'black', '0', '2', '1', '50']
+    ['Test Survey 1', 'Bob', '2000-01-01', 'Test page 1', 'Car', 'black', '0']
     >>> rows[1]
-    ['Test Survey 1', 'Bob', '2000-01-01', 'Test page 2', 'Boat', 'white', '1', '2', '1', '50']
+    ['Test Survey 1', 'Bob', '2000-01-01', 'Test page 2', 'Boat', 'white', '1']
     >>> rows[2]
-    ['Test Survey 1', 'Alice', '2000-01-01', 'Test page 1', 'Car', 'green', '1', '2', '2', '100']
-    >>> rows[3]
-    ['Test Survey 1', 'Alice', '2000-01-01', 'Test page 2', 'Boat', 'white', '1', '2', '2', '100']
+    ['Test Survey 1', 'Bob', '2000-01-01', '2', 'Total', '', '1 (50%)']
+
+    >>> csv_reader = csv.reader(StringIO.StringIO(csv_file_2), delimiter=";")
+    >>> headers = next(csv_reader)
+    >>> rows = [row for row in csv_reader]
+    >>> rows[0]
+    ['Test Survey 1', 'Alice', '2000-01-01', 'Test page 1', 'Car', 'green', '1']
+    >>> rows[1]
+    ['Test Survey 1', 'Alice', '2000-01-01', 'Test page 2', 'Boat', 'white', '1']
+    >>> rows[2]
+    ['Test Survey 1', 'Alice', '2000-01-01', '2', 'Total', '', '2 (100%)']
+
     """
-    headers = ["Survey", "Subject", "Birthdate", "Page", "Target", "Color", "Correct", "Total fills", "Total correct", "Percentage correct"]
-    buffer = StringIO.StringIO(b"")
-    writer = csv.writer(buffer, delimiter=";")
-    writer.writerow(headers)
+    headers = ["Survey", "Subject", "Birthdate", "Page", "Target", "Color", "Correct"]
+    csv_files = []
 
     for survey_result in survey_results:
+        buffer = StringIO.StringIO(b"")
+        writer = csv.writer(buffer, delimiter=";")
+        writer.writerow(headers)
         for evaluation in survey_result["evaluations"]:
-                writer.writerow(
-                    [
-                        survey_result["survey_name"],
-                        survey_result["subject_name"],
-                        survey_result["subject_dob"],
-                        evaluation["page"],
-                        evaluation["target"],
-                        evaluation["color"],
-                        evaluation["correct"],
-                        survey_result["total_fills"],
-                        survey_result["total_correct"],
-                        survey_result["percentage_correct"],
-                    ]
-                )
+            writer.writerow(
+                [
+                    survey_result["survey_name"],
+                    survey_result["subject_name"],
+                    survey_result["subject_dob"],
+                    evaluation["page"],
+                    evaluation["target"],
+                    evaluation["color"],
+                    evaluation["correct"],
+                ]
+            )
+        writer.writerow([
+            survey_result["survey_name"],
+            survey_result["subject_name"],
+            survey_result["subject_dob"],
+            survey_result["total_fills"],
+            "Total",
+            "",
+            "{} ({}%)".format(survey_result["total_correct"], survey_result["percentage_correct"])
+        ])
+        csv_files.append(buffer.getvalue())
+        buffer.close()
 
-    return buffer.getvalue()
+    return csv_files
 
 
 def send_email(recipient, survey_data, survey, immediate=False):
@@ -230,29 +251,30 @@ def send_email(recipient, survey_data, survey, immediate=False):
     template_context = {"survey_name": survey.name, "number_of_participants": len(survey_data)}
     html_body = render_template("email/email.html", context=template_context)
 
-    csv_file = compose_survey_results_csv(batch_results)
+    csv_files = compose_survey_results_csv(batch_results)
 
     # Only for testing purposes.
     if immediate is True:
-        send_async_email(message_subject, recipient, html_body, csv_file)
+        send_async_email(message_subject, recipient, html_body, csv_files)
 
-    send_async_email.delay(message_subject, recipient, html_body, csv_file)
+    send_async_email.delay(message_subject, recipient, html_body, csv_files)
 
 
 @shared_task(bind=True, max_retries=3)
-def send_async_email(self, subject, recipient, html, attachment):
+def send_async_email(self, subject, recipient, html, attachments):
     message = Message(subject=subject, recipients=[recipient], html=html)
 
-    attachment_file_name = "{}_{}.csv".format(
-        dt.datetime.now().strftime("%y%m%d%H%M"), 'survey_results'
-    )
+    for index, attachment in enumerate(attachments):
+        attachment_file_name = "{}_{}_{}.csv".format(
+            dt.datetime.now().strftime("%y%m%d%H%M"), 'survey_results', index
+        )
 
-    message.attach(
-        filename=attachment_file_name,
-        content_type="text/csv",
-        data=attachment,
-        disposition="attachment"
-    )
+        message.attach(
+            filename=attachment_file_name,
+            content_type="text/csv",
+            data=attachment,
+            disposition="attachment"
+        )
 
     try:
         mail_client.send(message)
