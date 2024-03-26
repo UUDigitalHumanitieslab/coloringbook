@@ -15,11 +15,11 @@ import sqlalchemy as sa
 
 def upgrade():
     op.alter_column('survey', 'information',
-               existing_type=sa.String(500),
-               type_=sa.Text)
+                existing_type=sa.String(500),
+                type_=sa.Text)
 
 
 def downgrade():
     op.alter_column('survey', 'information',
-               existing_type=sa.Text,
-               type_=sa.String(500))
+                existing_type=sa.Text,
+                type_=sa.String(500))

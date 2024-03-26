@@ -4,7 +4,7 @@
 
 """
     Logic and boilerplate code for custom WTForms form fields and validators.
-    
+
     Please refer to the WTForms documentation for details.
 """
 
@@ -23,14 +23,14 @@ class Select2MultipleWidget(widgets.HiddenInput):
         By default, the `_value()` method will be called upon the
         associated field to provide the ``value=`` HTML attribute.
     """
-    
+
     input_type = 'select2multiple'  # see flask-admin issue #511
 
     def __call__(self, field, **kwargs):
         kwargs.setdefault('data-choices', self.json_choices(field))
         kwargs.setdefault('type', 'hidden')  # see flask-admin issue #511
         return super(Select2MultipleWidget, self).__call__(field, **kwargs)
-    
+
     @staticmethod
     def json_choices(field):
         objects = ('{{"id": {}, "text": "{}"}}'.format(*c) for c in field.iter_choices())
@@ -43,13 +43,13 @@ class Select2MultipleField(fields.SelectMultipleField):
 
         You must include select2.js, form.js and select2 stylesheet for it to
         work.
-        
+
         This is a slightly altered derivation of the original Select2Field.
     """
     widget = Select2MultipleWidget()
 
     def __init__(self, label=None, validators=None, coerce=text_type,
-                 choices=None, allow_blank=False, blank_text=None, **kwargs):
+                choices=None, allow_blank=False, blank_text=None, **kwargs):
         super(Select2MultipleField, self).__init__(
             label, validators, coerce, choices, **kwargs
         )
@@ -91,7 +91,7 @@ class Select2MultipleField(fields.SelectMultipleField):
             return
 
         super(Select2MultipleField, self).pre_validate(form)
-    
+
     def _value(self):
         return ','.join(map(str, self.data))
 
@@ -111,12 +111,11 @@ class FileNameLength(Length):
             if message is None:
                 if self.max == -1:
                     message = field.ngettext('Field must be at least %(min)d character long.',
-                                             'Field must be at least %(min)d characters long.', self.min)
+                                            'Field must be at least %(min)d characters long.', self.min)
                 elif self.min == -1:
                     message = field.ngettext('Field cannot be longer than %(max)d character.',
-                                             'Field cannot be longer than %(max)d characters.', self.max)
+                                            'Field cannot be longer than %(max)d characters.', self.max)
                 else:
                     message = field.gettext('Field must be between %(min)d and %(max)d characters long.')
 
             raise ValidationError(message % dict(min=self.min, max=self.max, length=l))
-

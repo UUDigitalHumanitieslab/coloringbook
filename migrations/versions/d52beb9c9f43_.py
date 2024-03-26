@@ -16,29 +16,29 @@ import sqlalchemy as sa
 
 def upgrade():
     op.alter_column('area', 'name',
-               existing_type=sa.String(length=20),
-               type_=sa.String(length=40),
-               existing_nullable=False)
+                existing_type=sa.String(length=20),
+                type_=sa.String(length=40),
+                existing_nullable=False)
     op.alter_column('drawing', 'name',
-               existing_type=sa.String(length=30),
-               type_=sa.String(length=50),
-               existing_nullable=False)
+                existing_type=sa.String(length=30),
+                type_=sa.String(length=50),
+                existing_nullable=False)
     op.alter_column('sound', 'name',
-               existing_type=sa.String(length=30),
-               type_=sa.String(length=50),
-               existing_nullable=False)
+                existing_type=sa.String(length=30),
+                type_=sa.String(length=50),
+                existing_nullable=False)
 
 
 def downgrade():
     op.alter_column('sound', 'name',
-               existing_type=sa.String(length=50),
-               type_=sa.String(length=30),
-               existing_nullable=False)
+                existing_type=sa.String(length=50),
+                type_=sa.String(length=30),
+                existing_nullable=False)
     op.alter_column('drawing', 'name',
-               existing_type=sa.String(length=50),
-               type_=sa.String(length=30),
-               existing_nullable=False)
+                existing_type=sa.String(length=50),
+                type_=sa.String(length=30),
+                existing_nullable=False)
     op.alter_column('area', 'name',
-               existing_type=sa.String(length=40),
-               type_=sa.String(length=20),
-               existing_nullable=False)
+                existing_type=sa.String(length=40),
+                type_=sa.String(length=20),
+                existing_nullable=False)
