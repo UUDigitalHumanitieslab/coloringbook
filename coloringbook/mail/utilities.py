@@ -234,7 +234,9 @@ def send_email(recipient, survey_data, survey, immediate=False):
 
         total_fills = len(fills)
         total_correct = sum([evaluation["correct"] for evaluation in evaluations])
-        percentage_correct = (total_correct / total_fills * 100) if total_fills > 0 else 0
+        # In Python 2, division of integers returns an integer, so we need to cast the total_fills to a float.
+        percentage_correct_unrounded = (total_correct / float(total_fills) * 100) if total_fills > 0 else 0
+        percentage_correct_rounded = int(round(percentage_correct_unrounded))
 
         batch_results.append(
             {
@@ -244,7 +246,7 @@ def send_email(recipient, survey_data, survey, immediate=False):
                 "evaluations": evaluations,
                 "total_fills": total_fills,
                 "total_correct": total_correct,
-                "percentage_correct": percentage_correct,
+                "percentage_correct": percentage_correct_rounded,
             }
         )
 
