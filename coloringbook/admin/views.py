@@ -13,16 +13,13 @@
 import os, os.path as op
 
 from sqlalchemy.event import listens_for
-from jinja2 import Markup
 from wtforms import fields, validators
-from flask import request, url_for, redirect, flash, json, current_app
+from flask import flash, json, current_app
 from flask.ext.admin import expose, form
 from flask.ext.admin.contrib.sqla import ModelView
 import flask.ext.admin.contrib.sqla.filters as filters
-from flask.ext.admin.helpers import validate_form_on_submit, get_redirect_target
-from flask.ext.admin.form import FormOpts, rules
-from flask.ext.admin.model.helpers import get_mdict_item_or_list
-from flask.ext.admin.babel import gettext
+from flask.ext.admin.form import rules
+from flask.ext.admin.actions import action
 
 from ..models import *
 
@@ -200,7 +197,7 @@ class FillView(ModelView):
         )
 
 
-class SubjectView (ModelView):
+class SubjectView(ModelView):
     """ Custom admin table view of Subject data. """
     can_edit = False
     can_create = False
@@ -283,7 +280,7 @@ class SubjectView (ModelView):
         return query, headers, 'subject-languagedata'
 
 
-class SurveyView (ModelView):
+class SurveyView(ModelView):
     """ Custom admin table view of Survey objects. """
 
     edit_template = 'admin/augmented_edit.html'
@@ -393,6 +390,29 @@ class PageView(ModelView):
         rules.Container('forms.hide', rules.Field('expect_list')),
         rules.Macro('drawing.edit_expectations'),
     )
+
+    @action('duplicate', 'Duplicate', 'Are you sure you want to duplicate the selected pages?')
+    def duplicate_page(self, page_ids):
+        for page_id in page_ids:
+            page = Page.query.get(page_id)
+            new_page = Page(
+                name=page.name + ' (copy)',
+                drawing=page.drawing,
+                language=page.language,
+                text=page.text,
+                sound=page.sound,
+            )
+            for expectation in page.expectations:
+                new_page.expectations.append(Expectation(
+                    area=expectation.area,
+                    color=expectation.color,
+                    here=expectation.here,
+                ))
+            db.session.add(new_page)
+            db.session.commit()
+
+        flash('Page was successfully duplicated.', 'success')
+
 
     def on_model_change(self, form, model, is_created=False):
         if not is_created:
