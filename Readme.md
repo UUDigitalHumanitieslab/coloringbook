@@ -28,25 +28,25 @@ On the server side, all coloring data are collected in a table that can be filte
 Researchers can compose their own surveys with custom images and sounds. The surveys are made available to test subjects through a fixed URL.
 
 
-## How to deploy?
+## How do I deploy and run the application?
 
-On the client side, test subjects just need to run a HTML5 capable browser.
+On the client side, test subjects just need to run a HTML5 capable browser. If you want to serve Coloring Book yourself, you need a system with Docker installed.
 
-Coloring Book is deployed using Docker Compose. The application needs two configuration files. 
+Coloring Book is deployed using Docker Compose. It has two deployment modes: `prod` (for production deployment) and `dev` (for local development). In `prod` mode, the application is run with a production-safe WSGI server and the containers log much less (debugging) information compared to `prod` mode.
 
-Docker needs a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings.
+For either mode to work, you need to add two configuration files.
 
-    CONFIG_FILE=abcdefg
-    MYSQL_HOST=abcdefg
-    MYSQL_PORT=1234
-    MYSQL_USER=abcdefg
-    MYSQL_PASSWORD=abcdefg
-    MYSQL_DB=abcdefg
-    MYSQL_ROOT_PASSWORD=abcdefg
+Docker expects a file called `.env` to be present in the same folder as `docker-compose.yml`, containing at least the following settings. The `...` should be substituted with the appropriate values.
 
-The setting `CONFIG_FILE` should be refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
+    CONFIG_FILE=...
+    DB_PORT=...
+    DB_USER=...
+    DB_PASSWORD=...
+    DB_DB=...
+    DB_ROOT_PASSWORD=...
 
-    SQLALCHEMY_DATABASE_URI = 'mysql://coloringbook:myawesomepassword@localhost/coloringbook'
+The setting `CONFIG_FILE` should refer to the name of a configuration file (e.g. `CONFIG_FILE=config.py`). Create this file, put it in the `coloringbook` package folder and add at least the following settings.
+
     SECRET_KEY = '12345678901234567890'
     MAIL_SERVER = 'mail.server.com'
     MAIL_PORT = 1234
@@ -56,14 +56,17 @@ The setting `CONFIG_FILE` should be refer to the name of a configuration file (e
     MAIL_PASSWORD = 'password'
     MAIL_DEFAULT_SENDER = 'mysender@email.address'
 
-With these files present, running `docker compose up --build` in the root directory of the project will start four containers.
+With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the same location as `docker-compose.yml`. This will start the following containers.
 
-- the Coloring Book web server proper;
-- a MySQL database (MySQL);
-- Celery (for asynchronous tasks);
-- Redis (a message broker).
 
-Docker should automatically create the database and run the available migrations. To run migrations manually, run
+| Name   | Description                                                                                  |
+|--------|----------------------------------------------------------------------------------------------|
+| `app`    | The Coloring Book (Flask) web application proper, with a Gunicorn server in production mode. |
+| `db`     | A MySQL (5.7) DB.                                                                            |
+| `redis`  | A Redis (6.2) message broker.                                                                |
+| `worker` | A Celery instance for asynchronous tasks.                                                    |
+
+Docker should automatically create the database (if it does not exist) and run the available migrations when the `app` container starts. To run migrations manually, run
 
     python manage.py -A -c CONFIG db upgrade
 
@@ -73,21 +76,12 @@ The project source files are automatically mounted to the local file system. In 
 
 The application does not take care of authentication or authorization. You should configure this directly on the webserver by restricting access to `/admin/`, for example using LDAP.
 
-By default, the application will run on `localhost:5000`, but this is customisable in the `Dockerfile`.
+By default, the application will run on `localhost:3000`, but this is customisable in the `docker-compose` file.
 
 
 ## Development
 
 An overview of the database layout is given in `Database.svg`. For the complete specification, refer to `coloringbook/models.py`. Anything in `admin` subfolders is specific to the admin interface. Everything else in the `coloringbook` package is involved in delivering surveys to subjects and receiving data from them. Run `python test.py` for doctest-based testing. Motivations are documented throughout the code in comments; with some referencing to documentation for Flask, SQLAlchemy and jQuery, you should be able to find your way.
-
-It is possible to run the server in the development mode by adding the following line to `.env`. 
-
-```
-DEVELOPMENT=1
-``` 
-
-This will print debug messages in the container logs and enable automatic reloading when the source files are changed.
-
 
 ## Server maintenance
 

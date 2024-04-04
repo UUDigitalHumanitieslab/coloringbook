@@ -159,7 +159,7 @@ def fills_from_json(survey, page, subject, data):
     True
     >>> testoutput[3]
     Traceback (most recent call last):
-      ...
+    ...
     IndexError: list index out of range
     """
 

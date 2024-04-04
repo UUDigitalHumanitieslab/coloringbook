@@ -4,13 +4,13 @@
 
 """
     Auxiliary functions for testing purposes, only imported from doctests.
-    
+
     Typical way to use this module is to type something like the
     following at the top of your doctest:
-    
+
     >>> import coloringbook.testing as t
     >>> testapp = t.get_fixture_app()
-    
+
 """
 
 import coloringbook
@@ -18,7 +18,6 @@ import coloringbook
 
 def get_fixture_app():
     class config:
-        SQLALCHEMY_DATABASE_URI = 'sqlite://'
         SECRET_KEY = '1234567890'
         SQLALCHEMY_TRACK_MODIFICATIONS = False
         MAIL_SERVER = "smtp.uu.nl"
@@ -30,4 +29,4 @@ def get_fixture_app():
         MAIL_DEFAULT_SENDER = "test"
         # Ensures Flask Mail does not send any real emails.
         TESTING = True
-    return coloringbook.create_app(config, create_db=True)
+    return coloringbook.create_app(config, create_db=True, use_test_db=True)
