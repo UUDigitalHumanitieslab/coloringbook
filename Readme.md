@@ -59,8 +59,8 @@ The setting `CONFIG_FILE` should refer to the name of a configuration file (e.g.
 With both configuration files present, run either `docker compose --profile dev up --build` (development mode) or `docker compose --profile prod up --build` (production mode) in the same location as `docker-compose.yml`. This will start the following containers.
 
 
-| Name   | Description                                                                                  |
-|--------|----------------------------------------------------------------------------------------------|
+| Name     | Description                                                                                  |
+|----------|----------------------------------------------------------------------------------------------|
 | `app`    | The Coloring Book (Flask) web application proper, with a Gunicorn server in production mode. |
 | `db`     | A MySQL (5.7) DB.                                                                            |
 | `redis`  | A Redis (6.2) message broker.                                                                |
