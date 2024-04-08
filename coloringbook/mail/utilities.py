@@ -31,7 +31,7 @@ def compose_survey_results_csv(survey_results):
     ...             {"page": "Test page 1", "target": "Car", "color": "black", "correct": 0},
     ...             {"page": "Test page 2", "target": "Boat", "color": "white", "correct": 1}
     ...         ],
-    ...         "total_fills": 2,
+    ...         "total_pages": 2,
     ...         "total_correct": 1,
     ...         "percentage_correct": 50
     ...     },
@@ -43,7 +43,7 @@ def compose_survey_results_csv(survey_results):
     ...             {"page": "Test page 1", "target": "Car", "color": "green", "correct": 1},
     ...             {"page": "Test page 2", "target": "Boat", "color": "white", "correct": 1}
     ...         ],
-    ...         "total_fills": 2,
+    ...         "total_pages": 2,
     ...         "total_correct": 2,
     ...         "percentage_correct": 100
     ...     }
@@ -100,7 +100,7 @@ def compose_survey_results_csv(survey_results):
             survey_result["survey_name"],
             survey_result["subject_name"],
             survey_result["subject_dob"],
-            survey_result["total_fills"],
+            survey_result["total_pages"],
             "Total",
             "",
             "{} ({}%)".format(survey_result["total_correct"], survey_result["percentage_correct"])
@@ -232,6 +232,7 @@ def send_email(recipient, survey_data, survey, immediate=False):
                     }
                 )
 
+        total_pages = len(pages)
         total_fills = len(fills)
         total_correct = sum([evaluation["correct"] for evaluation in evaluations])
         # In Python 2, division of integers returns an integer, so we need to cast the total_fills to a float.
@@ -244,7 +245,7 @@ def send_email(recipient, survey_data, survey, immediate=False):
                 "subject_name": datum["subject"]["name"],
                 "subject_dob": datum["subject"]["birth"],
                 "evaluations": evaluations,
-                "total_fills": total_fills,
+                "total_pages": total_pages,
                 "total_correct": total_correct,
                 "percentage_correct": percentage_correct_rounded,
             }
