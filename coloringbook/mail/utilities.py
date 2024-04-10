@@ -10,10 +10,10 @@ from coloringbook.utilities import (
     fills_from_json,
     subject_from_json,
     get_survey_pages,
-    is_fill_correct,
+    evaluate_page_fills
 )
 
-def compose_survey_results_csv(survey_results):
+def create_survey_results_csv(survey_results):
     """
     Compose a list of CSV files with survey results, one for each session, to be sent as email attachments.
 
@@ -50,7 +50,7 @@ def compose_survey_results_csv(survey_results):
     ... ]
 
     >>> with testapp.test_request_context():
-    ...     csv_files = compose_survey_results_csv(survey_results)
+    ...     csv_files = create_survey_results_csv(survey_results)
     ...     csv_file_1 = csv_files[0]
     ...     csv_file_2 = csv_files[1]
 
@@ -109,6 +109,114 @@ def compose_survey_results_csv(survey_results):
         buffer.close()
 
     return csv_files
+
+def collect_csv_data(survey, survey_data):
+    """
+    Reads the survey session results and extracts/aggregates the data needed for the CSV files that are to be sent by email. There should be exactly one line in the CSV file for every page in the survey.
+
+    >>> import coloringbook as cb, flask, datetime, coloringbook.testing
+    >>> import coloringbook.models as m
+    >>> from flask_mail import Mail
+    >>> from HTMLParser import HTMLParser
+
+    >>> app = coloringbook.testing.get_fixture_app()
+    >>> mail = Mail(app)
+
+    >>> testwelcome = m.WelcomeText(name='a', content='a')
+    >>> testprivacy = m.PrivacyText(name='a', content='a')
+    >>> testsuccess = m.SuccessText(name='a', content='a')
+    >>> testinstruction = m.InstructionText(name='a', content='a')
+    >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
+    >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
+    >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a', post_survey_button='a', page_back_button='a')
+    >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
+
+    >>> testdrawing = cb.models.Drawing(name='picture')
+    >>> testarealeft = cb.models.Area(name='left door')
+    >>> testarearight = cb.models.Area(name='right door')
+    >>> testdrawing.areas.append(testarealeft)
+    >>> testdrawing.areas.append(testarearight)
+    >>> testpage = cb.models.Page(name='testpage', language_id=1, text='test', drawing=testdrawing)
+    >>> testsurveypage = cb.models.SurveyPage(survey=testsurvey, page=testpage, ordering=1)
+
+    >>> survey_data = [
+    ...     {
+    ...         "subject": {
+    ...             "name": "Bob",
+    ...             "birth": "2000-01-01",
+    ...             "languages": [["German", 10], ["Swahili", 1]],
+    ...             "numeral": "",
+    ...             "eyesight": ""
+    ...         },
+    ...         "results": [[
+    ...             {
+    ...                 "action": "fill",
+    ...                 "color": "#000",
+    ...                 "target": "left door",
+    ...                 "time": 1000
+    ...             },
+    ...             {
+    ...                 "action": "fill",
+    ...                 "color": "#fff",
+    ...                 "target": "right door",
+    ...                 "time": 2000
+    ...             }
+    ...         ]]
+    ...     }
+    ... ]
+
+    >>> with app.app_context():
+    ...     s = cb.models.db.session
+    ...     s.add(testsurveypage)
+    ...     s.add(cb.models.Color(code='#000', name='black'))
+    ...     s.add(cb.models.Color(code='#fff', name='white'))
+    ...     s.flush()
+    ...     csv_data = collect_csv_data(testsurvey, survey_data)
+
+    >>> csv_data[0]['survey_name']
+    'test'
+
+    >>> csv_data[0]['evaluations'][0]['correct']
+    0
+    >>> csv_data[0]['evaluations'][0]['page']
+    'testpage'
+    >>> csv_data[0]['evaluations'][0]['target']
+    'left door, right door'
+    >>> csv_data[0]['evaluations'][0]['color']
+    u'black, white'
+    """
+    batch_results = []
+    # Every datum corresponds to a subject.
+    for datum in survey_data:
+        subject = subject_from_json(datum["subject"])
+        pages = get_survey_pages(survey)
+
+        # Every subject has a list of results, one for each page.
+        results = datum["results"]
+        evaluations = []
+        for page, result in zip(pages, results):
+            fills = fills_from_json(survey, page, subject, result)
+            evaluations.append(evaluate_page_fills(fills, page))
+
+        # The amount of evaluations is equal to the amount of pages in the survey.
+        total_pages = len(pages)
+        total_correct_evaluations = sum([evaluation["correct"] for evaluation in evaluations])
+        # In Python 2, division of integers returns an integer, so we need to cast the total_pages to a float.
+        percentage_correct_unrounded = (total_correct_evaluations / float(total_pages) * 100) if total_pages > 0 else 0
+        percentage_correct_rounded = int(round(percentage_correct_unrounded))
+
+        batch_results.append(
+            {
+                "survey_name": survey.name,
+                "subject_name": datum["subject"]["name"],
+                "subject_dob": datum["subject"]["birth"],
+                "evaluations": evaluations,
+                "total_pages": total_pages,
+                "total_correct": total_correct_evaluations,
+                "percentage_correct": percentage_correct_rounded,
+            }
+        )
+    return batch_results
 
 
 def send_email(recipient, survey_data, survey, immediate=False):
@@ -211,50 +319,12 @@ def send_email(recipient, survey_data, survey, immediate=False):
 
     message_subject = "ColoringBook - nieuwe resultaten opgeslagen"
 
-    batch_results = []
-    # Every datum corresponds to a subject.
-    for datum in survey_data:
-        subject = subject_from_json(datum["subject"])
-        pages = get_survey_pages(survey)
-
-        # Every subject has a list of results, one for each page.
-        results = datum["results"]
-        evaluations = []
-        for page, result in zip(pages, results):
-            fills = fills_from_json(survey, page, subject, result)
-            for fill in fills:
-                evaluations.append(
-                    {
-                        "page": page.name,
-                        "target": fill.area,
-                        "color": fill.color,
-                        "correct": 1 if is_fill_correct(fill) else 0,
-                    }
-                )
-
-        total_pages = len(pages)
-        total_fills = len(fills)
-        total_correct = sum([evaluation["correct"] for evaluation in evaluations])
-        # In Python 2, division of integers returns an integer, so we need to cast the total_fills to a float.
-        percentage_correct_unrounded = (total_correct / float(total_fills) * 100) if total_fills > 0 else 0
-        percentage_correct_rounded = int(round(percentage_correct_unrounded))
-
-        batch_results.append(
-            {
-                "survey_name": survey.name,
-                "subject_name": datum["subject"]["name"],
-                "subject_dob": datum["subject"]["birth"],
-                "evaluations": evaluations,
-                "total_pages": total_pages,
-                "total_correct": total_correct,
-                "percentage_correct": percentage_correct_rounded,
-            }
-        )
+    csv_data = collect_csv_data(survey, survey_data)
 
     template_context = {"survey_name": survey.name, "number_of_participants": len(survey_data)}
     html_body = render_template("email/email.html", context=template_context)
 
-    csv_files = compose_survey_results_csv(batch_results)
+    csv_files = create_survey_results_csv(csv_data)
 
     # Only for testing purposes.
     if immediate is True:

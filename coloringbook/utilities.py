@@ -199,24 +199,44 @@ def fills_from_json(survey, page, subject, data):
     return actions
 
 
-def is_fill_correct(fill):
+def evaluate_page_fills(fills, page):
     """
-    Returns whether a fill action is correct.
+    Evaluates the fills on a page.
 
-    `fill` is expected to be a Fill object.
+    Expects a list of fills (which may be empty) and returns a dictionary containing `page_name`, `target`, `color` and a `correct` score. These values are determined as follows.
+
+    - If the page is skipped (no fills), the correct score is `0`.
+    - If the page has a single fill, a correct score of `1` is returned if the target of the fill is the same as the expected target. (The color does not matter.) Else, the correct score will be `0`.
+    - If the page has multiple fills, a correct score of `1` is returned if one of them has a target that is identical to the expected target. Else, this function returns a correct score of `0`.
 
     >>> import coloringbook as cb, flask, datetime, coloringbook.testing
     >>> import coloringbook.models as m
     >>> app = coloringbook.testing.get_fixture_app()
 
-    >>> test_color_correct = m.Color(code='#008000', name='green')
-    >>> test_color_incorrect = m.Color(code='#ff0000', name='red')
-    >>> testdrawing = cb.models.Drawing(name='picture')
-    >>> testarealeft = cb.models.Area(name='left door')
-    >>> testarearight = cb.models.Area(name='right door')
-    >>> testdrawing.areas.append(testarealeft)
-    >>> testdrawing.areas.append(testarearight)
-    >>> testpage = cb.models.Page(name='page1', drawing=testdrawing, text='test 123')
+    # Areas
+    >>> correct_area = m.Area(name='elephant')
+    >>> incorrect_area = m.Area(name='dog')
+    >>> extra_area = m.Area(name='fish')
+
+    # Drawing and page
+    >>> test_drawing = m.Drawing(name='picture')
+    >>> test_drawing.areas.append(correct_area)
+    >>> test_drawing.areas.append(incorrect_area)
+    >>> test_drawing.areas.append(extra_area)
+
+    >>> test_page_1 = m.Page(name='page1', drawing=test_drawing, text='test page 1')
+    >>> test_page_2 = m.Page(name='page2', drawing=test_drawing, text='test page 2')
+
+    # Colors
+    >>> correct_color = m.Color(code='#000', name='black')
+    >>> incorrect_color = m.Color(code='#fff', name='white')
+
+    # Expectations (in practice there is only one expectation per page; we test multiple for the sake of completeness.)
+    >>> test_exp_1 = m.Expectation(area=correct_area, here=True, page=test_page_1, color=correct_color)
+    >>> test_exp_2 = m.Expectation(area=correct_area, here=True, page=test_page_2, color=correct_color)
+
+
+    # Survey
     >>> testwelcome = m.WelcomeText(name='a', content='a')
     >>> testprivacy = m.PrivacyText(name='a', content='a')
     >>> testsuccess = m.SuccessText(name='a', content='a')
@@ -225,64 +245,102 @@ def is_fill_correct(fill):
     >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
     >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a', post_survey_button='a', page_back_button='a')
     >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
+
+    # Subject
     >>> testsubject = cb.models.Subject(name='Bob', birth=datetime.date(2000, 1, 1))
 
-    >>> test_correct_fill = m.Fill(
-    ...    survey=testsurvey,
-    ...    subject=testsubject,
-    ...    page=testpage,
-    ...    area=testarealeft,
-    ...    time=1000,
-    ...    color=test_color_correct)
+    # Fills
+    >>> correct_area_correct_color = m.Fill(area=correct_area, color=correct_color, survey=testsurvey, page=test_page_1, subject=testsubject, time=1000)
+    >>> incorrect_area_correct_color_1 = m.Fill(area=incorrect_area, color=correct_color, survey=testsurvey, page=test_page_1, subject=testsubject, time=1000)
+    >>> incorrect_area_correct_color_2 = m.Fill(area=extra_area, color=correct_color, survey=testsurvey, page=test_page_2, subject=testsubject, time=1000)
+    >>> incorrect_area_incorrect_color = m.Fill(area=incorrect_area, color=incorrect_color, survey=testsurvey, page=test_page_2, subject=testsubject, time=1000)
 
-    >>> test_incorrect_fill = m.Fill(
-    ...    survey=testsurvey,
-    ...    subject=testsubject,
-    ...    page=testpage,
-    ...    area=testarealeft,
-    ...    time=500,
-    ...    color=test_color_incorrect)
-
-    >>> test_expectation = m.Expectation(
-    ...    page=testpage,
-    ...    area=testarealeft,
-    ...    color=test_color_correct,
-    ...    here=True,
-    ...    motivation='test'
-    ...    )
-
-    # Run test function
     >>> with app.app_context():
-    ...     correct_result = is_fill_correct(test_correct_fill)
-
-    # Result if there are no expectations
-    >>> correct_result
-    False
-
-    # Add data to the database
-    >>> with app.app_context():
+    ...     # make sure the pre-existing data are persistent
     ...     s = cb.models.db.session
-    ...     s.add(test_expectation)
+    ...     s.add(correct_area)
+    ...     s.add(incorrect_area)
+    ...     s.add(extra_area)
+    ...     s.add(test_exp_1)
+    ...     s.add(test_exp_2)
+    ...     s.commit()
     ...     s.flush()
-    ...     # Run test function
-    ...     correct_result = is_fill_correct(test_correct_fill)
-    ...     incorrect_result = is_fill_correct(test_incorrect_fill)
+    ...     no_fills = evaluate_page_fills([], test_page_1)
+    ...     one_fill_correct = evaluate_page_fills([correct_area_correct_color], test_page_1)
+    ...     one_fill_incorrect = evaluate_page_fills([incorrect_area_correct_color_1], test_page_1)
+    ...     multiple_fills_incorrect = evaluate_page_fills([incorrect_area_correct_color_1, incorrect_area_correct_color_2], test_page_2)
+    ...     multiple_fills_mixed_correct = evaluate_page_fills([correct_area_correct_color, incorrect_area_incorrect_color], test_page_1)
 
-    # Result if fill matches expectation
-    >>> correct_result
-    True
+    >>> no_fills['correct']
+    0
+    >>> no_fills['page']
+    u'page1'
+    >>> no_fills['target']
+    '-'
+    >>> no_fills['color']
+    '-'
 
-    # Result if fill does not match expectation
-    >>> incorrect_result
-    False
+    >>> one_fill_correct['correct']
+    1
+    >>> one_fill_correct['page']
+    u'page1'
+    >>> one_fill_correct['target']
+    u'elephant'
+    >>> one_fill_correct['color']
+    u'black'
+
+    >>> one_fill_incorrect['correct']
+    0
+    >>> one_fill_incorrect['page']
+    u'page1'
+    >>> one_fill_incorrect['target']
+    u'dog'
+    >>> one_fill_incorrect['color']
+    u'black'
+
+    >>> multiple_fills_incorrect['correct']
+    0
+    >>> multiple_fills_incorrect['page']
+    u'page2'
+    >>> multiple_fills_incorrect['target']
+    u'dog, fish'
+    >>> multiple_fills_incorrect['color']
+    u'black, black'
+
+    >>> multiple_fills_mixed_correct['correct']
+    1
+    >>> multiple_fills_mixed_correct['page']
+    u'page1'
+    >>> multiple_fills_mixed_correct['target']
+    u'elephant'
+    >>> multiple_fills_mixed_correct['color']
+    u'black'
     """
 
-    actual_color = fill.color
-    expectation = Expectation.query.filter_by(
-        page=fill.page,
-        area=fill.area,
-    )
-    if expectation.count() == 0:
-        return False
-    expected_color = expectation.one().color
-    return actual_color == expected_color
+    # User skipped the page.
+    if len(fills) == 0:
+        return {
+            "page": page.name,
+            "target": "-",
+            "color": "-",
+            "correct": 0,
+        }
+
+    # User filled in the correct area.
+    for fill in fills:
+        for expectation in page.expectations:
+            if fill.area.id == expectation.area.id:
+                return {
+                    "page": page.name,
+                    "target": fill.area.name,
+                    "color": fill.color.name,
+                    "correct": 1,
+                }
+
+    # User filled in the wrong area.
+    return {
+        "page": page.name,
+        "target": ', '.join(fill.area.name for fill in fills),
+        "color": ', '.join(fill.color.name for fill in fills),
+        "correct": 0,
+    }
