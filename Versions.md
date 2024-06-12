@@ -1,6 +1,13 @@
 # Coloring Book -- version history #
 
-## 2.1 (current) ##
+## 2.2 ##
+
+  * An email field has been added to the Survey form. Whenever a batch of survey data is uploaded, an email is sent to the provided email address to notify the associated user.
+  * For every participant in the uploaded survey data, a CSV file is compiled and added to this email as an attachment. This file contains the participant's score for each page and an aggregated score.
+  * The application is Dockerized and Celery/Redis are added to handle the sending of emails.
+  * Pages can now be duplicated by selecting one or multiple pages and clicking 'Duplicate' in the 'With selected' dropdown.
+
+## 2.1 ##
 
   * Updated the index page to redirect to the project website.
 

@@ -1,3 +1,9 @@
 *.pyc
-/config.py
+/coloringbook/config.py
 /instance
+.venv
+.env
+
+# Gunicorn logs
+access_log
+error_log

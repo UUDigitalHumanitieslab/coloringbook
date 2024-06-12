@@ -1,6 +1,8 @@
-# -*- coding: utf-8 -*-
-# (c) 2014-2016 Digital Humanities Lab, Utrecht University
-# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+# coding=utf-8
+
+# (c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University
+# Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
 
 """
     Helper functions for various purposes.
@@ -14,9 +16,9 @@ from flask import make_response, request
 def maybe_utf8(value):
     """
         Returns UTF-8 encoded byte strings for unicode strings.
-        
+
         For other types of objects, returns the value unchanged.
-        
+
         >>> maybe_utf8(u'Magda Szábo')
         'Magda Sz\\xc3\\x83\\xc2\\xa1bo'
         >>> maybe_utf8(10)
@@ -37,9 +39,9 @@ def convert_utf8(table):
 def csvdownload(view):
     r"""
         View decorator adding suitable response headers for CSV downloads.
-        
+
         Use this inside a view decorator. Example:
-        
+
         >>> import coloringbook.testing as t, coloringbook.models as m
         >>> site = t.get_fixture_app()
         >>> # using the decorator
@@ -88,10 +90,10 @@ def csvdownload(view):
 def filters_from_request(self):
     """
         Parse the request arguments and return flask-admin Filter objects.
-        
+
         This is an extract from flask-admin sqla.ModelView.get_list.
         Example of usage:
-        
+
         >>> import coloringbook as cb, coloringbook.testing as t
         >>> from coloringbook.admin.views import FillView
         >>> testapp = t.get_fixture_app()
@@ -100,7 +102,7 @@ def filters_from_request(self):
         ...     cb.admin.utilities.filters_from_request(FillView(s))
         [(<flask_admin.contrib.sqla.filters.FilterEqual object at 0x...>, u'rode')]
     """
-    
+
     filters = self._get_list_filter_args()
     applicables = []
 
@@ -108,5 +110,5 @@ def filters_from_request(self):
         for idx, name, value in filters:
             flt = self._filters[idx]
             applicables.append((flt, value))
-    
+
     return applicables

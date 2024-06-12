@@ -1,9 +1,10 @@
-# (c) 2014, 2016-2017 Digital Humanities Lab, Utrecht University
-# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+# (c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University
+# Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
 
 """
     This is the head of the admin subpackage.
-    
+
     The purpose of the package is to define a flask.ext.admin.Admin
     object, which will be responsible for serving the administrative
     backend of the web application. Most of the work is done in the
@@ -22,10 +23,10 @@ from ..models import db, WelcomeText, PrivacyText, InstructionText, SuccessText
 def create_admin(app):
     """
         Create an Admin object on Flask instance `app` and return it.
-        
+
         `app` must be a live Flask instance which has already been
         configured. Using this function basically goes like this:
-        
+
         >>> import coloringbook, flask
         >>> application = flask.Flask(__name__)
         >>> application.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://'
@@ -33,7 +34,7 @@ def create_admin(app):
         >>> db.init_app(application)
         >>> db.create_all(app = application)
         >>> admin = create_admin(application)
-        
+
     """
     sess = db.session
     admin = Admin(name='Coloring Book', app=app, base_template='admin/style_master.html')

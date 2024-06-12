@@ -1,17 +1,19 @@
 #!/usr/bin/env python
 
-# (c) 2014 Digital Humanities Lab, Faculty of Humanities, Utrecht University
-# Author: Julian Gonggrijp, j.gonggrijp@uu.nl
+# (c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University
+# Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at
+# https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
 
 """
-    Script for automatically running the doctest test cases.
+    Script for automatically running the doctest and unittest test cases.
 """
 
 from doctest import testmod, ELLIPSIS
+import unittest
 
 import coloringbook, coloringbook.testing
 
-def test_all ( ):
+def test_all():
     testmod(coloringbook.testing)
     testmod(coloringbook)
     testmod(coloringbook.models)
@@ -20,6 +22,10 @@ def test_all ( ):
     testmod(coloringbook.admin.utilities, optionflags = ELLIPSIS)
     testmod(coloringbook.admin.forms)
     testmod(coloringbook.admin.views)
+    testmod(coloringbook.utilities)
+    testmod(coloringbook.mail.utilities)
+
+    unittest.main()
 
 if __name__ == '__main__':
     test_all()
