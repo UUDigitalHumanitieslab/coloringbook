@@ -12,10 +12,10 @@ COPY . /coloringbook
 WORKDIR /coloringbook
 
 # Install dependencies
-RUN pip install -r requirements.txt --no-cache-dir
+RUN pip install -r requirements.txt --no-cache-dir --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org
 
 # Install Gunicorn for production deployment
-RUN pip install gunicorn==19.9.0
+RUN pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org gunicorn==19.9.0
 
 # Expose port
 EXPOSE 5000
