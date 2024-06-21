@@ -9,8 +9,8 @@
 """
 
 import StringIO, csv, datetime as dt
-
 from flask import make_response, request
+from coloringbook.models import PAGE_NAME_CHAR_LIMIT
 
 
 def maybe_utf8(value):
@@ -112,3 +112,24 @@ def filters_from_request(self):
             applicables.append((flt, value))
 
     return applicables
+
+def get_page_copy_name(old_page_name):
+    """
+    Returns the name for a duplicated page, with ' (copy)' appended to the original name, as long as the resulting name is within the character limit.
+
+    >>> from coloringbook.admin.utilities import get_page_copy_name
+    >>> get_page_copy_name('A page')
+    'A page (copy)'
+
+    >>> get_page_copy_name('A page whose name is just ninety-eight characters long, so that copy will not be added at its end.')
+    'A page whose name is just ninety-eight characters long, so that copy will not be added at its end.'
+
+    """
+    copy_suffix = " (copy)"
+
+    new_page_name = old_page_name + copy_suffix
+
+    if len(new_page_name) > PAGE_NAME_CHAR_LIMIT:
+        return old_page_name
+
+    return new_page_name
