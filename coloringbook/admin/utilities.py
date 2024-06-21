@@ -9,6 +9,7 @@
 """
 
 import StringIO, csv, datetime as dt
+
 from flask import make_response, request
 from coloringbook.models import PAGE_NAME_CHAR_LIMIT
 
@@ -112,6 +113,7 @@ def filters_from_request(self):
             applicables.append((flt, value))
 
     return applicables
+
 
 def get_page_copy_name(old_page_name):
     """
