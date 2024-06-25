@@ -23,7 +23,7 @@ from flask.ext.admin.actions import action
 
 from ..models import *
 
-from .utilities import csvdownload, get_page_copy_name
+from .utilities import csvdownload, get_copied_name
 from .forms import Select2MultipleField, FileNameLength
 
 
@@ -326,6 +326,41 @@ class SurveyView(ModelView):
         'email_address': 'Used to send a notification when a survey is completed and uploaded.',
     }
 
+    @action('duplicate', 'Duplicate', 'Are you sure you want to duplicate the selected surveys?')
+    def duplicate_surveys(self, survey_ids):
+        for survey_id in survey_ids:
+            survey = Survey.query.get(survey_id)
+            new_survey = Survey(
+                name=get_copied_name(survey.name, 40),
+                language_id=survey.language_id,
+                begin=survey.begin,
+                end=survey.end,
+                simultaneous=survey.simultaneous,
+                information=survey.information,
+                duration=survey.duration,
+                email_address=survey.email_address,
+                instruction_text_id=survey.instruction_text_id,
+                privacy_text_id=survey.privacy_text_id,
+                success_text_id=survey.success_text_id,
+                title=survey.title,
+                welcome_text_id=survey.welcome_text_id,
+                ending_form_id=survey.ending_form_id,
+                starting_form_id=survey.starting_form_id,
+                button_set_id=survey.button_set_id,
+            )
+            db.session.add(new_survey)
+            db.session.commit()
+            for old_survey_page in survey.survey_pages:
+                new_survey_page = SurveyPage(
+                    survey_id=new_survey.id,
+                    page_id=old_survey_page.page_id,
+                    ordering=old_survey_page.ordering
+                )
+                db.session.add(new_survey_page)
+            db.session.commit()
+
+        flash('Survey was successfully duplicated.', 'success')
+
     def create_form(self, obj=None):
         form = super(SurveyView, self).create_form(obj)
         form.page_list.choices = db.session.query(Page.id, Page.name).order_by(Page.name).all()
@@ -396,7 +431,7 @@ class PageView(ModelView):
         for page_id in page_ids:
             page = Page.query.get(page_id)
             new_page = Page(
-                name=get_page_copy_name(page.name),
+                name=get_copied_name(page.name, PAGE_NAME_CHAR_LIMIT),
                 drawing=page.drawing,
                 language=page.language,
                 text=page.text,
