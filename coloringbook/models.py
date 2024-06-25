@@ -14,6 +14,8 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.declarative import declared_attr
 
 
+PAGE_NAME_CHAR_LIMIT = 100  # maximum length of a Page name
+
 def TableArgsMeta(parent_class, table_args):
     """
         Metaclass generator to set global defaults for __table_args__.
@@ -175,7 +177,7 @@ class Page(db.Model):
     """ Combination of a sentence and a Drawing. """
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(30), nullable=False)
+    name = db.Column(db.String(PAGE_NAME_CHAR_LIMIT), nullable=False)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     text = db.Column(db.String(200))  # sentence
     sound_id = db.Column(db.Integer, db.ForeignKey('sound.id'))

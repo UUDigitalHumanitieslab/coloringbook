@@ -23,7 +23,7 @@ from flask.ext.admin.actions import action
 
 from ..models import *
 
-from .utilities import csvdownload
+from .utilities import csvdownload, get_page_copy_name
 from .forms import Select2MultipleField, FileNameLength
 
 
@@ -396,7 +396,7 @@ class PageView(ModelView):
         for page_id in page_ids:
             page = Page.query.get(page_id)
             new_page = Page(
-                name=page.name + ' (copy)',
+                name=get_page_copy_name(page.name),
                 drawing=page.drawing,
                 language=page.language,
                 text=page.text,
