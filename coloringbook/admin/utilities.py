@@ -116,14 +116,18 @@ def filters_from_request(self):
 
 def get_copied_name(old_name, limit):
     """
-    Returns the name for a duplicated page or survey, with '_copy' appended to the original name, as long as the resulting name is within the provided character limit.
+    Returns the name for a duplicated page or survey, with a suffix appended to
+    the original name to indicate that it is a copy. This only works as long as
+    the resulting name is within the provided character limit.
+
+    :param old_name: The original name of the page or survey.
+    :param limit: The maximum number of characters allowed for the new name.
 
     >>> from coloringbook.admin.utilities import get_copied_name
-    >>> from coloringbook.models import PAGE_NAME_CHAR_LIMIT
-    >>> get_copied_name('A page', PAGE_NAME_CHAR_LIMIT)
+    >>> get_copied_name('A page', 100)
     'A page_copy)'
 
-    >>> get_copied_name('A page whose name is just ninety-eight characters long, so that copy will not be added at its end.', PAGE_NAME_CHAR_LIMIT)
+    >>> get_copied_name('A page whose name is just ninety-eight characters long, so that copy will not be added at its end.', 100)
     'A page whose name is just ninety-eight characters long, so that copy will not be added at its end.'
 
     """
