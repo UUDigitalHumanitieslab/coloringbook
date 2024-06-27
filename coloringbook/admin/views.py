@@ -328,10 +328,22 @@ class SurveyView(ModelView):
 
     @action('duplicate', 'Duplicate', 'Are you sure you want to duplicate the selected surveys?')
     def duplicate_surveys(self, survey_ids):
+        successful = []
+        failed = []
         for survey_id in survey_ids:
             survey = Survey.query.get(survey_id)
+
+            new_survey_name = get_copied_name(
+                old_name=survey.name,
+                limit=SURVEY_NAME_CHAR_LIMIT
+            )
+            existing = Survey.query.filter_by(name=new_survey_name).first()
+            if existing:
+                failed.append(new_survey_name)
+                continue
+
             new_survey = Survey(
-                name=get_copied_name(survey.name, 40),
+                name=new_survey_name,
                 language_id=survey.language_id,
                 begin=survey.begin,
                 end=survey.end,
@@ -359,7 +371,14 @@ class SurveyView(ModelView):
                 db.session.add(new_survey_page)
             db.session.commit()
 
-        flash('Survey was successfully duplicated.', 'success')
+            successful.append(new_survey_name)
+
+        if len(failed) > 0:
+            flash('Could not create the following duplicated survey(s) because their names are already in use: ' + ', '.join(failed), 'error')
+
+        if len(successful) > 0:
+            flash('Successfully created the following duplicated survey(s): ' + ', '.join(successful), 'success')
+
 
     def create_form(self, obj=None):
         form = super(SurveyView, self).create_form(obj)
@@ -427,7 +446,7 @@ class PageView(ModelView):
     )
 
     @action('duplicate', 'Duplicate', 'Are you sure you want to duplicate the selected pages?')
-    def duplicate_page(self, page_ids):
+    def duplicate_pages(self, page_ids):
         for page_id in page_ids:
             page = Page.query.get(page_id)
             new_page = Page(
@@ -446,7 +465,7 @@ class PageView(ModelView):
             db.session.add(new_page)
             db.session.commit()
 
-        flash('Page was successfully duplicated.', 'success')
+        flash('Page duplication successful.', 'success')
 
 
     def on_model_change(self, form, model, is_created=False):
