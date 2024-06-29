@@ -326,7 +326,7 @@ class SurveyView(ModelView):
         'email_address': 'Used to send a notification when a survey is completed and uploaded.',
     }
 
-    @action('duplicate', 'Duplicate', 'Are you sure you want to duplicate the selected surveys?')
+    @action('duplicate', 'Duplicate')
     def duplicate_surveys(self, survey_ids):
         successful = []
         failed = []
@@ -445,7 +445,7 @@ class PageView(ModelView):
         rules.Macro('drawing.edit_expectations'),
     )
 
-    @action('duplicate', 'Duplicate', 'Are you sure you want to duplicate the selected pages?')
+    @action('duplicate', 'Duplicate')
     def duplicate_pages(self, page_ids):
         for page_id in page_ids:
             page = Page.query.get(page_id)
