@@ -13,6 +13,8 @@ import StringIO, csv, datetime as dt
 from flask import make_response, request
 
 
+COPY_PREFIX = 'Copy of '
+
 def maybe_utf8(value):
     """
         Returns UTF-8 encoded byte strings for unicode strings.
@@ -124,18 +126,13 @@ def get_copied_name(old_name, limit):
     :param limit: The maximum number of characters allowed for the new name.
 
     >>> from coloringbook.admin.utilities import get_copied_name
-    >>> get_copied_name('A page', 100)
-    'A page_copy)'
+    >>> get_copied_name('a page', 100)
+    'Copy of a page'
 
-    >>> get_copied_name('A page whose name is just ninety-eight characters long, so that copy will not be added at its end.', 100)
-    'A page whose name is just ninety-eight characters long, so that copy will not be added at its end.'
+    >>> get_copied_name('a page whose name is exactly ninety-five characters long, so that it will have to be truncated.', 100)
+    'Copy of a page whose name is exactly ninety-five characters long, so that it will have to be truncat'
 
     """
-    copy_suffix = "_copy"
 
-    new_name = old_name + copy_suffix
-
-    if len(new_name) > limit:
-        return old_name
-
-    return new_name
+    new_name = COPY_PREFIX + old_name
+    return new_name[:limit]
