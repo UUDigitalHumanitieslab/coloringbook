@@ -15,6 +15,7 @@ from sqlalchemy.ext.declarative import declared_attr
 
 
 PAGE_NAME_CHAR_LIMIT = 100  # maximum length of a Page name
+SURVEY_NAME_CHAR_LIMIT = 100 # maximum length of a Survey name
 
 def TableArgsMeta(parent_class, table_args):
     """
@@ -334,7 +335,7 @@ class Survey(db.Model):
     """ Prepared series of Pages that is presented to Subjects. """
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(40), nullable=False, unique=True)
+    name = db.Column(db.String(SURVEY_NAME_CHAR_LIMIT), nullable=False, unique=True)
     language_id = db.Column(db.Integer, db.ForeignKey('language.id'))
     begin = db.Column(db.DateTime)
     end = db.Column(db.DateTime)

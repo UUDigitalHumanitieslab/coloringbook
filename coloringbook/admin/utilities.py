@@ -11,8 +11,9 @@
 import StringIO, csv, datetime as dt
 
 from flask import make_response, request
-from coloringbook.models import PAGE_NAME_CHAR_LIMIT
 
+
+COPY_PREFIX = 'Copy of '
 
 def maybe_utf8(value):
     """
@@ -115,23 +116,23 @@ def filters_from_request(self):
     return applicables
 
 
-def get_page_copy_name(old_page_name):
+def get_copied_name(old_name, limit):
     """
-    Returns the name for a duplicated page, with ' (copy)' appended to the original name, as long as the resulting name is within the character limit.
+    Returns the name for a duplicated page or survey, with a suffix appended to
+    the original name to indicate that it is a copy. This only works as long as
+    the resulting name is within the provided character limit.
 
-    >>> from coloringbook.admin.utilities import get_page_copy_name
-    >>> get_page_copy_name('A page')
-    'A page (copy)'
+    :param old_name: The original name of the page or survey.
+    :param limit: The maximum number of characters allowed for the new name.
 
-    >>> get_page_copy_name('A page whose name is just ninety-eight characters long, so that copy will not be added at its end.')
-    'A page whose name is just ninety-eight characters long, so that copy will not be added at its end.'
+    >>> from coloringbook.admin.utilities import get_copied_name
+    >>> get_copied_name('a page', 100)
+    'Copy of a page'
+
+    >>> get_copied_name('a page whose name is exactly ninety-five characters long, so that it will have to be truncated.', 100)
+    'Copy of a page whose name is exactly ninety-five characters long, so that it will have to be truncat'
 
     """
-    copy_suffix = " (copy)"
 
-    new_page_name = old_page_name + copy_suffix
-
-    if len(new_page_name) > PAGE_NAME_CHAR_LIMIT:
-        return old_page_name
-
-    return new_page_name
+    new_name = COPY_PREFIX + old_name
+    return new_name[:limit]
