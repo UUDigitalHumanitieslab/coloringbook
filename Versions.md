@@ -1,5 +1,10 @@
 # Coloring Book -- version history #
 
+## 2.3 ##
+
+  * Surveys can now be duplicated by selecting one or multiple and clicking on 'Duplicate' in the 'With selected' dropdown.
+  * Increases the maximum character limit on Survey names.
+
 ## 2.2.1 ##
 
   * Increases the maximum character limit on Page names.
