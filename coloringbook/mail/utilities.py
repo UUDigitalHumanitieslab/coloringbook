@@ -1,7 +1,8 @@
 import csv
 import StringIO
 from celery import shared_task
-from flask import render_template
+from flask import render_template, current_app
+import redis
 from coloringbook.mail import mail_client
 from flask_mail import Message
 import datetime as dt
@@ -218,6 +219,16 @@ def collect_csv_data(survey, survey_data):
         )
     return batch_results
 
+def is_broker_available():
+    """
+    Checks whether the Redis broker is available.
+    """
+    try:
+        redis_client = redis.StrictRedis.from_url('redis://redis:6379/0')
+        redis_client.ping()
+        return True
+    except redis.exceptions.ConnectionError:
+        return False
 
 def send_email(recipient, survey_data, survey, immediate=False):
     """
@@ -330,7 +341,10 @@ def send_email(recipient, survey_data, survey, immediate=False):
     if immediate is True:
         send_async_email(message_subject, recipient, html_body, csv_files)
 
-    send_async_email.delay(message_subject, recipient, html_body, csv_files)
+    if is_broker_available():
+        send_async_email.delay(message_subject, recipient, html_body, csv_files)
+    else:
+        current_app.logger.warning('Broker not available. Skipping sending emails...')
 
 
 @shared_task(bind=True, max_retries=3)
