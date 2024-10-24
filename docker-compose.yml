@@ -4,7 +4,7 @@ services:
   app-prod: &app-prod
     container_name: cb-app
     image: cb-app-prod
-    restart: always
+    restart: unless-stopped
     profiles: ["prod"]
     build:
       context: .
@@ -29,7 +29,7 @@ services:
       --error-logfile '/logs/gunicorn-error.log'"
     volumes:
       - .:/coloringbook:rw
-      - cb-logs:/logs
+      - ./logs/cb:/logs
     ports:
       - 3000:5000
 
@@ -49,7 +49,7 @@ services:
     image: mysql:5.7
     container_name: cb-db
     env_file: .env
-    restart: always
+    restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
     environment:
       MYSQL_DATABASE: ${DB_DB}
@@ -68,6 +68,12 @@ services:
   redis:
     container_name: cb-redis
     image: redis:6.2
+    restart: unless-stopped
+    volumes:
+        - ./redis.conf:/usr/local/etc/redis/redis.conf
+        - ./redis-entrypoint.sh:/usr/local/bin/entrypoint.sh
+        - ./logs/redis:/logs/redis
+    entrypoint: ["sh", "/usr/local/bin/entrypoint.sh"]
 
   worker-prod: &worker-prod
     build: .
@@ -75,6 +81,7 @@ services:
     image: cb-worker-prod
     profiles: ["prod"]
     command: celery -A make_celery worker --uid=nobody --gid=nogroup
+    restart: unless-stopped
     environment: &worker-env
       FLASK_DEBUG: 0
       APP_SETTINGS: project.server.config.DevelopmentConfig
@@ -97,6 +104,7 @@ services:
     <<: *worker-prod
     image: cb-worker-dev
     profiles: ["dev"]
+    restart: no
     command: celery -A make_celery worker --loglevel=info --uid=nobody --gid=nogroup
     environment:
         <<: *worker-env
@@ -104,5 +112,4 @@ services:
 
 volumes:
   sql-db:
-  cb-logs:
 
