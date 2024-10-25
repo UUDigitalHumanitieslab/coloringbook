@@ -38,6 +38,7 @@
     potentially be served in production.
 """
 
+from logging.config import dictConfig
 from os import environ
 from flask import Flask
 from flask_migrate import Migrate
@@ -83,6 +84,24 @@ def create_app(config, disable_admin=False, create_db=False, use_test_db=False, 
         The Flask application.
 
     """
+
+    # Set up logging. https://flask.palletsprojects.com/en/1.1.x/logging/
+    dictConfig({
+        'version': 1,
+        'formatters': {'default': {
+            'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+        }},
+        'handlers': {'wsgi': {
+            'class': 'logging.StreamHandler',
+            'stream': 'ext://sys.stdout',
+            'formatter': 'default'
+        }},
+        'root': {
+            'level': 'INFO',
+            'handlers': ['wsgi']
+        }
+    })
+
     app = Flask(__name__, instance_path=instance)
 
     # The following line may be uncommented, and the corresponding

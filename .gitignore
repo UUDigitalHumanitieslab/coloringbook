@@ -4,6 +4,5 @@
 .venv
 .env
 
-# Gunicorn logs
-access_log
-error_log
+# Log files
+logs/*
