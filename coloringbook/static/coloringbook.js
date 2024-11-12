@@ -2,7 +2,7 @@
 	(c) 2014-2023 Research Software Lab, Centre for Digital Humanities, Utrecht University
 	Licensed under the EUPL-1.2 or later. You may obtain a copy of the license at
 	https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12.
-	
+
 	It is helpful to think of this script as an event-driven state machine.
 */
 
@@ -183,7 +183,6 @@ var TransferFsm = machina.Fsm.extend({
 		if (response === 'Error') {
 			// The data were somehow invalid, but still safely stored
 			// on the server.
-			console.log('if error');
 			this.emit('uploadError');
 			this.errors = true;
 		}
@@ -327,8 +326,6 @@ function init_application() {
 	});
 	init_controls();
 	create_swatches(colors);
-	console.log(base);
-	
 	// The part below retrieves the data about the coloring pages.
 	$.ajax({
 		type: 'GET',
@@ -516,7 +513,6 @@ function refreshBufferbox() {
 
 // Make it visible to the user that the server emitted at least one error.
 function showError() {
-	console.log('showError');
 	$('#error_indicator').text('!');
 	$('#error_status').text('yes (notify maintainer)');
 	transferFsm.off('uploadError', showError);
@@ -555,7 +551,6 @@ function add_coloring_book_events() {
 // Passing an SVG to resume signals that the page start is a
 // resumption, otherwise it is a new page.
 function start_page(resumed) {
-	console.log('start_page', !!resumed);
 	page = pages[pagenum];
 	$('#sentence').html(page.text).show();
 	first_command = last_command = null;
@@ -584,7 +579,6 @@ function play_sound() {
 // Initializes the clock for coloring actions if the page is new.
 // For resumed images, preparations have been done already.
 function start_image(resumed) {
-	console.log('start_image', !!resumed);
 	var image = $('#coloring_book_image');
 	image.empty();
 	if (resumed) {
@@ -597,7 +591,6 @@ function start_image(resumed) {
 	$('#controls').show();
 	add_coloring_book_events();
 	if (! resumed) page_onset = $.now();
-	console.log(page_onset);
 }
 
 // Serialize data and do some cleanup after the subject is done
@@ -606,7 +599,6 @@ function start_image(resumed) {
 // If `prehistory` is defined, it should be an array of serialized
 // commands. Use this if the current page was a resumption.
 function end_page(prehistory) {
-	console.log('end_page', !!prehistory);
 	$('#speaker-icon').hide();
 	$('#controls').hide();
 	$('#sentence').hide();
