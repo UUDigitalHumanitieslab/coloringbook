@@ -101,11 +101,19 @@ def submit(survey_name):
         return 'Error'
     if all(map(partial(store_subject_data, survey), data)):
         if survey.email_address:
-            send_email(
-                recipient=survey.email_address,
-                survey_data=data,
-                survey=survey
-            )
+            try:
+                send_email(
+                    recipient=survey.email_address,
+                    survey_data=data,
+                    survey=survey
+                )
+            except Exception as e:
+                current_app.logger.error(
+                    'Email sending failed for survey "{}".\n{}'.format(
+                        survey_name,
+                        traceback.format_exc(),
+                    )
+                )
         return 'Success'
     else:
         return 'Error'
