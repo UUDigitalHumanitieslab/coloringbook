@@ -20,7 +20,7 @@ from flask import Blueprint, render_template, request, json, abort, jsonify, sen
 from .models import Survey, SurveySubject, db
 
 from .mail.utilities import send_email
-from .utilities import fills_from_json, subject_from_json, get_survey_pages
+from .utilities import actions_from_json, subject_from_json, get_survey_pages
 
 
 site = Blueprint('site', __name__)
@@ -123,7 +123,7 @@ def store_subject_data(survey, data):
         assert len(pages) == len(results)
         for pagenum, (page, result) in enumerate(zip(pages, results)):
             try:
-                s.add_all(fills_from_json(survey, page, subject, result))
+                s.add_all(actions_from_json(survey, page, subject, result))
             except:
                 current_app.logger.error(
                     'Next exception thrown on page {}.'.format(pagenum),

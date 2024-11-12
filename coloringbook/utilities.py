@@ -84,9 +84,9 @@ def subject_from_json(data):
     return subject
 
 
-def fills_from_json(survey, page, subject, data):
+def actions_from_json(survey, page, subject, data):
     """
-    Take fill actions from JSON and put into [relational object].
+    Take actions from JSON and put into [relational object].
 
     `survey`, `page` and `subject` must be pre-instantiated
     objects of the respective models. `data` is a parsed JSON
@@ -132,6 +132,10 @@ def fills_from_json(survey, page, subject, data):
     ...         "color": "#000",
     ...         "target": "right door",
     ...         "time": 3000
+    ...     },
+    ...     {
+    ...         "action": "resume",
+    ...         "time": 4000
     ...     }
     ... ]'''
     >>> testinput = flask.json.loads(testdata)
@@ -143,7 +147,7 @@ def fills_from_json(survey, page, subject, data):
     ...     s.add(cb.models.Color(code='#fff', name='white'))
     ...     s.flush()
     ...     # using the function
-    ...     testoutput = fills_from_json(testsurvey, testpage, testsubject, testinput)
+    ...     testoutput = actions_from_json(testsurvey, testpage, testsubject, testinput)
     >>> # inspecting the outcome
     >>> testoutput[0].survey == testsurvey
     True
@@ -157,7 +161,9 @@ def fills_from_json(survey, page, subject, data):
     True
     >>> testoutput[2].color.name == 'black'
     True
-    >>> testoutput[3]
+    >>> testoutput[3].action == 'resume'
+    True
+    >>> testoutput[4]
     Traceback (most recent call last):
     ...
     IndexError: list index out of range
@@ -199,9 +205,9 @@ def fills_from_json(survey, page, subject, data):
     return actions
 
 
-def evaluate_page_fills(fills, page):
+def evaluate_page_actions(actions, page):
     """
-    Evaluates the fills on a page.
+    Evaluates the actions on a page.
 
     Expects a list of fills (which may be empty) and returns a dictionary containing `page_name`, `target`, `color` and a `correct` score. These values are determined as follows.
 
@@ -235,7 +241,6 @@ def evaluate_page_fills(fills, page):
     >>> test_exp_1 = m.Expectation(area=correct_area, here=True, page=test_page_1, color=correct_color)
     >>> test_exp_2 = m.Expectation(area=correct_area, here=True, page=test_page_2, color=correct_color)
 
-
     # Survey
     >>> testwelcome = m.WelcomeText(name='a', content='a')
     >>> testprivacy = m.PrivacyText(name='a', content='a')
@@ -255,6 +260,9 @@ def evaluate_page_fills(fills, page):
     >>> incorrect_area_correct_color_2 = m.Fill(area=extra_area, color=correct_color, survey=testsurvey, page=test_page_2, subject=testsubject, time=1000)
     >>> incorrect_area_incorrect_color = m.Fill(area=incorrect_area, color=incorrect_color, survey=testsurvey, page=test_page_2, subject=testsubject, time=1000)
 
+    # Non-fill action (resume)
+    >>> resume_action = m.Action(action='resume', survey=testsurvey, page=test_page_1, subject=testsubject, time=5000)
+
     >>> with app.app_context():
     ...     # make sure the pre-existing data are persistent
     ...     s = cb.models.db.session
@@ -265,11 +273,13 @@ def evaluate_page_fills(fills, page):
     ...     s.add(test_exp_2)
     ...     s.commit()
     ...     s.flush()
-    ...     no_fills = evaluate_page_fills([], test_page_1)
-    ...     one_fill_correct = evaluate_page_fills([correct_area_correct_color], test_page_1)
-    ...     one_fill_incorrect = evaluate_page_fills([incorrect_area_correct_color_1], test_page_1)
-    ...     multiple_fills_incorrect = evaluate_page_fills([incorrect_area_correct_color_1, incorrect_area_correct_color_2], test_page_2)
-    ...     multiple_fills_mixed_correct = evaluate_page_fills([correct_area_correct_color, incorrect_area_incorrect_color], test_page_1)
+    ...     no_fills = evaluate_page_actions([], test_page_1)
+    ...     one_fill_correct = evaluate_page_actions([correct_area_correct_color], test_page_1)
+    ...     one_fill_incorrect = evaluate_page_actions([incorrect_area_correct_color_1], test_page_1)
+    ...     multiple_fills_incorrect = evaluate_page_actions([incorrect_area_correct_color_1, incorrect_area_correct_color_2], test_page_2)
+    ...     multiple_fills_mixed_correct = evaluate_page_actions([correct_area_correct_color, incorrect_area_incorrect_color], test_page_1)
+    ...     correct_and_non_fills = evaluate_page_actions([correct_area_correct_color, resume_action], test_page_1)
+    ...     incorrect_and_non_fills = evaluate_page_actions([incorrect_area_correct_color_1, resume_action], test_page_1)
 
     >>> no_fills['correct']
     0
@@ -315,10 +325,28 @@ def evaluate_page_fills(fills, page):
     u'elephant'
     >>> multiple_fills_mixed_correct['color']
     u'black'
+
+    >>> correct_and_non_fills['correct']
+    1
+    >>> correct_and_non_fills['page']
+    u'page1'
+    >>> correct_and_non_fills['target']
+    u'elephant'
+    >>> correct_and_non_fills['color']
+    u'black'
+
+    >>> incorrect_and_non_fills['correct']
+    0
+    >>> incorrect_and_non_fills['page']
+    u'page1'
+    >>> incorrect_and_non_fills['target']
+    u'dog'
+    >>> incorrect_and_non_fills['color']
+    u'black'
     """
 
     # User skipped the page.
-    if len(fills) == 0:
+    if len(actions) == 0:
         return {
             "page": page.name,
             "target": "-",
@@ -326,21 +354,30 @@ def evaluate_page_fills(fills, page):
             "correct": 0,
         }
 
-    # User filled in the correct area.
-    for fill in fills:
+    for action in actions:
+        # If the action does not have an area property, it is not a fill.
+        # We skip it.
+        if not hasattr(action, "area"):
+            continue
         for expectation in page.expectations:
-            if fill.area.id == expectation.area.id:
+            if action.area.id == expectation.area.id:
                 return {
                     "page": page.name,
-                    "target": fill.area.name,
-                    "color": fill.color.name,
+                    "target": action.area.name,
+                    "color": action.color.name,
                     "correct": 1,
                 }
 
-    # User filled in the wrong area.
+    # User filled in the wrong area, or there are only non-fill actions.
+    targets = []
+    colors = []
+    for action in actions:
+        if hasattr(action, "area"):
+            targets.append(action.area.name)
+            colors.append(action.color.name)
     return {
         "page": page.name,
-        "target": ', '.join(fill.area.name for fill in fills),
-        "color": ', '.join(fill.color.name for fill in fills),
+        "target": ', '.join(targets),
+        "color": ', '.join(colors),
         "correct": 0,
     }
