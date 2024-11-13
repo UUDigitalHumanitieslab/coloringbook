@@ -1,14 +1,21 @@
 # Coloring Book -- version history #
 
+## 2.3.2 ##
+
+  * Fixes a bug that caused the application to hang if a user pressed the 'Back' button on a page.
+
+
 ## 2.3.1 ##
 
   * Fixes a bug that caused the application to repeatedly write data to the database if the Redis container was not running.
   * Improves logging for both the Flask and Redis containers.
 
+
 ## 2.3 ##
 
   * Surveys can now be duplicated by selecting one or multiple and clicking on 'Duplicate' in the 'With selected' dropdown.
   * Increases the maximum character limit on Survey names.
+
 
 ## 2.2.1 ##
 
