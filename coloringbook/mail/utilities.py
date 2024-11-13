@@ -8,10 +8,10 @@ from flask_mail import Message
 import datetime as dt
 
 from coloringbook.utilities import (
-    fills_from_json,
+    actions_from_json,
     subject_from_json,
     get_survey_pages,
-    evaluate_page_fills
+    evaluate_page_actions
 )
 
 def create_survey_results_csv(survey_results):
@@ -196,8 +196,8 @@ def collect_csv_data(survey, survey_data):
         results = datum["results"]
         evaluations = []
         for page, result in zip(pages, results):
-            fills = fills_from_json(survey, page, subject, result)
-            evaluations.append(evaluate_page_fills(fills, page))
+            actions = actions_from_json(survey, page, subject, result)
+            evaluations.append(evaluate_page_actions(actions, page))
 
         # The amount of evaluations is equal to the amount of pages in the survey.
         total_pages = len(pages)

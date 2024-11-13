@@ -19,7 +19,7 @@ def upgrade():
         'page_back_button',
         sa.String(length=30),
         nullable=False,
-        server_default='',
+        server_default='Terug',
     ))
 
 
