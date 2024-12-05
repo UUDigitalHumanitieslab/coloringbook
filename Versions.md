@@ -1,5 +1,10 @@
 # Coloring Book -- version history #
 
+## 2.4 ##
+
+  * Allows users to enter multiple email addresses for survey data notifications.
+
+
 ## 2.3.2 ##
 
   * Fixes a bug that caused the application to hang if a user pressed the 'Back' button on a page.
