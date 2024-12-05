@@ -103,7 +103,6 @@ def submit(survey_name):
         if survey.email_address:
             try:
                 send_email(
-                    recipient=survey.email_address,
                     survey_data=data,
                     survey=survey
                 )

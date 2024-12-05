@@ -323,7 +323,7 @@ class SurveyView(ModelView):
     column_descriptions = {
         'name': 'Used for your reference and for generating the survey URL.',
         'title': 'Shown on the first page of the survey and in the window title.',
-        'email_address': 'Used to send a notification when a survey is completed and uploaded.',
+        'email_address': 'Used to send a notification when a survey is completed and uploaded. Add multiple addresses separated by semicolons.',
     }
 
     @action('duplicate', 'Duplicate')

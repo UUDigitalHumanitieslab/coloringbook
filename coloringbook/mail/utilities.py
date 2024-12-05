@@ -230,11 +230,10 @@ def is_broker_available():
     except redis.exceptions.ConnectionError:
         return False
 
-def send_email(recipient, survey_data, survey, immediate=False):
+def send_email(survey_data, survey, immediate=False):
     """
-    Send an email to the given recipient with the given survey data.
+    Send an email with a summary of the survey data to the email address(es) attached to a survey.
 
-    :param recipient: The email address of the recipient.
     :param survey_data: The survey data to send.
     :param survey: The survey that the data belongs to.
     :param immediate: If False (default), send the asynchronously via Celery. If True, send the email immediately (for testing purposes).
@@ -254,7 +253,7 @@ def send_email(recipient, survey_data, survey, immediate=False):
     >>> teststartform = m.StartingForm(name='a', name_label='a', birth_label='a', eyesight_label='a', language_label='a')
     >>> testendform = m.EndingForm(name='a', introduction='a', difficulty_label='a', topic_label='a', comments_label='a')
     >>> testbuttonset = m.ButtonSet(name='a', post_instruction_button='a', post_page_button='a', post_survey_button='a', page_back_button='a')
-    >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset)
+    >>> testsurvey = cb.models.Survey(name='test', simultaneous=False, welcome_text=testwelcome, privacy_text=testprivacy, success_text=testsuccess, instruction_text=testinstruction, starting_form=teststartform, ending_form=testendform, button_set=testbuttonset, email_address='test.recipient@colbook.com; test.recipient2@colbook.com')
 
     >>> testdrawing = cb.models.Drawing(name='picture')
     >>> testarealeft = cb.models.Area(name='left door')
@@ -297,7 +296,6 @@ def send_email(recipient, survey_data, survey, immediate=False):
     ...     s.add(cb.models.Color(code='#fff', name='white'))
     ...     s.flush()
     ...     send_email(
-    ...         recipient="test.recipient@colbook.com",
     ...         survey_data=survey_data,
     ...         survey=testsurvey,
     ...         immediate=True,
@@ -306,7 +304,7 @@ def send_email(recipient, survey_data, survey, immediate=False):
     ...     first_message = outbox[0]
 
     >>> outbox_length
-    1
+    2
 
     >>> first_message.subject
     'ColoringBook - nieuwe resultaten opgeslagen'
@@ -328,6 +326,10 @@ def send_email(recipient, survey_data, survey, immediate=False):
     u'De vragenlijst test is ingevuld door 1 deelnemer(s).'
     """
 
+    recipients = [address.strip() for address in survey.email_address.split(";")]
+    if len(recipients) == 0:
+        return
+
     message_subject = "ColoringBook - nieuwe resultaten opgeslagen"
 
     csv_data = collect_csv_data(survey, survey_data)
@@ -338,13 +340,15 @@ def send_email(recipient, survey_data, survey, immediate=False):
     csv_files = create_survey_results_csv(csv_data)
 
     # Only for testing purposes.
-    if immediate is True:
-        send_async_email(message_subject, recipient, html_body, csv_files)
+    for recipient in recipients:
+        if immediate is True:
+            send_async_email(message_subject, recipient, html_body, csv_files)
 
-    if is_broker_available():
-        send_async_email.delay(message_subject, recipient, html_body, csv_files)
-    else:
-        current_app.logger.warning('Broker not available. Skipping sending emails...')
+        if is_broker_available():
+            send_async_email.delay(message_subject, recipient, html_body, csv_files)
+        else:
+            current_app.logger.warning('Broker not available. Skipping sending emails...')
+            return
 
 
 @shared_task(bind=True, max_retries=3)
