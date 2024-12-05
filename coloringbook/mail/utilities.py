@@ -339,8 +339,8 @@ def send_email(survey_data, survey, immediate=False):
 
     csv_files = create_survey_results_csv(csv_data)
 
-    # Only for testing purposes.
     for recipient in recipients:
+        # Only for testing purposes.
         if immediate is True:
             send_async_email(message_subject, recipient, html_body, csv_files)
 
